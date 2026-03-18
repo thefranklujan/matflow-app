@@ -70,7 +70,7 @@ export default function Navbar() {
 
             <Link
               href="/members/login"
-              className="hidden sm:inline-block bg-brand-teal text-brand-black text-xs font-bold px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition"
+              className="inline-block bg-brand-teal text-brand-black text-xs font-bold px-3 sm:px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition"
             >
               Member Login
             </Link>
