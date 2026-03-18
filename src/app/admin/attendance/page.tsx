@@ -15,8 +15,8 @@ export default function AdminAttendancePage() {
   const [classDate, setClassDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [classType, setClassType] = useState(CLASS_TYPES[0].value);
-  const [locationSlug, setLocationSlug] = useState(LOCATIONS[0].value);
+  const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
+  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0].value);
   const [members, setMembers] = useState<MemberItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState<Set<string>>(new Set());

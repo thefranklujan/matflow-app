@@ -23,9 +23,9 @@ export default function AdminSchedulePage() {
   const [dayOfWeek, setDayOfWeek] = useState(1);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
-  const [classType, setClassType] = useState(CLASS_TYPES[0].value);
+  const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
   const [instructor, setInstructor] = useState("");
-  const [locationSlug, setLocationSlug] = useState(LOCATIONS[0].value);
+  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0].value);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
