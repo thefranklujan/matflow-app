@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const memberId = session.user.memberId;
+  if (!memberId) {
+    return NextResponse.json({ error: "No member profile" }, { status: 403 });
+  }
 
   const body = await request.json();
   const { title, targetValue, goalType, startDate, endDate } = body;
