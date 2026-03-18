@@ -33,9 +33,6 @@ export default function Navbar() {
             <Link href="/products" className="text-sm font-medium text-gray-300 hover:text-brand-teal transition uppercase tracking-wider">
               Shop
             </Link>
-            <Link href="/members/login" className="text-sm font-medium text-gray-300 hover:text-brand-teal transition uppercase tracking-wider">
-              Members
-            </Link>
             <div className="relative group">
               <button className="text-sm font-medium text-gray-300 hover:text-brand-teal transition uppercase tracking-wider">
                 Categories
@@ -58,8 +55,8 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Cart + Mobile Menu */}
-          <div className="flex items-center gap-4">
+          {/* Cart + Member Login + Mobile Menu */}
+          <div className="flex items-center gap-3">
             <Link href="/cart" className="relative p-2 text-gray-300 hover:text-brand-teal transition">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -69,6 +66,13 @@ export default function Navbar() {
                   {itemCount}
                 </span>
               )}
+            </Link>
+
+            <Link
+              href="/members/login"
+              className="hidden sm:inline-block bg-brand-teal text-brand-black text-xs font-bold px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition"
+            >
+              Member Login
             </Link>
 
             {/* Mobile hamburger */}
@@ -96,8 +100,8 @@ export default function Navbar() {
             <Link href="/products" className="block py-2 text-gray-300 hover:text-brand-teal uppercase tracking-wider text-sm font-medium" onClick={() => setMenuOpen(false)}>
               Shop All
             </Link>
-            <Link href="/members/login" className="block py-2 text-gray-300 hover:text-brand-teal uppercase tracking-wider text-sm font-medium" onClick={() => setMenuOpen(false)}>
-              Members
+            <Link href="/members/login" className="inline-block mt-2 mb-2 bg-brand-teal text-brand-black text-xs font-bold px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition" onClick={() => setMenuOpen(false)}>
+              Member Login
             </Link>
             {["Gis", "Rash Guards", "Shorts", "T-Shirts", "Hoodies", "Belts", "Patches", "Accessories"].map(
               (cat) => (
