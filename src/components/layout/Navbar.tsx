@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 
 const categories = ["Gis", "Rash Guards", "Shorts", "T-Shirts", "Hoodies", "Belts", "Patches", "Accessories"];
 
 export default function Navbar() {
   const { itemCount } = useCart();
+  const pathname = usePathname();
+
+  // Hide Member Login button inside the member portal (but show on login/register pages)
+  const inMemberPortal =
+    pathname.startsWith("/members") &&
+    pathname !== "/members/login" &&
+    pathname !== "/members/register";
 
   return (
     <nav className="sticky top-0 z-50 bg-brand-black/95 backdrop-blur border-b border-brand-gray">
@@ -53,9 +61,10 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Cart + Member Login (desktop only) */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/cart" className="relative p-2 text-gray-300 hover:text-brand-teal transition">
+          {/* Right side: Cart (desktop) + Member Login (all screens, hidden in portal) */}
+          <div className="flex items-center gap-3">
+            {/* Cart - desktop only */}
+            <Link href="/cart" className="relative p-2 text-gray-300 hover:text-brand-teal transition hidden md:block">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
               </svg>
@@ -66,12 +75,15 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link
-              href="/members/login"
-              className="bg-brand-teal text-brand-black text-xs font-bold px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition"
-            >
-              Member Login
-            </Link>
+            {/* Member Login - visible on all screens, hidden inside member portal */}
+            {!inMemberPortal && (
+              <Link
+                href="/members/login"
+                className="bg-brand-teal text-brand-black text-xs font-bold px-3 sm:px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-teal/90 transition"
+              >
+                Member Login
+              </Link>
+            )}
           </div>
         </div>
       </div>
