@@ -318,11 +318,11 @@ export default function TechniqueCurriculum({
                             <span className="text-[10px] text-gray-500">
                               {stripeCompleted}/{techniques.length} complete
                             </span>
-                            {/* Stripe dots */}
+                            {/* Stripe bars */}
                             {stripe > 0 && (
                               <div className="flex gap-0.5 ml-1">
                                 {Array.from({ length: stripe }).map((_, i) => (
-                                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-brand-teal" />
+                                  <div key={i} className="w-1 h-3 rounded-sm bg-black" />
                                 ))}
                               </div>
                             )}

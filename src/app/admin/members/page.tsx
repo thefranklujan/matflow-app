@@ -48,8 +48,10 @@ export default async function AdminMembersPage() {
                   <td className="px-4 py-3 text-sm text-gray-300">
                     {beltLabel(member.beltRank)}
                     {member.stripes > 0 && (
-                      <span className="ml-1 text-yellow-400">
-                        {"".padStart(member.stripes, "\u2605")}
+                      <span className="inline-flex gap-0.5 ml-1.5 align-middle">
+                        {Array.from({ length: member.stripes }).map((_, i) => (
+                          <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
+                        ))}
                       </span>
                     )}
                   </td>

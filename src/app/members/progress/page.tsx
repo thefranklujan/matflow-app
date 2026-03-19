@@ -108,7 +108,7 @@ export default async function MemberProgressPage() {
                       {entry.stripes > 0 && (
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-px">
                           {Array.from({ length: entry.stripes }).map((_, i) => (
-                            <span key={i} className="w-1 h-1 rounded-full bg-brand-teal" />
+                            <span key={i} className="w-0.5 h-2 rounded-sm bg-black" />
                           ))}
                         </div>
                       )}

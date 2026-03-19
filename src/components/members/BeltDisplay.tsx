@@ -36,10 +36,10 @@ export default function BeltDisplay({
     lg: "h-14 text-base",
   };
 
-  const dotSizes = {
-    sm: "w-2 h-2",
-    md: "w-3 h-3",
-    lg: "w-4 h-4",
+  const stripeSizes = {
+    sm: "w-1 h-4",
+    md: "w-1.5 h-6",
+    lg: "w-2 h-9",
   };
 
   return (
@@ -58,8 +58,7 @@ export default function BeltDisplay({
             {Array.from({ length: stripes }).map((_, i) => (
               <div
                 key={i}
-                className={`${dotSizes[size]} rounded-full`}
-                style={{ backgroundColor: "#0fe69b" }}
+                className={`${stripeSizes[size]} rounded-sm bg-black`}
               />
             ))}
           </div>

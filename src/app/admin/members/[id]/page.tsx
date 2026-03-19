@@ -70,8 +70,10 @@ export default async function AdminMemberDetailPage({
                 <dd className="text-white font-medium">
                   {beltLabel}
                   {member.stripes > 0 && (
-                    <span className="ml-1 text-yellow-400">
-                      {"".padStart(member.stripes, "\u2605")}
+                    <span className="inline-flex gap-0.5 ml-1.5 align-middle">
+                      {Array.from({ length: member.stripes }).map((_, i) => (
+                        <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
+                      ))}
                     </span>
                   )}
                 </dd>
@@ -124,8 +126,10 @@ export default async function AdminMemberDetailPage({
                       <div>
                         <span className="text-white text-sm font-medium">{label}</span>
                         {bp.stripes > 0 && (
-                          <span className="ml-1 text-yellow-400 text-sm">
-                            {"".padStart(bp.stripes, "\u2605")}
+                          <span className="inline-flex gap-0.5 ml-1.5 align-middle">
+                            {Array.from({ length: bp.stripes }).map((_, i) => (
+                              <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
+                            ))}
                           </span>
                         )}
                         {bp.note && <p className="text-gray-400 text-xs mt-0.5">{bp.note}</p>}
