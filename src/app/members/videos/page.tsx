@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import Link from "next/link";
+import Image from "next/image";
+
+function getYouTubeThumbnail(embedUrl: string): string | null {
+  const match = embedUrl.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/
+  );
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -73,16 +81,27 @@ export default async function MemberVideosPage({
                 href={`/members/videos/${video.id}`}
                 className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden hover:border-brand-teal transition group"
               >
-                {/* Thumbnail placeholder */}
-                <div className="aspect-video bg-brand-gray/50 flex items-center justify-center relative">
-                  <div className="w-16 h-16 rounded-full bg-brand-teal/20 flex items-center justify-center group-hover:bg-brand-teal/30 transition">
-                    <svg
-                      className="w-8 h-8 text-brand-teal ml-1"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
+                {/* YouTube Thumbnail */}
+                <div className="aspect-video bg-brand-gray/50 relative overflow-hidden">
+                  {getYouTubeThumbnail(video.embedUrl) ? (
+                    <Image
+                      src={getYouTubeThumbnail(video.embedUrl)!}
+                      alt={video.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition">
+                    <div className="w-14 h-14 rounded-full bg-brand-teal/80 flex items-center justify-center group-hover:bg-brand-teal transition group-hover:scale-110">
+                      <svg
+                        className="w-7 h-7 text-white ml-1"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
                 <div className="p-4">

@@ -3,7 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { BRAND } from "@/lib/constants";
+
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, subtotal } = useCart();
@@ -111,23 +111,20 @@ export default function CartPage() {
           <span className="text-2xl font-bold text-brand-teal">{formatCurrency(subtotal)}</span>
         </div>
 
-        <div className="bg-brand-black border border-brand-gray rounded-lg p-4 mb-4">
-          <p className="text-gray-300 text-sm mb-2">
-            Online payment coming soon! To complete your order, visit us at either location:
-          </p>
-          {BRAND.locations.map((loc) => (
-            <p key={loc.name} className="text-sm text-gray-400">
-              <span className="text-brand-teal font-medium">{loc.name}:</span> {loc.address}
-            </p>
-          ))}
-          <p className="text-sm text-gray-400 mt-2">
-            Call us: <span className="text-brand-teal">{BRAND.phone}</span>
-          </p>
-        </div>
+        <p className="text-gray-500 text-xs mb-4">
+          Payment collected at pickup or by arrangement.
+        </p>
+
+        <Link
+          href="/checkout"
+          className="block text-center bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition mb-3"
+        >
+          Proceed to Checkout
+        </Link>
 
         <Link
           href="/products"
-          className="block text-center bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition"
+          className="block text-center text-gray-400 hover:text-white text-sm transition"
         >
           Continue Shopping
         </Link>

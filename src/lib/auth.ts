@@ -14,15 +14,16 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+        const decode = (b64?: string) => b64 ? Buffer.from(b64, "base64").toString("utf-8") : undefined;
         const admins = [
-          { email: process.env.ADMIN_EMAIL || "admin@ceconibjj.com", password: process.env.ADMIN_PASSWORD || "ceconibjj2024" },
-          { email: "ada@craftedsystems.io", password: "Ceconi2026!" },
-        ];
-        const admin = admins.find(
-          (a) => a.email === credentials.email && a.password === credentials.password
-        );
+          { email: process.env.ADMIN_EMAIL, passwordHash: decode(process.env.ADMIN_PASSWORD_B64) },
+          { email: process.env.ADMIN2_EMAIL, passwordHash: decode(process.env.ADMIN2_PASSWORD_B64) },
+        ].filter((a) => a.email && a.passwordHash);
+        const admin = admins.find((a) => a.email === credentials.email);
         if (!admin) return null;
-        return { id: "admin", email: admin.email, name: "Admin", role: "admin" };
+        const valid = await bcrypt.compare(credentials.password, admin.passwordHash!);
+        if (!valid) return null;
+        return { id: "admin", email: admin.email!, name: "Admin", role: "admin" };
       },
     }),
     CredentialsProvider({
