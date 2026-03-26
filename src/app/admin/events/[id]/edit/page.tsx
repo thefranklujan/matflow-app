@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 
 const eventTypes = ["seminar", "open-mat", "promotion", "closure", "social", "other"];
@@ -83,14 +83,11 @@ export default function AdminEditEventPage() {
 
   if (fetching) {
     return (
-      <AdminShell>
         <div className="text-gray-400">Loading event...</div>
-      </AdminShell>
     );
   }
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -210,6 +207,5 @@ export default function AdminEditEventPage() {
           </div>
         </form>
       </div>
-    </AdminShell>
   );
 }

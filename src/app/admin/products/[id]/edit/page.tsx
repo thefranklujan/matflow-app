@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
-import AdminShell from "@/components/admin/AdminShell";
+
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,6 @@ export default async function EditProductPage({
   if (!product) return notFound();
 
   return (
-    <AdminShell>
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Edit: {product.name}</h1>
       <ProductForm
@@ -49,6 +48,5 @@ export default async function EditProductPage({
         }}
       />
     </div>
-    </AdminShell>
   );
 }

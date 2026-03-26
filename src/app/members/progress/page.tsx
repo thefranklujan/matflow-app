@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import BeltDisplay from "@/components/members/BeltDisplay";
 import TechniqueCurriculum from "./TechniqueCurriculum";
 import { getTechniquesUpTo, CURRICULUM } from "@/lib/curriculum";
@@ -50,7 +50,6 @@ export default async function MemberProgressPage() {
   };
 
   return (
-    <MemberShell>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-6">
           Progress
@@ -135,6 +134,5 @@ export default async function MemberProgressPage() {
           </div>
         )}
       </div>
-    </MemberShell>
   );
 }

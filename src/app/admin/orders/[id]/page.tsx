@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import OrderStatusUpdater from "./OrderStatusUpdater";
-import AdminShell from "@/components/admin/AdminShell";
+
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +25,6 @@ export default async function AdminOrderDetailPage({
   if (!order) return notFound();
 
   return (
-    <AdminShell>
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold text-white mb-2">Order Details</h1>
       <p className="text-gray-400 text-sm font-mono mb-8">{order.id}</p>
@@ -77,6 +76,5 @@ export default async function AdminOrderDetailPage({
         </div>
       </div>
     </div>
-    </AdminShell>
   );
 }

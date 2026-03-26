@@ -10,7 +10,8 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
 
-  const category = await prisma.category.findUnique({
+  // TODO: scope by gymId when subdomain/slug routing is added
+  const category = await prisma.category.findFirst({
     where: { slug },
   });
 

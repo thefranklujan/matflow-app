@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
-import AdminShell from "@/components/admin/AdminShell";
+
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,6 @@ export default async function AdminProductsPage() {
   });
 
   return (
-    <AdminShell>
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Products</h1>
@@ -93,6 +92,5 @@ export default async function AdminProductsPage() {
         )}
       </div>
     </div>
-    </AdminShell>
   );
 }

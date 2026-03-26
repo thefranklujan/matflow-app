@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import { BELT_RANKS } from "@/lib/constants";
 
 // TODO: Locations will come from the Gym model
@@ -36,7 +36,6 @@ export default async function AdminMemberDetailPage({
     LOCATIONS.find((l) => l.value === member.locationSlug)?.label ?? member.locationSlug ?? "-";
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -148,6 +147,5 @@ export default async function AdminMemberDetailPage({
           </div>
         </div>
       </div>
-    </AdminShell>
   );
 }

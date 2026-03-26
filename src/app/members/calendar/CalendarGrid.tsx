@@ -262,7 +262,7 @@ export default function CalendarGrid({
   const selectedDateKey = selectedDay ? getDateKey(selectedDay) : null;
   const selectedDow = selectedDay ? getDow(selectedDay) : null;
   const selectedDayAttendance = selectedDateKey ? attendanceByDate.get(selectedDateKey) || [] : [];
-  const selectedDayAllAttendance = selectedDateKey ? allAttendanceByDate.get(selectedDateKey) || [] : [];
+  const _selectedDayAllAttendance = selectedDateKey ? allAttendanceByDate.get(selectedDateKey) || [] : [];
   const selectedDayCommitments = selectedDateKey ? commitmentsByDate.get(selectedDateKey) || [] : [];
   const selectedDayEvents = selectedDateKey ? eventsByDate.get(selectedDateKey) || [] : [];
   const selectedDayClasses = selectedDow !== null ? classesByDow.get(selectedDow) || [] : [];

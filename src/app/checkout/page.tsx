@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { MATFLOW } from "@/lib/constants";
+
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -70,8 +70,8 @@ export default function CheckoutPage() {
       const order = await res.json();
       clearCart();
       router.push(`/checkout/confirmation?orderId=${order.id}`);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

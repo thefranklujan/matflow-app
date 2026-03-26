@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -41,7 +41,6 @@ export default async function MemberVideosPage({
   });
 
   return (
-    <MemberShell>
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-6">
           Class Videos
@@ -126,6 +125,5 @@ export default async function MemberVideosPage({
           </div>
         )}
       </div>
-    </MemberShell>
   );
 }

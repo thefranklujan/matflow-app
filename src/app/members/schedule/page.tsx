@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import Link from "next/link";
 import { formatTime } from "@/lib/utils";
 
@@ -41,7 +41,6 @@ export default async function MemberSchedulePage({
   })).filter((g) => g.classes.length > 0);
 
   return (
-    <MemberShell>
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-6">
           Class Schedule
@@ -133,6 +132,5 @@ export default async function MemberSchedulePage({
           </div>
         )}
       </div>
-    </MemberShell>
   );
 }

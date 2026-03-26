@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminShell from "@/components/admin/AdminShell";
+
 import { CLASS_TYPES } from "@/lib/constants";
 
 // TODO: Locations will come from the Gym model
@@ -107,7 +107,6 @@ export default function AdminAttendancePage() {
   }
 
   return (
-    <AdminShell>
       <div>
         <h1 className="text-2xl font-bold text-white mb-8">Record Attendance</h1>
 
@@ -241,6 +240,5 @@ export default function AdminAttendancePage() {
           </div>
         </div>
       </div>
-    </AdminShell>
   );
 }

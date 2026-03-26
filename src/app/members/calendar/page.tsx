@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import CalendarFilters from "./CalendarFilters";
 import CalendarGrid from "./CalendarGrid";
 
@@ -62,7 +62,6 @@ export default async function MemberCalendarPage() {
     ]);
 
   return (
-    <MemberShell>
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-6">
           Calendar
@@ -79,6 +78,5 @@ export default async function MemberCalendarPage() {
           currentMemberId={memberId}
         />
       </div>
-    </MemberShell>
   );
 }

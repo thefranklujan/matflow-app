@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminShell from "@/components/admin/AdminShell";
+
 import { CLASS_TYPES, DAYS_OF_WEEK, SCHEDULE_TOPICS } from "@/lib/constants";
 
 // TODO: Locations will come from the Gym model
@@ -97,7 +97,6 @@ export default function AdminSchedulePage() {
   });
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Class Schedule</h1>
@@ -270,6 +269,5 @@ export default function AdminSchedulePage() {
           </div>
         )}
       </div>
-    </AdminShell>
   );
 }

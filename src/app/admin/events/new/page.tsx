@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 
 const eventTypes = ["seminar", "open-mat", "promotion", "closure", "social", "other"];
@@ -48,7 +48,6 @@ export default function AdminNewEventPage() {
   }
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -155,6 +154,5 @@ export default function AdminNewEventPage() {
           </div>
         </form>
       </div>
-    </AdminShell>
   );
 }

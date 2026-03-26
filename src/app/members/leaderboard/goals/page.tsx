@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +38,6 @@ export default async function GoalsPage() {
   const completedGoals = goals.filter((g) => g.completed);
 
   return (
-    <MemberShell>
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -181,6 +180,5 @@ export default async function GoalsPage() {
           </div>
         )}
       </div>
-    </MemberShell>
   );
 }

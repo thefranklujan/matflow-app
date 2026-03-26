@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import MemberShell from "@/components/members/MemberShell";
+
 import VideoPlayer from "@/components/members/VideoPlayer";
 import Link from "next/link";
 
@@ -22,7 +22,6 @@ export default async function MemberVideoDetailPage({
   }
 
   return (
-    <MemberShell>
       <div className="max-w-4xl mx-auto">
         <Link
           href="/members/videos"
@@ -64,6 +63,5 @@ export default async function MemberVideoDetailPage({
           )}
         </div>
       </div>
-    </MemberShell>
   );
 }

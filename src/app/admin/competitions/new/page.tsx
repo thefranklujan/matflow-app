@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 
 const placements = ["gold", "silver", "bronze", "participant"];
@@ -69,7 +69,6 @@ export default function AdminNewCompetitionPage() {
   }
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -180,6 +179,5 @@ export default function AdminNewCompetitionPage() {
           </div>
         </form>
       </div>
-    </AdminShell>
   );
 }

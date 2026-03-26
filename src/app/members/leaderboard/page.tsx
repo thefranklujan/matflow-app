@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import LeaderboardTabs from "./LeaderboardTabs";
 import LeaderboardTable from "./LeaderboardTable";
 import PeriodToggle from "./PeriodToggle";
@@ -260,7 +260,6 @@ export default async function LeaderboardPage({
   }
 
   return (
-    <MemberShell>
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <h1 className="text-2xl font-bold text-white uppercase tracking-wider">
@@ -278,6 +277,5 @@ export default async function LeaderboardPage({
         <LeaderboardTabs />
         <LeaderboardTable entries={entries} currentMemberId={currentMemberId} />
       </div>
-    </MemberShell>
   );
 }

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import AdminShell from "@/components/admin/AdminShell";
+
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,6 @@ export default async function AdminOrdersPage() {
   });
 
   return (
-    <AdminShell>
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Orders</h1>
 
@@ -75,6 +74,5 @@ export default async function AdminOrdersPage() {
         )}
       </div>
     </div>
-    </AdminShell>
   );
 }

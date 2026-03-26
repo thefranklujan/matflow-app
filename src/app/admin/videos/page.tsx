@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import AdminShell from "@/components/admin/AdminShell";
+
 import { CLASS_TYPES } from "@/lib/constants";
 import DeleteVideoButton from "./DeleteVideoButton";
 
@@ -16,7 +16,6 @@ export default async function AdminVideosPage() {
   }
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Videos</h1>
@@ -74,6 +73,5 @@ export default async function AdminVideosPage() {
           )}
         </div>
       </div>
-    </AdminShell>
   );
 }

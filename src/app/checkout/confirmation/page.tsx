@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MATFLOW } from "@/lib/constants";
 import { Suspense } from "react";
 
 function ConfirmationContent() {

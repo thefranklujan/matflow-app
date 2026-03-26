@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 import VideoForm from "../../VideoForm";
 
@@ -27,7 +27,6 @@ export default async function AdminEditVideoPage({
   };
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -40,6 +39,5 @@ export default async function AdminEditVideoPage({
         <h1 className="text-2xl font-bold text-white mb-6">Edit Video</h1>
         <VideoForm video={serialized} />
       </div>
-    </AdminShell>
   );
 }

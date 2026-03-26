@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import MemberShell from "@/components/members/MemberShell";
+
 import Link from "next/link";
 
 export default function NewGoalPage() {
@@ -45,7 +45,6 @@ export default function NewGoalPage() {
   }
 
   return (
-    <MemberShell>
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -149,6 +148,5 @@ export default function NewGoalPage() {
           </div>
         </form>
       </div>
-    </MemberShell>
   );
 }

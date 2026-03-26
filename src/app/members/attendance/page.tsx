@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -56,7 +56,7 @@ export default async function MemberAttendancePage({
     currentWeekStart.setDate(today.getDate() - today.getDay());
     currentWeekStart.setHours(0, 0, 0, 0);
 
-    let weekStart = new Date(currentWeekStart);
+    const weekStart = new Date(currentWeekStart);
     let foundThisWeek = true;
 
     while (foundThisWeek) {
@@ -76,7 +76,6 @@ export default async function MemberAttendancePage({
   }
 
   return (
-    <MemberShell>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-white uppercase tracking-wider mb-8">
           Attendance
@@ -184,6 +183,5 @@ export default async function MemberAttendancePage({
           )}
         </div>
       </div>
-    </MemberShell>
   );
 }

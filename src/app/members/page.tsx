@@ -1,6 +1,6 @@
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import MemberShell from "@/components/members/MemberShell";
+
 import BeltDisplay from "@/components/members/BeltDisplay";
 import Link from "next/link";
 import { formatTime } from "@/lib/utils";
@@ -56,7 +56,6 @@ export default async function MemberDashboardPage() {
     ]);
 
   return (
-    <MemberShell>
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Welcome */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -187,6 +186,5 @@ export default async function MemberDashboardPage() {
           )}
         </div>
       </div>
-    </MemberShell>
   );
 }

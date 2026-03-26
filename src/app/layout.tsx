@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 
@@ -43,7 +42,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <ClerkProvider appearance={{ baseTheme: dark }}>
+        <ClerkProvider>
           <CartProvider>
             <main className="flex-1">{children}</main>
           </CartProvider>

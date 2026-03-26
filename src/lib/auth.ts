@@ -39,7 +39,7 @@ export async function getAuthContext(): Promise<AuthContext> {
     }
   }
 
-  return { userId, orgId, orgRole, gymId, memberId };
+  return { userId, orgId: orgId ?? null, orgRole: orgRole ?? null, gymId, memberId };
 }
 
 /**

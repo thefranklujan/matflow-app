@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import ProductCard from "@/components/products/ProductCard";
 import Link from "next/link";
 import { DEFAULT_CATEGORIES } from "@/lib/constants";
@@ -11,7 +12,7 @@ export default async function ProductsPage({
   const params = await searchParams;
   const { category, sort, search } = params;
 
-  const where: any = { active: true };
+  const where: Prisma.ProductWhereInput = { active: true };
   if (category) {
     where.category = { slug: category };
   }
@@ -22,7 +23,7 @@ export default async function ProductsPage({
     ];
   }
 
-  const orderBy: any = {};
+  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case "price-asc":
       orderBy.price = "asc";

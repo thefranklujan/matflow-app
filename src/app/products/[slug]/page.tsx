@@ -12,7 +12,8 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
 
-  const product = await prisma.product.findUnique({
+  // TODO: scope by gymId when subdomain/slug routing is added
+  const product = await prisma.product.findFirst({
     where: { slug },
     include: {
       category: true,

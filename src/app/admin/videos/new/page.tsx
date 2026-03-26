@@ -1,10 +1,9 @@
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 import VideoForm from "../VideoForm";
 
 export default function AdminNewVideoPage() {
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -17,6 +16,5 @@ export default function AdminNewVideoPage() {
         <h1 className="text-2xl font-bold text-white mb-6">Add Video</h1>
         <VideoForm />
       </div>
-    </AdminShell>
   );
 }

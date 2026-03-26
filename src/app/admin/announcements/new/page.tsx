@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
+
 import Link from "next/link";
 
 export default function AdminNewAnnouncementPage() {
@@ -35,7 +35,6 @@ export default function AdminNewAnnouncementPage() {
   }
 
   return (
-    <AdminShell>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link
@@ -103,6 +102,5 @@ export default function AdminNewAnnouncementPage() {
           </div>
         </form>
       </div>
-    </AdminShell>
   );
 }
