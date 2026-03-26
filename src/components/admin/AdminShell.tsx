@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 
 export default async function AdminShell({
@@ -8,8 +7,9 @@ export default async function AdminShell({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/admin/login");
+  const { userId, orgId } = await auth();
+  if (!userId) redirect("/sign-in");
+  if (!orgId) redirect("/onboarding");
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">

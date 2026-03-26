@@ -20,7 +20,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("ceconi-cart");
+    const stored = localStorage.getItem("matflow-cart");
     if (stored) {
       try {
         setItems(JSON.parse(stored));
@@ -31,7 +31,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loaded) {
-      localStorage.setItem("ceconi-cart", JSON.stringify(items));
+      localStorage.setItem("matflow-cart", JSON.stringify(items));
     }
   }, [items, loaded]);
 

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
-import PWARegister from "@/components/PWARegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,14 +16,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ceconi BJJ",
-  description: "Official app for Ceconi BJJ - Brazilian Jiu-Jitsu academy in Magnolia & Cypress, TX",
+  title: "MatFlow",
+  description: "Gym management platform for martial arts academies",
   manifest: "/manifest.json",
-  themeColor: "#00b4d8",
+  themeColor: "#0fe69b",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Ceconi BJJ",
+    title: "MatFlow",
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -44,12 +43,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <CartProvider>
-          <PWARegister />
-          <Navbar />
-          <main className="flex-1 pt-20">{children}</main>
-          <Footer />
-        </CartProvider>
+        <ClerkProvider appearance={{ baseTheme: dark }}>
+          <CartProvider>
+            <main className="flex-1">{children}</main>
+          </CartProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

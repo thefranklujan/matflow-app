@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import MemberSidebar from "@/components/layout/MemberSidebar";
 import MemberMobileNav from "@/components/layout/MemberMobileNav";
 import AutoRefreshIndicator from "@/components/members/AutoRefreshIndicator";
@@ -10,9 +9,11 @@ export default async function MemberShell({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user.role !== "member" && session.user.role !== "admin")) {
-    redirect("/members/login");
+  const { userId, orgId, orgRole } = await auth();
+  if (!userId) redirect("/sign-in");
+  if (!orgId) redirect("/onboarding");
+  if (orgRole !== "org:member" && orgRole !== "org:admin") {
+    redirect("/sign-in");
   }
 
   return (

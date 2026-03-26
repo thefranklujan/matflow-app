@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import BeltDisplay from "@/components/members/BeltDisplay";
@@ -9,8 +8,7 @@ import { getTechniquesUpTo, CURRICULUM } from "@/lib/curriculum";
 export const dynamic = "force-dynamic";
 
 export default async function MemberProgressPage() {
-  const session = await getServerSession(authOptions);
-  const memberId = session?.user?.memberId;
+  const { memberId } = await requireMember();
 
   const [member, beltHistory, techniqueProgress] = await Promise.all([
     memberId

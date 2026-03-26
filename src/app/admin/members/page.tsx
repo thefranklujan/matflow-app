@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import AdminShell from "@/components/admin/AdminShell";
-import { BELT_RANKS, LOCATIONS } from "@/lib/constants";
+import { BELT_RANKS } from "@/lib/constants";
+
+// TODO: Locations will come from the Gym model
+const LOCATIONS: { value: string; label: string }[] = [];
 import MemberActions from "./MemberActions";
 
 export const dynamic = "force-dynamic";

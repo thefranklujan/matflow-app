@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import LeaderboardTabs from "./LeaderboardTabs";
@@ -57,8 +56,7 @@ export default async function LeaderboardPage({
   searchParams: Promise<{ category?: string; period?: string }>;
 }) {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
-  const currentMemberId = session?.user?.memberId;
+  const { memberId: currentMemberId } = await requireMember();
 
   const category = params.category || "overall";
   const period = params.period || "month";

@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import BeltDisplay from "@/components/members/BeltDisplay";
@@ -19,8 +18,7 @@ const DAY_NAMES = [
 ];
 
 export default async function MemberDashboardPage() {
-  const session = await getServerSession(authOptions);
-  const memberId = session?.user?.memberId;
+  const { memberId } = await requireMember();
 
   const now = new Date();
   const todayDayOfWeek = now.getDay(); // 0=Sunday

@@ -8,20 +8,58 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ── Multi-Tenancy ─────────────────────────────────────
+
+model Gym {
+  id                 String    @id @default(cuid())
+  clerkOrgId         String    @unique
+  name               String
+  slug               String    @unique
+  logo               String?
+  primaryColor       String    @default("#0fe69b")
+  secondaryColor     String?
+  phone              String?
+  website            String?
+  timezone           String    @default("America/Chicago")
+  stripeCustomerId   String?
+  stripePriceId      String?
+  subscriptionStatus String    @default("trialing")
+  trialEndsAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  members        Member[]
+  categories     Category[]
+  products       Product[]
+  orders         Order[]
+  videos         Video[]
+  announcements  Announcement[]
+  classSchedules ClassSchedule[]
+  events         Event[]
+}
+
+// ── E-Commerce ────────────────────────────────────────
+
 model Category {
   id        String    @id @default(cuid())
-  name      String    @unique
-  slug      String    @unique
+  gymId     String
+  gym       Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name      String
+  slug      String
   image     String?
   sortOrder Int       @default(0)
   products  Product[]
   createdAt DateTime  @default(now())
+
+  @@unique([gymId, slug])
 }
 
 model Product {
   id          String           @id @default(cuid())
+  gymId       String
+  gym         Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
   name        String
-  slug        String           @unique
+  slug        String
   description String
   price       Float
   compareAt   Float?
@@ -34,6 +72,8 @@ model Product {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   orderItems  OrderItem[]
+
+  @@unique([gymId, slug])
 }
 
 model ProductImage {
@@ -58,6 +98,8 @@ model ProductVariant {
 
 model Order {
   id              String      @id @default(cuid())
+  gymId           String
+  gym             Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
   status          String      @default("pending")
   customerName    String
   customerEmail   String
@@ -86,29 +128,36 @@ model OrderItem {
 // ── Member Portal ──────────────────────────────────────
 
 model Member {
-  id                 String              @id @default(cuid())
-  email              String              @unique
-  passwordHash       String
-  firstName          String
-  lastName           String
-  phone              String?
-  beltRank           String              @default("white")
-  stripes            Int                 @default(0)
-  approved           Boolean             @default(false)
-  active             Boolean             @default(true)
-  locationSlug       String?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  attendances        Attendance[]
-  beltHistory        BeltProgress[]
+  id                  String              @id @default(cuid())
+  gymId               String
+  gym                 Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  clerkUserId         String
+  email               String
+  firstName           String
+  lastName            String
+  phone               String?
+  beltRank            String              @default("white")
+  stripes             Int                 @default(0)
+  approved            Boolean             @default(true)
+  active              Boolean             @default(true)
+  locationSlug        String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  attendances         Attendance[]
+  beltHistory         BeltProgress[]
   competitionResults  CompetitionResult[]
   personalGoals       PersonalGoal[]
   scheduleCommitments ScheduleCommitment[]
   techniqueProgress   TechniqueProgress[]
+
+  @@unique([gymId, clerkUserId])
+  @@unique([gymId, email])
 }
 
 model Video {
   id          String   @id @default(cuid())
+  gymId       String
+  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title       String
   description String?
   embedUrl    String
@@ -120,6 +169,7 @@ model Video {
 
 model Attendance {
   id           String   @id @default(cuid())
+  gymId        String
   memberId     String
   member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   classDate    DateTime
@@ -127,11 +177,12 @@ model Attendance {
   locationSlug String
   checkedInAt  DateTime @default(now())
 
-  @@unique([memberId, classDate, classType])
+  @@unique([gymId, memberId, classDate, classType])
 }
 
 model BeltProgress {
   id        String   @id @default(cuid())
+  gymId     String
   memberId  String
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   beltRank  String
@@ -144,6 +195,8 @@ model BeltProgress {
 
 model Announcement {
   id          String   @id @default(cuid())
+  gymId       String
+  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title       String
   content     String
   pinned      Boolean  @default(false)
@@ -153,6 +206,8 @@ model Announcement {
 
 model ClassSchedule {
   id           String  @id @default(cuid())
+  gymId        String
+  gym          Gym     @relation(fields: [gymId], references: [id], onDelete: Cascade)
   dayOfWeek    Int
   startTime    String
   endTime      String
@@ -165,6 +220,7 @@ model ClassSchedule {
 
 model ScheduleCommitment {
   id           String   @id @default(cuid())
+  gymId        String
   memberId     String
   member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   classDate    DateTime
@@ -172,29 +228,32 @@ model ScheduleCommitment {
   locationSlug String
   createdAt    DateTime @default(now())
 
-  @@unique([memberId, classDate, classType])
+  @@unique([gymId, memberId, classDate, classType])
 }
 
 model TechniqueProgress {
   id          String   @id @default(cuid())
+  gymId       String
   memberId    String
   member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   techniqueId String
   completedAt DateTime @default(now())
   verifiedBy  String?
 
-  @@unique([memberId, techniqueId])
+  @@unique([gymId, memberId, techniqueId])
 }
 
 // ── Calendar & Leaderboard ─────────────────────────────
 
 model Event {
   id           String    @id @default(cuid())
+  gymId        String
+  gym          Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title        String
   description  String?
   date         DateTime
   endDate      DateTime?
-  eventType    String // seminar | open-mat | promotion | closure | social | other
+  eventType    String
   locationSlug String
   active       Boolean   @default(true)
   createdAt    DateTime  @default(now())
@@ -203,11 +262,12 @@ model Event {
 
 model CompetitionResult {
   id              String   @id @default(cuid())
+  gymId           String
   memberId        String
   member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   competitionName String
   date            DateTime
-  placement       String // gold | silver | bronze | participant
+  placement       String
   division        String?
   notes           String?
   createdAt       DateTime @default(now())
@@ -215,12 +275,13 @@ model CompetitionResult {
 
 model PersonalGoal {
   id           String    @id @default(cuid())
+  gymId        String
   memberId     String
   member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
   title        String
   targetValue  Int
   currentValue Int       @default(0)
-  goalType     String // monthly-attendance | weekly-streak | competition | custom
+  goalType     String
   startDate    DateTime
   endDate      DateTime?
   completed    Boolean   @default(false)

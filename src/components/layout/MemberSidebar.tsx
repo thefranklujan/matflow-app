@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useClerk } from "@clerk/nextjs";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,7 @@ const links = [
 
 export default function MemberSidebar() {
   const pathname = usePathname();
+  const { signOut } = useClerk();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -82,17 +83,17 @@ export default function MemberSidebar() {
         <div className="mt-8 pt-4 border-t border-brand-gray space-y-2">
           <Link
             href="/"
-            title={collapsed ? "Back to Store" : undefined}
+            title={collapsed ? "Back to Home" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-brand-gray/50 transition",
               collapsed ? "justify-center px-2 py-2" : "px-3 py-2"
             )}
           >
             <span>🏪</span>
-            {!collapsed && "Back to Store"}
+            {!collapsed && "Back to Home"}
           </Link>
           <button
-            onClick={() => signOut({ callbackUrl: "/members/login" })}
+            onClick={() => signOut({ redirectUrl: "/" })}
             title={collapsed ? "Sign Out" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-brand-gray/50 transition w-full",

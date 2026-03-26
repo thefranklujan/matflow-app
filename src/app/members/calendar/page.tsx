@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import CalendarFilters from "./CalendarFilters";
@@ -8,8 +7,7 @@ import CalendarGrid from "./CalendarGrid";
 export const dynamic = "force-dynamic";
 
 export default async function MemberCalendarPage() {
-  const session = await getServerSession(authOptions);
-  const memberId = session?.user?.memberId ?? null;
+  const { memberId } = await requireMember();
 
   const now = new Date();
   const month = now.getMonth() + 1;

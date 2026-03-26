@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
-import { BELT_RANKS, LOCATIONS } from "@/lib/constants";
+import { BELT_RANKS } from "@/lib/constants";
+
+// TODO: Locations will come from the Gym model
+const LOCATIONS: { value: string; label: string }[] = [];
 import Link from "next/link";
 import BeltPromotionForm from "./BeltPromotionForm";
 

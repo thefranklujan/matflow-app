@@ -1,75 +1,80 @@
-import type { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      id: "admin-login",
-      name: "Admin Login",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const decode = (b64?: string) => b64 ? Buffer.from(b64, "base64").toString("utf-8") : undefined;
-        const admins = [
-          { email: process.env.ADMIN_EMAIL, passwordHash: decode(process.env.ADMIN_PASSWORD_B64) },
-          { email: process.env.ADMIN2_EMAIL, passwordHash: decode(process.env.ADMIN2_PASSWORD_B64) },
-        ].filter((a) => a.email && a.passwordHash);
-        const admin = admins.find((a) => a.email === credentials.email);
-        if (!admin) return null;
-        const valid = await bcrypt.compare(credentials.password, admin.passwordHash!);
-        if (!valid) return null;
-        return { id: "admin", email: admin.email!, name: "Admin", role: "admin" };
-      },
-    }),
-    CredentialsProvider({
-      id: "member-login",
-      name: "Member Login",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const member = await prisma.member.findUnique({
-          where: { email: credentials.email },
-        });
-        if (!member) return null;
-        const valid = await bcrypt.compare(credentials.password, member.passwordHash);
-        if (!valid) return null;
-        if (!member.approved) return null;
-        if (!member.active) return null;
-        return {
-          id: member.id,
-          email: member.email,
-          name: `${member.firstName} ${member.lastName}`,
-          role: "member",
-          memberId: member.id,
-        };
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-        token.memberId = user.role === "member" ? user.id : undefined;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.role = token.role;
-        session.user.memberId = token.memberId;
-      }
-      return session;
-    },
-  },
-  session: { strategy: "jwt" },
-  pages: { signIn: "/admin/login" },
-  secret: process.env.NEXTAUTH_SECRET,
-};
+export interface AuthContext {
+  userId: string;
+  orgId: string | null;
+  orgRole: string | null;
+  gymId: string | null;
+  memberId: string | null;
+}
+
+/**
+ * Get the full auth context for the current request.
+ * Returns Clerk user info + resolved gymId and memberId from the database.
+ */
+export async function getAuthContext(): Promise<AuthContext> {
+  const { userId, orgId, orgRole } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  let gymId: string | null = null;
+  let memberId: string | null = null;
+
+  if (orgId) {
+    const gym = await prisma.gym.findUnique({
+      where: { clerkOrgId: orgId },
+      select: { id: true },
+    });
+    gymId = gym?.id ?? null;
+
+    if (gymId) {
+      const member = await prisma.member.findFirst({
+        where: { clerkUserId: userId, gymId },
+        select: { id: true },
+      });
+      memberId = member?.id ?? null;
+    }
+  }
+
+  return { userId, orgId, orgRole, gymId, memberId };
+}
+
+/**
+ * Require the user to be an admin of the current org.
+ */
+export async function requireAdmin(): Promise<AuthContext & { gymId: string }> {
+  const ctx = await getAuthContext();
+
+  if (!ctx.orgId || !ctx.gymId) {
+    throw new Error("No organization selected");
+  }
+
+  if (ctx.orgRole !== "org:admin") {
+    throw new Error("Forbidden: admin access required");
+  }
+
+  return ctx as AuthContext & { gymId: string };
+}
+
+/**
+ * Require the user to be a member (or admin) of the current org.
+ */
+export async function requireMember(): Promise<AuthContext & { gymId: string; memberId: string }> {
+  const ctx = await getAuthContext();
+
+  if (!ctx.orgId || !ctx.gymId) {
+    throw new Error("No organization selected");
+  }
+
+  if (!ctx.memberId && ctx.orgRole !== "org:admin") {
+    throw new Error("No member profile found");
+  }
+
+  // Admins might not have a member record — use a sentinel
+  const memberId = ctx.memberId ?? "admin";
+
+  return { ...ctx, gymId: ctx.gymId, memberId } as AuthContext & { gymId: string; memberId: string };
+}

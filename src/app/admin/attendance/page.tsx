@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import { CLASS_TYPES, LOCATIONS } from "@/lib/constants";
+import { CLASS_TYPES } from "@/lib/constants";
+
+// TODO: Locations will come from the Gym model
+const LOCATIONS: { value: string; label: string }[] = [];
 
 interface MemberItem {
   id: string;
@@ -16,7 +19,7 @@ export default function AdminAttendancePage() {
     new Date().toISOString().split("T")[0]
   );
   const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
-  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0].value);
+  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0]?.value ?? "");
   const [members, setMembers] = useState<MemberItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState<Set<string>>(new Set());

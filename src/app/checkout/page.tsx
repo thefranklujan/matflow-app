@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { BRAND } from "@/lib/constants";
+import { MATFLOW } from "@/lib/constants";
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -137,17 +137,13 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* TODO: Gym-specific location & contact info will come from the Gym model */}
           <div className="bg-brand-black border border-brand-gray rounded-lg p-4">
             <p className="text-gray-300 text-sm font-medium mb-2">
               Payment collected at pickup or by arrangement
             </p>
-            {BRAND.locations.map((loc) => (
-              <p key={loc.name} className="text-sm text-gray-400">
-                <span className="text-brand-teal font-medium">{loc.name}:</span> {loc.address}
-              </p>
-            ))}
-            <p className="text-sm text-gray-400 mt-2">
-              Call us: <span className="text-brand-teal">{BRAND.phone}</span>
+            <p className="text-sm text-gray-400">
+              Contact your gym for pickup details.
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BRAND } from "@/lib/constants";
+import { MATFLOW } from "@/lib/constants";
 import { Suspense } from "react";
 
 function ConfirmationContent() {
@@ -20,17 +20,13 @@ function ConfirmationContent() {
         </p>
         <p className="text-2xl font-bold text-brand-teal mb-6">#{orderNumber}</p>
 
+        {/* TODO: Gym-specific location & contact info will come from the Gym model */}
         <div className="bg-brand-black border border-brand-gray rounded-lg p-4 mb-6 text-left">
           <p className="text-gray-300 text-sm font-medium mb-2">
             Payment will be collected at pickup or by arrangement
           </p>
-          {BRAND.locations.map((loc) => (
-            <p key={loc.name} className="text-sm text-gray-400">
-              <span className="text-brand-teal font-medium">{loc.name}:</span> {loc.address}
-            </p>
-          ))}
-          <p className="text-sm text-gray-400 mt-2">
-            Call us: <span className="text-brand-teal">{BRAND.phone}</span>
+          <p className="text-sm text-gray-400">
+            Contact your gym for pickup details.
           </p>
         </div>
 

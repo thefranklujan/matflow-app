@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import { CLASS_TYPES, DAYS_OF_WEEK, LOCATIONS, SCHEDULE_TOPICS } from "@/lib/constants";
+import { CLASS_TYPES, DAYS_OF_WEEK, SCHEDULE_TOPICS } from "@/lib/constants";
+
+// TODO: Locations will come from the Gym model
+const LOCATIONS: { value: string; label: string }[] = [];
 import { formatTime } from "@/lib/utils";
 
 interface ScheduleEntry {
@@ -27,7 +30,7 @@ export default function AdminSchedulePage() {
   const [endTime, setEndTime] = useState("10:00");
   const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
   const [instructor, setInstructor] = useState("");
-  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0].value);
+  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0]?.value ?? "");
   const [topic, setTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);

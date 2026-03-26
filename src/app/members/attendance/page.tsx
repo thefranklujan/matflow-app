@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import Link from "next/link";
@@ -13,8 +12,7 @@ export default async function MemberAttendancePage({
   searchParams: Promise<{ filter?: string }>;
 }) {
   const params = await searchParams;
-  const session = await getServerSession(authOptions);
-  const memberId = session?.user?.memberId;
+  const { memberId } = await requireMember();
   const filter = params.filter || "all";
 
   const now = new Date();

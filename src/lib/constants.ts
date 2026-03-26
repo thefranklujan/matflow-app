@@ -1,21 +1,13 @@
-export const BRAND = {
-  name: "Ceconi BJJ",
-  tagline: "Respect & Friendship",
-  motto: "Work hard pays off",
-  phone: "713-594-8160",
-  website: "www.ceconibjj.com",
-  locations: [
-    {
-      name: "Magnolia",
-      address: "10540 FM1488 Ste 110, Magnolia, TX 77354",
-    },
-    {
-      name: "Cypress",
-      address: "15460 FM 529 RD, Houston, TX 77095",
-    },
-  ],
+// MatFlow — Gym management SaaS for martial arts academies
+// These are platform defaults. Per-gym branding comes from the Gym model.
+
+export const MATFLOW = {
+  name: "MatFlow",
+  tagline: "Gym Management for Martial Arts",
+  website: "www.mymatflow.com",
+  supportEmail: "support@mymatflow.com",
   colors: {
-    teal: "#0fe69b",
+    primary: "#0fe69b",
     black: "#0a0a0a",
     dark: "#1a1a1a",
     gray: "#2a2a2a",
@@ -84,11 +76,6 @@ export const DAYS_OF_WEEK = [
   "Saturday",
 ] as const;
 
-export const LOCATIONS = [
-  { value: "magnolia", label: "Magnolia" },
-  { value: "cypress", label: "Cypress" },
-] as const;
-
 export const SCHEDULE_TOPICS = [
   "Takedowns",
   "Guard Passing",
@@ -111,7 +98,7 @@ export const SCHEDULE_TOPICS = [
   "Review / Q&A",
 ] as const;
 
-export const CATEGORIES = [
+export const DEFAULT_CATEGORIES = [
   { name: "Gis", slug: "gis", sortOrder: 1 },
   { name: "Rash Guards", slug: "rash-guards", sortOrder: 2 },
   { name: "Shorts", slug: "shorts", sortOrder: 3 },

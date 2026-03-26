@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MemberShell from "@/components/members/MemberShell";
 import Link from "next/link";
@@ -26,8 +25,7 @@ const GOAL_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default async function GoalsPage() {
-  const session = await getServerSession(authOptions);
-  const memberId = session?.user?.memberId;
+  const { memberId } = await requireMember();
 
   const goals = memberId
     ? await prisma.personalGoal.findMany({

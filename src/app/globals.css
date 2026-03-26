@@ -1,53 +1,5 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-Medium.ttf") format("truetype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-ExtraBold.ttf") format("truetype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Kanit";
-  src: url("https://ceconibjj.com/wp-content/uploads/2025/09/Kanit-Black.ttf") format("truetype");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme inline {
   --color-brand-teal: #0fe69b;
   --color-brand-black: #0a0a0a;
@@ -59,18 +11,18 @@
   --color-foreground: #ededed;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-kanit: "Kanit", sans-serif;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: "Kanit", var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Kanit", sans-serif;
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans), sans-serif;
+  letter-spacing: 0.01em;
+  font-weight: 600;
 }
 
 /* Scrollbar styling */

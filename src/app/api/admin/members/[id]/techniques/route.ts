@@ -1,54 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  try {
+    const { gymId } = await requireAdmin();
+
+    const { id: memberId } = await params;
+    const { techniqueId } = await request.json();
+
+    if (!techniqueId) {
+      return NextResponse.json({ error: "techniqueId required" }, { status: 400 });
+    }
+
+    // Verify member belongs to this gym
+    const member = await prisma.member.findFirst({ where: { id: memberId, gymId } });
+    if (!member) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const record = await prisma.techniqueProgress.upsert({
+      where: {
+        gymId_memberId_techniqueId: { gymId, memberId, techniqueId },
+      },
+      update: {},
+      create: {
+        memberId,
+        techniqueId,
+        verifiedBy: "admin",
+        gymId,
+      },
+    });
+
+    return NextResponse.json(record, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { id: memberId } = await params;
-  const { techniqueId } = await request.json();
-
-  if (!techniqueId) {
-    return NextResponse.json({ error: "techniqueId required" }, { status: 400 });
-  }
-
-  const record = await prisma.techniqueProgress.upsert({
-    where: {
-      memberId_techniqueId: { memberId, techniqueId },
-    },
-    update: {},
-    create: {
-      memberId,
-      techniqueId,
-      verifiedBy: session.user.email || "admin",
-    },
-  });
-
-  return NextResponse.json(record, { status: 201 });
 }
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  try {
+    const { gymId } = await requireAdmin();
+
+    const { id: memberId } = await params;
+    const { techniqueId } = await request.json();
+
+    // Verify member belongs to this gym
+    const member = await prisma.member.findFirst({ where: { id: memberId, gymId } });
+    if (!member) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await prisma.techniqueProgress.deleteMany({
+      where: { memberId, techniqueId, gymId },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { id: memberId } = await params;
-  const { techniqueId } = await request.json();
-
-  await prisma.techniqueProgress.deleteMany({
-    where: { memberId, techniqueId },
-  });
-
-  return NextResponse.json({ ok: true });
 }

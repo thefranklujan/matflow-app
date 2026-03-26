@@ -1,11 +1,11 @@
 {
-  "name": "Ceconi BJJ",
-  "short_name": "Ceconi BJJ",
-  "description": "Official app for Ceconi BJJ - Brazilian Jiu-Jitsu academy in Magnolia & Cypress, TX",
+  "name": "MatFlow",
+  "short_name": "MatFlow",
+  "description": "Gym management platform for martial arts academies",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#00b4d8",
+  "theme_color": "#0fe69b",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

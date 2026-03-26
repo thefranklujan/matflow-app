@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/components/products/ProductCard";
 import Link from "next/link";
-import { CATEGORIES } from "@/lib/constants";
+import { DEFAULT_CATEGORIES } from "@/lib/constants";
 
 export default async function ProductsPage({
   searchParams,
@@ -51,7 +51,7 @@ export default async function ProductsPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-white mb-8">
         {category
-          ? CATEGORIES.find((c) => c.slug === category)?.name || "Products"
+          ? DEFAULT_CATEGORIES.find((c) => c.slug === category)?.name || "Products"
           : "All Products"}
       </h1>
 
@@ -68,7 +68,7 @@ export default async function ProductsPage({
           >
             All
           </Link>
-          {CATEGORIES.map((cat) => (
+          {DEFAULT_CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/products?category=${cat.slug}`}

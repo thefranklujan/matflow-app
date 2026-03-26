@@ -25,7 +25,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center">
             <Image
               src="/logo-white.svg"
-              alt="Ceconi BJJ"
+              alt="MatFlow"
               width={270}
               height={81}
               className="h-[72px] w-auto"
