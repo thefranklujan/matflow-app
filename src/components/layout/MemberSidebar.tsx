@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,11 @@ const links = [
 
 export default function MemberSidebar() {
   const pathname = usePathname();
-  const { signOut } = useClerk();
+  const router = useRouter();
+  const signOut = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/sign-in");
+  };
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -93,7 +97,7 @@ export default function MemberSidebar() {
             {!collapsed && "Back to Home"}
           </Link>
           <button
-            onClick={() => signOut({ redirectUrl: "/" })}
+            onClick={() => signOut()}
             title={collapsed ? "Sign Out" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-brand-gray/50 transition w-full",

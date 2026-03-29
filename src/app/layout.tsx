@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 
@@ -42,11 +41,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <ClerkProvider>
-          <CartProvider>
-            <main className="flex-1">{children}</main>
-          </CartProvider>
-        </ClerkProvider>
+        <CartProvider>
+          <main className="flex-1">{children}</main>
+        </CartProvider>
       </body>
     </html>
   );

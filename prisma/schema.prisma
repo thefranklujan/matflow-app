@@ -8,48 +8,43 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ── Multi-Tenancy ─────────────────────────────────────
-
 model Gym {
-  id                 String    @id @default(cuid())
-  clerkOrgId         String    @unique
+  id                 String          @id @default(cuid())
+  clerkOrgId         String          @unique
   name               String
-  slug               String    @unique
+  slug               String          @unique
   logo               String?
-  primaryColor       String    @default("#0fe69b")
+  primaryColor       String          @default("#0fe69b")
   secondaryColor     String?
   phone              String?
   website            String?
-  timezone           String    @default("America/Chicago")
+  timezone           String          @default("America/Chicago")
   stripeCustomerId   String?
   stripePriceId      String?
-  subscriptionStatus String    @default("trialing")
+  subscriptionStatus String          @default("trialing")
   trialEndsAt        DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-
-  members        Member[]
-  categories     Category[]
-  products       Product[]
-  orders         Order[]
-  videos         Video[]
-  announcements  Announcement[]
-  classSchedules ClassSchedule[]
-  events         Event[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  announcements      Announcement[]
+  categories         Category[]
+  classSchedules     ClassSchedule[]
+  events             Event[]
+  members            Member[]
+  orders             Order[]
+  products           Product[]
+  videos             Video[]
 }
-
-// ── E-Commerce ────────────────────────────────────────
 
 model Category {
   id        String    @id @default(cuid())
   gymId     String
-  gym       Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   name      String
   slug      String
   image     String?
   sortOrder Int       @default(0)
-  products  Product[]
   createdAt DateTime  @default(now())
+  gym       Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  products  Product[]
 
   @@unique([gymId, slug])
 }
@@ -57,21 +52,21 @@ model Category {
 model Product {
   id          String           @id @default(cuid())
   gymId       String
-  gym         Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
   name        String
   slug        String
   description String
   price       Float
   compareAt   Float?
   categoryId  String
-  category    Category         @relation(fields: [categoryId], references: [id])
-  images      ProductImage[]
-  variants    ProductVariant[]
   featured    Boolean          @default(false)
   active      Boolean          @default(true)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   orderItems  OrderItem[]
+  category    Category         @relation(fields: [categoryId], references: [id])
+  gym         Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  images      ProductImage[]
+  variants    ProductVariant[]
 
   @@unique([gymId, slug])
 }
@@ -92,14 +87,13 @@ model ProductVariant {
   stock      Int         @default(0)
   sku        String?     @unique
   productId  String
-  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Order {
   id              String      @id @default(cuid())
   gymId           String
-  gym             Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
   status          String      @default("pending")
   customerName    String
   customerEmail   String
@@ -108,9 +102,10 @@ model Order {
   notes           String?
   subtotal        Float
   total           Float
-  items           OrderItem[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  gym             Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  items           OrderItem[]
 }
 
 model OrderItem {
@@ -118,34 +113,32 @@ model OrderItem {
   quantity  Int
   unitPrice Float
   orderId   String
-  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String
-  product   Product        @relation(fields: [productId], references: [id])
   variantId String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product        @relation(fields: [productId], references: [id])
   variant   ProductVariant @relation(fields: [variantId], references: [id])
 }
 
-// ── Member Portal ──────────────────────────────────────
-
 model Member {
-  id                  String              @id @default(cuid())
+  id                  String               @id @default(cuid())
   gymId               String
-  gym                 Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
   clerkUserId         String
   email               String
   firstName           String
   lastName            String
   phone               String?
-  beltRank            String              @default("white")
-  stripes             Int                 @default(0)
-  approved            Boolean             @default(true)
-  active              Boolean             @default(true)
+  beltRank            String               @default("white")
+  stripes             Int                  @default(0)
+  approved            Boolean              @default(true)
+  active              Boolean              @default(true)
   locationSlug        String?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   attendances         Attendance[]
   beltHistory         BeltProgress[]
   competitionResults  CompetitionResult[]
+  gym                 Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
   personalGoals       PersonalGoal[]
   scheduleCommitments ScheduleCommitment[]
   techniqueProgress   TechniqueProgress[]
@@ -157,7 +150,6 @@ model Member {
 model Video {
   id          String   @id @default(cuid())
   gymId       String
-  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title       String
   description String?
   embedUrl    String
@@ -165,17 +157,18 @@ model Video {
   classDate   DateTime
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
+  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 }
 
 model Attendance {
   id           String   @id @default(cuid())
   gymId        String
   memberId     String
-  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   classDate    DateTime
   classType    String
   locationSlug String
   checkedInAt  DateTime @default(now())
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([gymId, memberId, classDate, classType])
 }
@@ -184,30 +177,29 @@ model BeltProgress {
   id        String   @id @default(cuid())
   gymId     String
   memberId  String
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   beltRank  String
   stripes   Int
   note      String?
   awardedAt DateTime @default(now())
   awardedBy String?
   createdAt DateTime @default(now())
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model Announcement {
   id          String   @id @default(cuid())
   gymId       String
-  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title       String
   content     String
   pinned      Boolean  @default(false)
   publishedAt DateTime @default(now())
   createdAt   DateTime @default(now())
+  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 }
 
 model ClassSchedule {
   id           String  @id @default(cuid())
   gymId        String
-  gym          Gym     @relation(fields: [gymId], references: [id], onDelete: Cascade)
   dayOfWeek    Int
   startTime    String
   endTime      String
@@ -216,17 +208,18 @@ model ClassSchedule {
   locationSlug String
   topic        String?
   active       Boolean @default(true)
+  gym          Gym     @relation(fields: [gymId], references: [id], onDelete: Cascade)
 }
 
 model ScheduleCommitment {
   id           String   @id @default(cuid())
   gymId        String
   memberId     String
-  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   classDate    DateTime
   classType    String
   locationSlug String
   createdAt    DateTime @default(now())
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([gymId, memberId, classDate, classType])
 }
@@ -235,20 +228,17 @@ model TechniqueProgress {
   id          String   @id @default(cuid())
   gymId       String
   memberId    String
-  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   techniqueId String
   completedAt DateTime @default(now())
   verifiedBy  String?
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([gymId, memberId, techniqueId])
 }
 
-// ── Calendar & Leaderboard ─────────────────────────────
-
 model Event {
   id           String    @id @default(cuid())
   gymId        String
-  gym          Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   title        String
   description  String?
   date         DateTime
@@ -258,26 +248,26 @@ model Event {
   active       Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  gym          Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
 }
 
 model CompetitionResult {
   id              String   @id @default(cuid())
   gymId           String
   memberId        String
-  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   competitionName String
   date            DateTime
   placement       String
   division        String?
   notes           String?
   createdAt       DateTime @default(now())
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model PersonalGoal {
   id           String    @id @default(cuid())
   gymId        String
   memberId     String
-  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
   title        String
   targetValue  Int
   currentValue Int       @default(0)
@@ -287,4 +277,5 @@ model PersonalGoal {
   completed    Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }

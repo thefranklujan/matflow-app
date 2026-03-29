@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,11 @@ const links = [
 
 export default function MemberMobileNav() {
   const pathname = usePathname();
-  const { signOut } = useClerk();
+  const router = useRouter();
+  const signOut = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/sign-in");
+  };
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -122,7 +126,7 @@ export default function MemberMobileNav() {
             Back to Home
           </Link>
           <button
-            onClick={() => signOut({ redirectUrl: "/" })}
+            onClick={() => signOut()}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-brand-gray/50 transition w-full"
           >
             <span>🚪</span>

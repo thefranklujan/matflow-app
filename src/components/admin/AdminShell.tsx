@@ -1,20 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import AdminSidebar from "@/components/layout/AdminSidebar";
-
-export default async function AdminShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { userId, orgId } = await auth();
-  if (!userId) redirect("/sign-in");
-  if (!orgId) redirect("/onboarding");
-
-  return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
-      <AdminSidebar />
-      <div className="flex-1 lg:ml-64 p-6 lg:p-8">{children}</div>
-    </div>
-  );
+// AdminShell is no longer used — auth is handled by src/app/admin/layout.tsx
+// Kept as an empty re-export for backwards compat if anything still imports it.
+export default function AdminShell({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

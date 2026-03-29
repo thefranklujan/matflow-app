@@ -1,5 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getSession } from "@/lib/local-auth";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 
 export default async function AdminLayout({
@@ -7,9 +7,9 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, orgId } = await auth();
-  if (!userId) redirect("/sign-in");
-  if (!orgId) redirect("/onboarding");
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
+  if (session.role !== "admin") redirect("/members");
 
   return (
     <div className="flex min-h-screen">

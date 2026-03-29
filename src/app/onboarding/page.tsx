@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useOrganizationList } from "@clerk/nextjs";
 import { MATFLOW } from "@/lib/constants";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { setActive } = useOrganizationList();
   const [gymName, setGymName] = useState("");
   const [slug, setSlug] = useState("");
   const [timezone, setTimezone] = useState("America/Chicago");
@@ -44,11 +42,6 @@ export default function OnboardingPage() {
         setError(data.error || "Failed to create gym");
         setLoading(false);
         return;
-      }
-
-      // Set the new org as active in Clerk
-      if (setActive && data.orgId) {
-        await setActive({ organization: data.orgId });
       }
 
       router.push("/admin");

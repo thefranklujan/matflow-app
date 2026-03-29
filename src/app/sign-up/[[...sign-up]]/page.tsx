@@ -1,16 +1,6 @@
-import { SignUp } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
+// For now, redirect sign-up to sign-in (dev mode uses hardcoded credentials)
 export default function SignUpPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-black px-4">
-      <SignUp
-        appearance={{
-          elements: {
-            rootBox: "mx-auto",
-            card: "bg-brand-dark border border-brand-gray",
-          },
-        }}
-      />
-    </div>
-  );
+  redirect("/sign-in");
 }

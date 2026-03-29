@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -23,7 +23,11 @@ const links = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { signOut } = useClerk();
+  const router = useRouter();
+  const signOut = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/sign-in");
+  };
 
   return (
     <aside className="w-64 bg-brand-dark border-r border-brand-gray hidden lg:block fixed top-[5rem] h-[calc(100vh-5rem)] overflow-hidden z-30">
@@ -64,7 +68,7 @@ export default function AdminSidebar() {
             Back to Home
           </Link>
           <button
-            onClick={() => signOut({ redirectUrl: "/" })}
+            onClick={() => signOut()}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-brand-gray/50 transition w-full"
           >
             <span>🚪</span>
