@@ -94,7 +94,7 @@ export async function ensureDefaults() {
     where: { email: DEFAULT_ADMIN.email, gymId: gym.id },
   });
   if (!adminExists) {
-    const hash = await bcrypt.hash(DEFAULT_ADMIN.password, 10);
+    const _hash = await bcrypt.hash(DEFAULT_ADMIN.password, 10);
     await prisma.member.create({
       data: {
         gymId: gym.id,
