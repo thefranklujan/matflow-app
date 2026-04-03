@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, getAuthContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -26,7 +26,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymId } = await requireAdmin();
+    const ctx = await getAuthContext();
+    const gymId = ctx.gymId;
+    if (!gymId) {
+      return NextResponse.json({ error: "No gym context" }, { status: 400 });
+    }
 
     const body = await req.json();
     const { customerName, customerEmail, customerPhone, shippingAddress, notes, items } = body;
