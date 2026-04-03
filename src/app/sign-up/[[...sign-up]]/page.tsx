@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const joinSlug = searchParams.get("join");
   const [step, setStep] = useState(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -40,6 +43,30 @@ export default function SignUpPage() {
         return;
       }
       setError("");
+
+      // If joining a gym, submit directly (no step 2)
+      if (joinSlug) {
+        setLoading(true);
+        try {
+          const res = await fetch("/api/auth/join", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstName, lastName, email, password, gymSlug: joinSlug }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setError(data.error || "Registration failed");
+            setLoading(false);
+            return;
+          }
+          router.push("/members");
+        } catch {
+          setError("Something went wrong. Please try again.");
+          setLoading(false);
+        }
+        return;
+      }
+
       setStep(2);
       return;
     }
@@ -83,14 +110,16 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">MatFlow</h1>
           <p className="text-gray-400">
-            {step === 1 ? "Create your account" : "Set up your gym"}
+            {joinSlug ? "Join your gym" : step === 1 ? "Create your account" : "Set up your gym"}
           </p>
         </div>
 
-        <div className="flex gap-2 mb-6 justify-center">
-          <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-brand-teal" : "bg-brand-gray"}`} />
-          <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-brand-teal" : "bg-brand-gray"}`} />
-        </div>
+        {!joinSlug && (
+          <div className="flex gap-2 mb-6 justify-center">
+            <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-brand-teal" : "bg-brand-gray"}`} />
+            <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-brand-teal" : "bg-brand-gray"}`} />
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -156,9 +185,10 @@ export default function SignUpPage() {
 
               <button
                 type="submit"
-                className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition"
+                disabled={loading}
+                className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
               >
-                Continue
+                {joinSlug ? (loading ? "Joining..." : "Join Gym") : "Continue"}
               </button>
             </>
           ) : (
@@ -241,5 +271,13 @@ export default function SignUpPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SignUpForm />
+    </Suspense>
   );
 }

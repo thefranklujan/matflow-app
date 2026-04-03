@@ -29,7 +29,7 @@ export default async function JoinGymPage({ params }: Props) {
 
         <div className="space-y-4">
           <Link
-            href="/sign-up"
+            href={`/sign-up?join=${gym.slug}`}
             className="block w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition text-center uppercase tracking-wider"
           >
             Sign Up
