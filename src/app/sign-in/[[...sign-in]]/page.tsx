@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -30,7 +31,6 @@ export default function SignInPage() {
         return;
       }
 
-      // Redirect based on role
       if (data.user.role === "admin") {
         router.push("/admin");
       } else {
@@ -67,7 +67,7 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
-              placeholder="admin@matflow.dev"
+              placeholder="you@yourgym.com"
               required
             />
           </div>
@@ -92,25 +92,12 @@ export default function SignInPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
 
-          <div className="border-t border-brand-gray pt-4">
-            <p className="text-gray-500 text-xs text-center mb-2">Dev Credentials</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => { setEmail("admin@matflow.dev"); setPassword("matflow123"); }}
-                className="bg-brand-gray/50 text-gray-300 px-3 py-2 rounded hover:bg-brand-gray transition"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => { setEmail("member@matflow.dev"); setPassword("matflow123"); }}
-                className="bg-brand-gray/50 text-gray-300 px-3 py-2 rounded hover:bg-brand-gray transition"
-              >
-                Member
-              </button>
-            </div>
-          </div>
+          <p className="text-center text-gray-500 text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/sign-up" className="text-brand-teal hover:underline">
+              Start free trial
+            </Link>
+          </p>
         </form>
       </div>
     </div>

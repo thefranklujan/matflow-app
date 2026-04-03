@@ -1,13 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateUser, createSession, ensureDefaults } from "@/lib/local-auth";
+import { authenticateUser, createSession } from "@/lib/local-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    // Ensure default gym and users exist
-    await ensureDefaults();
-
     const { email, password } = await request.json();
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password required" }, { status: 400 });
@@ -15,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     const user = await authenticateUser(email, password);
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
     await createSession(user);

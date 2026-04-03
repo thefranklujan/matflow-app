@@ -1,7 +1,6 @@
 /**
- * Local auth system for development.
- * Uses JWT stored in cookies — no external services needed.
- * Replace with Clerk when going to production.
+ * Auth system using JWT + bcrypt with Prisma/Postgres.
+ * Supports gym owner registration, member sign-up, and login.
  */
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -9,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "matflow-dev-secret-change-in-production"
+  process.env.JWT_SECRET || "matflow-dev-secret-change-in-production"
 );
 const COOKIE_NAME = "matflow-session";
 
@@ -21,21 +20,6 @@ export interface SessionUser {
   gymId: string;
   memberId: string;
 }
-
-// ── Default credentials (dev) ─────────────────────────
-const DEFAULT_ADMIN = {
-  email: "admin@matflow.dev",
-  password: "matflow123",
-  firstName: "Admin",
-  lastName: "User",
-};
-
-const DEFAULT_MEMBER = {
-  email: "member@matflow.dev",
-  password: "matflow123",
-  firstName: "Test",
-  lastName: "Member",
-};
 
 // ── JWT helpers ───────────────────────────────────────
 
@@ -73,69 +57,99 @@ export async function destroySession() {
   cookieStore.delete(COOKIE_NAME);
 }
 
-// ── Ensure default gym + users exist ──────────────────
+// ── Register gym owner ───────────────────────────────
 
-export async function ensureDefaults() {
-  // Create default gym if none exists
-  let gym = await prisma.gym.findFirst();
-  if (!gym) {
-    gym = await prisma.gym.create({
+export async function registerGymOwner(data: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gymName: string;
+  gymSlug: string;
+  timezone?: string;
+}): Promise<{ gym: { id: string; name: string; slug: string }; member: { id: string } }> {
+  // Check if email already exists
+  const existing = await prisma.member.findFirst({ where: { email: data.email } });
+  if (existing) throw new Error("An account with this email already exists");
+
+  // Check if slug is taken
+  const slugTaken = await prisma.gym.findUnique({ where: { slug: data.gymSlug } });
+  if (slugTaken) throw new Error("This gym URL is already taken");
+
+  const passwordHash = await bcrypt.hash(data.password, 10);
+
+  // Create gym + admin member in a transaction
+  const result = await prisma.$transaction(async (tx) => {
+    const gym = await tx.gym.create({
       data: {
-        clerkOrgId: "local-dev-org",
-        name: "Demo Gym",
-        slug: "demo-gym",
-        timezone: "America/Chicago",
+        clerkOrgId: `owner-${Date.now()}`,
+        name: data.gymName,
+        slug: data.gymSlug,
+        timezone: data.timezone || "America/Chicago",
+        subscriptionStatus: "trialing",
+        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
       },
     });
-  }
 
-  // Create admin member if not exists
-  const adminExists = await prisma.member.findFirst({
-    where: { email: DEFAULT_ADMIN.email, gymId: gym.id },
-  });
-  if (!adminExists) {
-    const _hash = await bcrypt.hash(DEFAULT_ADMIN.password, 10);
-    await prisma.member.create({
+    const member = await tx.member.create({
       data: {
         gymId: gym.id,
-        clerkUserId: "local-admin",
-        email: DEFAULT_ADMIN.email,
-        firstName: DEFAULT_ADMIN.firstName,
-        lastName: DEFAULT_ADMIN.lastName,
+        clerkUserId: `owner-${Date.now()}`,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        passwordHash,
         approved: true,
         active: true,
         beltRank: "black",
-        stripes: 4,
-        // Store password hash in a field we'll add
+        stripes: 0,
       },
     });
-    // Store password hash separately since Member model doesn't have it
-    // We'll use a simple approach: store in a local file or env
-    console.log(`[MatFlow] Admin created: ${DEFAULT_ADMIN.email} / ${DEFAULT_ADMIN.password}`);
-  }
 
-  // Create test member if not exists
-  const memberExists = await prisma.member.findFirst({
-    where: { email: DEFAULT_MEMBER.email, gymId: gym.id },
+    return { gym, member };
   });
-  if (!memberExists) {
-    await prisma.member.create({
-      data: {
-        gymId: gym.id,
-        clerkUserId: "local-member",
-        email: DEFAULT_MEMBER.email,
-        firstName: DEFAULT_MEMBER.firstName,
-        lastName: DEFAULT_MEMBER.lastName,
-        approved: true,
-        active: true,
-        beltRank: "blue",
-        stripes: 2,
-      },
-    });
-    console.log(`[MatFlow] Member created: ${DEFAULT_MEMBER.email} / ${DEFAULT_MEMBER.password}`);
-  }
 
-  return gym;
+  return {
+    gym: { id: result.gym.id, name: result.gym.name, slug: result.gym.slug },
+    member: { id: result.member.id },
+  };
+}
+
+// ── Register member (joins existing gym) ─────────────
+
+export async function registerMember(data: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gymSlug: string;
+}): Promise<{ member: { id: string; gymId: string } }> {
+  const gym = await prisma.gym.findUnique({ where: { slug: data.gymSlug } });
+  if (!gym) throw new Error("Gym not found");
+
+  const existing = await prisma.member.findFirst({
+    where: { email: data.email, gymId: gym.id },
+  });
+  if (existing) throw new Error("An account with this email already exists at this gym");
+
+  const passwordHash = await bcrypt.hash(data.password, 10);
+
+  const member = await prisma.member.create({
+    data: {
+      gymId: gym.id,
+      clerkUserId: `member-${Date.now()}`,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      passwordHash,
+      approved: true,
+      active: true,
+      beltRank: "white",
+      stripes: 0,
+    },
+  });
+
+  return { member: { id: member.id, gymId: gym.id } };
 }
 
 // ── Login handler ─────────────────────────────────────
@@ -144,40 +158,49 @@ export async function authenticateUser(
   email: string,
   password: string
 ): Promise<SessionUser | null> {
-  // Check hardcoded dev credentials
-  const gym = await prisma.gym.findFirst();
-  if (!gym) return null;
+  // Find member by email (could be in any gym)
+  const member = await prisma.member.findFirst({
+    where: { email },
+    include: { gym: true },
+  });
 
-  if (email === DEFAULT_ADMIN.email && password === DEFAULT_ADMIN.password) {
-    const member = await prisma.member.findFirst({
-      where: { email, gymId: gym.id },
+  if (!member) return null;
+
+  // Check password
+  if (!member.passwordHash) return null;
+  const valid = await bcrypt.compare(password, member.passwordHash);
+  if (!valid) return null;
+
+  // Determine role: first member created for a gym is admin
+  const firstMember = await prisma.member.findFirst({
+    where: { gymId: member.gymId },
+    orderBy: { createdAt: "asc" },
+  });
+  const isAdmin = firstMember?.id === member.id;
+
+  return {
+    userId: member.clerkUserId,
+    email: member.email,
+    name: `${member.firstName} ${member.lastName}`,
+    role: isAdmin ? "admin" : "member",
+    gymId: member.gymId,
+    memberId: member.id,
+  };
+}
+
+// ── Legacy: ensure defaults (for backward compat) ────
+
+export async function ensureDefaults() {
+  let gym = await prisma.gym.findFirst();
+  if (!gym) {
+    gym = await prisma.gym.create({
+      data: {
+        clerkOrgId: "default-gym",
+        name: "Demo Gym",
+        slug: "demo-gym",
+        timezone: "America/Chicago",
+      },
     });
-    return {
-      userId: "local-admin",
-      email,
-      name: `${DEFAULT_ADMIN.firstName} ${DEFAULT_ADMIN.lastName}`,
-      role: "admin",
-      gymId: gym.id,
-      memberId: member?.id || "admin",
-    };
   }
-
-  if (email === DEFAULT_MEMBER.email && password === DEFAULT_MEMBER.password) {
-    const member = await prisma.member.findFirst({
-      where: { email, gymId: gym.id },
-    });
-    if (!member) return null;
-    return {
-      userId: "local-member",
-      email,
-      name: `${DEFAULT_MEMBER.firstName} ${DEFAULT_MEMBER.lastName}`,
-      role: "member",
-      gymId: gym.id,
-      memberId: member.id,
-    };
-  }
-
-  // Check database members (for any manually created accounts)
-  // Note: Member model no longer has passwordHash — skip DB auth for now
-  return null;
+  return gym;
 }

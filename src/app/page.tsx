@@ -16,16 +16,16 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/sign-in"
+            href="/sign-up"
             className="bg-brand-teal text-brand-black font-bold px-8 py-4 rounded-lg hover:bg-brand-teal/90 transition text-lg uppercase tracking-wider"
           >
-            Sign In
+            Start Free Trial
           </Link>
           <Link
-            href="/sign-up"
+            href="/sign-in"
             className="border-2 border-brand-teal text-brand-teal font-bold px-8 py-4 rounded-lg hover:bg-brand-teal hover:text-brand-black transition text-lg uppercase tracking-wider"
           >
-            Get Started
+            Sign In
           </Link>
         </div>
 
