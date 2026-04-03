@@ -59,7 +59,7 @@ function SignUpForm() {
             setLoading(false);
             return;
           }
-          router.push("/members");
+          router.push("/app");
         } catch {
           setError("Something went wrong. Please try again.");
           setLoading(false);
@@ -97,7 +97,7 @@ function SignUpForm() {
         return;
       }
 
-      router.push("/admin");
+      router.push("/app");
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);

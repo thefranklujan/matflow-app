@@ -31,11 +31,7 @@ export default function SignInPage() {
         return;
       }
 
-      if (data.user.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/members");
-      }
+      router.push("/app");
     } catch {
       setError("Something went wrong");
       setLoading(false);
