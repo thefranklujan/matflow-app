@@ -29,10 +29,13 @@ model Gym {
   categories         Category[]
   classSchedules     ClassSchedule[]
   events             Event[]
+  leads              Lead[]
   members            Member[]
   orders             Order[]
   products           Product[]
   videos             Video[]
+  waiverSignatures   WaiverSignature[]
+  waiverTemplates    WaiverTemplate[]
 }
 
 model Category {
@@ -129,6 +132,7 @@ model Member {
   lastName            String
   phone               String?
   passwordHash        String?
+  status              String               @default("active")
   beltRank            String               @default("white")
   stripes             Int                  @default(0)
   approved            Boolean              @default(true)
@@ -143,6 +147,7 @@ model Member {
   personalGoals       PersonalGoal[]
   scheduleCommitments ScheduleCommitment[]
   techniqueProgress   TechniqueProgress[]
+  waiverSignatures    WaiverSignature[]
 
   @@unique([gymId, clerkUserId])
   @@unique([gymId, email])
@@ -279,4 +284,44 @@ model PersonalGoal {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  gymId     String
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  source    String   @default("website")
+  status    String   @default("new")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+}
+
+model WaiverTemplate {
+  id         String            @id @default(cuid())
+  gymId      String
+  title      String
+  content    String
+  active     Boolean           @default(true)
+  version    Int               @default(1)
+  createdAt  DateTime          @default(now())
+  gym        Gym               @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  signatures WaiverSignature[]
+}
+
+model WaiverSignature {
+  id                    String         @id @default(cuid())
+  gymId                 String
+  memberId              String
+  templateId            String
+  signedName            String
+  signedAt              DateTime       @default(now())
+  waiverContentSnapshot String
+  gym                   Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member                Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  template              WaiverTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getAuthContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendOrderConfirmation } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
       },
       include: { items: true },
     });
+
+    const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
+    sendOrderConfirmation(customerEmail, customerName, order.id, subtotal, gym?.name || "Your Gym");
 
     return NextResponse.json(order, { status: 201 });
   } catch {

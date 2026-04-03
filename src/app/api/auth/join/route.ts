@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerMember, createSession } from "@/lib/local-auth";
+import { sendWelcomeEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,6 +40,9 @@ export async function POST(request: NextRequest) {
       gymId: result.member.gymId,
       memberId: result.member.id,
     });
+
+    const gym = await prisma.gym.findUnique({ where: { slug: gymSlug }, select: { name: true } });
+    sendWelcomeEmail(email, `${firstName} ${lastName}`, gym?.name || "your gym");
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

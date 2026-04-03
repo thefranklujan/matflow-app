@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerGymOwner, createSession } from "@/lib/local-auth";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +42,8 @@ export async function POST(request: NextRequest) {
       gymId: result.gym.id,
       memberId: result.member.id,
     });
+
+    sendWelcomeEmail(email, `${firstName} ${lastName}`, gymName);
 
     return NextResponse.json(
       { success: true, gym: result.gym },

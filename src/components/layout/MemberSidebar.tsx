@@ -14,6 +14,7 @@ const links = [
   { href: "/members/attendance", label: "Attendance", icon: "✅" },
   { href: "/members/calendar", label: "Calendar", icon: "📆" },
   { href: "/members/leaderboard", label: "Leaderboard", icon: "🏆" },
+  { href: "/members/waiver", label: "Waiver", icon: "📝" },
   { href: "/members/profile", label: "Profile", icon: "👤" },
 ];
 
