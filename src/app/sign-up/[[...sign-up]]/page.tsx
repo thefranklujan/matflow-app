@@ -267,7 +267,7 @@ function SignUpForm() {
         </form>
 
         <p className="text-center text-gray-600 text-xs mt-6">
-          14 day free trial. No credit card required.
+          30 day free trial. No credit card required.
         </p>
       </div>
     </div>

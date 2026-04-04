@@ -87,7 +87,7 @@ export async function registerGymOwner(data: {
         slug: data.gymSlug,
         timezone: data.timezone || "America/Chicago",
         subscriptionStatus: "trialing",
-        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+        trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       },
     });
 

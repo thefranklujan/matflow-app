@@ -22,7 +22,7 @@ export async function createCheckoutSession(gymId: string, customerId: string | 
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/admin/billing?canceled=true`,
     metadata: { gymId },
     subscription_data: {
-      trial_period_days: 14,
+      trial_period_days: 30,
       metadata: { gymId },
     },
   };
