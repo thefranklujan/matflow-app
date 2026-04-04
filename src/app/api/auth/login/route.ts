@@ -17,9 +17,13 @@ export async function POST(request: NextRequest) {
 
     await createSession(user);
 
+    const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "").split(",").map(e => e.trim());
+    const isPlatformAdmin = platformAdmins.includes(user.email);
+
     return NextResponse.json({
       success: true,
       user: { email: user.email, name: user.name, role: user.role },
+      isPlatformAdmin,
     });
   } catch (error) {
     console.error("Login error:", error);

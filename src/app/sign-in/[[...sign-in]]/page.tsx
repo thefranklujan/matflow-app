@@ -31,7 +31,11 @@ export default function SignInPage() {
         return;
       }
 
-      router.push("/app");
+      if (data.isPlatformAdmin) {
+        router.push("/platform");
+      } else {
+        router.push("/app");
+      }
     } catch {
       setError("Something went wrong");
       setLoading(false);
