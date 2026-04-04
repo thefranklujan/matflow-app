@@ -28,7 +28,6 @@ export default async function PlatformDashboard() {
     prisma.attendance.count(),
   ]);
 
-  const activeGyms = gyms.filter(g => g.subscriptionStatus !== "cancelled");
   const trialingGyms = gyms.filter(g => g.subscriptionStatus === "trialing");
   const paidGyms = gyms.filter(g => g.subscriptionStatus === "active");
 
