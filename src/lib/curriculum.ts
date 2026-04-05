@@ -329,7 +329,7 @@ export function getNextMilestoneTechniques(
       label: `${currentBelt.charAt(0).toUpperCase() + currentBelt.slice(1)} Belt : Stripe ${nextStripe}`,
       techniques: getTechniquesForStripe(currentBelt, nextStripe),
     };
-  } else if (beltIdx < beltOrder.length : 1) {
+  } else if (beltIdx < beltOrder.length - 1) {
     // Next belt
     const nextBelt = beltOrder[beltIdx + 1];
     return {

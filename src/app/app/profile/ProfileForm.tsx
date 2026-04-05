@@ -102,7 +102,7 @@ export default function ProfileForm() {
               <p className="text-white text-lg font-semibold capitalize">
                 {profile.beltRank} Belt
                 {profile.stripes > 0 &&
-                  ` - ${profile.stripes} stripe${profile.stripes !== 1 ? "s" : ""}`}
+                  ` (${profile.stripes} stripe${profile.stripes !== 1 ? "s" : ""})`}
               </p>
             </div>
             <BeltDisplay
