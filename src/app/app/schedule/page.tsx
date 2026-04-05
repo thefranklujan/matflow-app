@@ -193,7 +193,7 @@ export default function AdminSchedulePage() {
                   onChange={(e) => setTopic(e.target.value)}
                   className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 >
-                  <option value="">— No Topic —</option>
+                  <option value="">No Topic</option>
                   {SCHEDULE_TOPICS.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -244,7 +244,7 @@ export default function AdminSchedulePage() {
                         {dayEntries.map((entry) => (
                           <tr key={entry.id} className="border-b border-brand-gray/50 hover:bg-brand-gray/20 transition">
                             <td className="px-4 py-2 text-sm text-brand-accent font-medium">
-                              {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
+                              {formatTime(entry.startTime)} to {formatTime(entry.endTime)}
                             </td>
                             <td className="px-4 py-2 text-sm text-white">{classLabel(entry.classType)}</td>
                             <td className="px-4 py-2 text-sm text-gray-300">{entry.instructor}</td>

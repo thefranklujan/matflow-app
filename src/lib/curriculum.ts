@@ -37,27 +37,27 @@ function t(
 
 // ─── WHITE BELT ──────────────────────────────────────────
 const whiteBelt: Technique[] = [
-  // Stripe 1 — Survival & Basic Positions
+  // Stripe 1 : Survival & Basic Positions
   t("w1-01", "Trap & Roll Escape from Mount", "Escapes & Defenses", "white", 1),
   t("w1-02", "Elbow-Knee Escape from Mount", "Escapes & Defenses", "white", 1),
   t("w1-03", "Bridge & Shrimp Drill", "Escapes & Defenses", "white", 1),
   t("w1-04", "Closed Guard Posture Control", "Guard", "white", 1),
   t("w1-05", "Closed Guard Hip Bump Sweep", "Sweeps", "white", 1),
   t("w1-06", "Standing in Closed Guard", "Passes", "white", 1),
-  t("w1-07", "Basic Takedown - Body Lock", "Takedowns", "white", 1),
+  t("w1-07", "Basic Takedown : Body Lock", "Takedowns", "white", 1),
   t("w1-08", "Cross Collar Choke from Guard", "Submissions", "white", 1),
   t("w1-09", "Maintaining Mount", "Positional Control", "white", 1),
   t("w1-10", "Maintaining Side Control", "Positional Control", "white", 1),
   t("w1-11", "Basic Breakfall (back, side)", "Escapes & Defenses", "white", 1),
   t("w1-12", "Rear Naked Choke (basic)", "Submissions", "white", 1),
 
-  // Stripe 2 — Guard Fundamentals
+  // Stripe 2 : Guard Fundamentals
   t("w2-01", "Scissor Sweep from Closed Guard", "Sweeps", "white", 2),
   t("w2-02", "Armbar from Closed Guard", "Submissions", "white", 2),
   t("w2-03", "Triangle Choke from Closed Guard", "Submissions", "white", 2),
   t("w2-04", "Kimura from Closed Guard", "Submissions", "white", 2),
   t("w2-05", "Guillotine Choke (closed guard)", "Submissions", "white", 2),
-  t("w2-06", "Side Control Escape - Shrimp to Guard", "Escapes & Defenses", "white", 2),
+  t("w2-06", "Side Control Escape : Shrimp to Guard", "Escapes & Defenses", "white", 2),
   t("w2-07", "Half Guard Recovery", "Guard", "white", 2),
   t("w2-08", "Double Leg Takedown", "Takedowns", "white", 2),
   t("w2-09", "Guard Pull to Closed Guard", "Takedowns", "white", 2),
@@ -65,7 +65,7 @@ const whiteBelt: Technique[] = [
   t("w2-11", "Americana from Mount", "Submissions", "white", 2),
   t("w2-12", "Basic Guard Retention Concepts", "Guard", "white", 2),
 
-  // Stripe 3 — Passing & Transitions
+  // Stripe 3 : Passing & Transitions
   t("w3-01", "Torreando Pass", "Passes", "white", 3),
   t("w3-02", "Knee Cut Pass", "Passes", "white", 3),
   t("w3-03", "Over-Under Pass", "Passes", "white", 3),
@@ -75,11 +75,11 @@ const whiteBelt: Technique[] = [
   t("w3-07", "Flower Sweep", "Sweeps", "white", 3),
   t("w3-08", "Ezekiel Choke from Mount", "Submissions", "white", 3),
   t("w3-09", "Back Mount Control (hooks & seatbelt)", "Positional Control", "white", 3),
-  t("w3-10", "Turtle Escape - Sit Out", "Escapes & Defenses", "white", 3),
+  t("w3-10", "Turtle Escape : Sit Out", "Escapes & Defenses", "white", 3),
   t("w3-11", "North-South Position", "Positional Control", "white", 3),
   t("w3-12", "Headlock Escape (Kesa Gatame)", "Escapes & Defenses", "white", 3),
 
-  // Stripe 4 — Combinations & Competition Prep
+  // Stripe 4 : Combinations & Competition Prep
   t("w4-01", "Open Guard Basics (feet on hips)", "Guard", "white", 4),
   t("w4-02", "Butterfly Guard Sweep", "Sweeps", "white", 4),
   t("w4-03", "Omoplata from Guard", "Submissions", "white", 4),
@@ -96,7 +96,7 @@ const whiteBelt: Technique[] = [
 
 // ─── BLUE BELT ───────────────────────────────────────────
 const blueBelt: Technique[] = [
-  // Stripe 1 — Advanced Guard
+  // Stripe 1 : Advanced Guard
   t("b1-01", "De La Riva Guard Basics", "Guard", "blue", 1),
   t("b1-02", "Spider Guard Control", "Guard", "blue", 1),
   t("b1-03", "Lasso Guard Sweep", "Sweeps", "blue", 1),
@@ -112,7 +112,7 @@ const blueBelt: Technique[] = [
   t("b1-13", "Backstep Pass", "Passes", "blue", 1),
   t("b1-14", "Ankle Pick Takedown", "Takedowns", "blue", 1),
 
-  // Stripe 2 — No-Gi Fundamentals
+  // Stripe 2 : No-Gi Fundamentals
   t("b2-01", "Guillotine Variations (arm-in, high elbow)", "Submissions", "blue", 2),
   t("b2-02", "D'Arce Choke", "Submissions", "blue", 2),
   t("b2-03", "Anaconda Choke", "Submissions", "blue", 2),
@@ -127,7 +127,7 @@ const blueBelt: Technique[] = [
   t("b2-12", "Reverse Half Guard Pass", "Passes", "blue", 2),
   t("b2-13", "Duck Under Takedown", "Takedowns", "blue", 2),
 
-  // Stripe 3 — Attacks from Top
+  // Stripe 3 : Attacks from Top
   t("b3-01", "Paper Cutter Choke from Side Control", "Submissions", "blue", 3),
   t("b3-02", "Baseball Bat Choke", "Submissions", "blue", 3),
   t("b3-03", "North-South Choke", "Submissions", "blue", 3),
@@ -136,13 +136,13 @@ const blueBelt: Technique[] = [
   t("b3-06", "Clock Choke from Turtle", "Submissions", "blue", 3),
   t("b3-07", "Crucifix Position & Attacks", "Positional Control", "blue", 3),
   t("b3-08", "Knee on Belly Attacks & Transitions", "Positional Control", "blue", 3),
-  t("b3-09", "Back Control — Body Triangle", "Positional Control", "blue", 3),
+  t("b3-09", "Back Control : Body Triangle", "Positional Control", "blue", 3),
   t("b3-10", "Mount Retention & Transitions", "Positional Control", "blue", 3),
   t("b3-11", "Float Pass", "Passes", "blue", 3),
   t("b3-12", "Long Step Pass", "Passes", "blue", 3),
   t("b3-13", "Wrist Lock from Multiple Positions", "Submissions", "blue", 3),
 
-  // Stripe 4 — Competition & Combinations
+  // Stripe 4 : Competition & Combinations
   t("b4-01", "Submission Chains from Mount", "Submissions", "blue", 4),
   t("b4-02", "Submission Chains from Back", "Submissions", "blue", 4),
   t("b4-03", "Guard Passing Chains", "Passes", "blue", 4),
@@ -159,7 +159,7 @@ const blueBelt: Technique[] = [
 
 // ─── PURPLE BELT ─────────────────────────────────────────
 const purpleBelt: Technique[] = [
-  // Stripe 1 — System Development
+  // Stripe 1 : System Development
   t("p1-01", "Developing a Personal Guard Game", "Guard", "purple", 1),
   t("p1-02", "Deep Half Guard System", "Guard", "purple", 1),
   t("p1-03", "Reverse De La Riva Guard", "Guard", "purple", 1),
@@ -175,21 +175,21 @@ const purpleBelt: Technique[] = [
   t("p1-13", "Advanced Takedown Combinations", "Takedowns", "purple", 1),
   t("p1-14", "Judo Throws (Osoto Gari, Seoi Nage)", "Takedowns", "purple", 1),
 
-  // Stripe 2 — Teaching & Advanced Concepts
+  // Stripe 2 : Teaching & Advanced Concepts
   t("p2-01", "Chaining Leg Lock Entries", "Submissions", "purple", 2),
   t("p2-02", "Leg Lock Defense & Escapes", "Escapes & Defenses", "purple", 2),
   t("p2-03", "Advanced Back Attack System", "Submissions", "purple", 2),
   t("p2-04", "Truck Position & Calf Slicer", "Positional Control", "purple", 2),
   t("p2-05", "Lapel Guard Variations (Gi)", "Guard", "purple", 2),
   t("p2-06", "Worm Guard Basics", "Guard", "purple", 2),
-  t("p2-07", "Advanced Half Guard — Coyote Guard", "Guard", "purple", 2),
+  t("p2-07", "Advanced Half Guard : Coyote Guard", "Guard", "purple", 2),
   t("p2-08", "Teaching Methodology for White Belts", "Positional Control", "purple", 2),
   t("p2-09", "Analyzing Opponent Patterns", "Positional Control", "purple", 2),
-  t("p2-10", "Footlock Defense — Boot", "Escapes & Defenses", "purple", 2),
+  t("p2-10", "Footlock Defense : Boot", "Escapes & Defenses", "purple", 2),
   t("p2-11", "Toreando Counter Attacks", "Sweeps", "purple", 2),
   t("p2-12", "Maintaining Composure Under Submissions", "Escapes & Defenses", "purple", 2),
 
-  // Stripe 3 — Mastery & Flow
+  // Stripe 3 : Mastery & Flow
   t("p3-01", "Transition Chains (5+ positions)", "Positional Control", "purple", 3),
   t("p3-02", "Advanced Sweeps from Open Guard", "Sweeps", "purple", 3),
   t("p3-03", "Inverting Safely", "Guard", "purple", 3),
@@ -203,7 +203,7 @@ const purpleBelt: Technique[] = [
   t("p3-11", "Creating Dilemmas (2-on-1 choices)", "Submissions", "purple", 3),
   t("p3-12", "Advanced Rolling Back Take", "Positional Control", "purple", 3),
 
-  // Stripe 4 — Leadership & Competition Excellence
+  // Stripe 4 : Leadership & Competition Excellence
   t("p4-01", "Developing Training Plans for Students", "Positional Control", "purple", 4),
   t("p4-02", "Advanced Competition Strategy", "Positional Control", "purple", 4),
   t("p4-03", "Adapting Game to Opponent Style", "Positional Control", "purple", 4),
@@ -326,16 +326,16 @@ export function getNextMilestoneTechniques(
     return {
       beltRank: currentBelt,
       stripe: nextStripe,
-      label: `${currentBelt.charAt(0).toUpperCase() + currentBelt.slice(1)} Belt — Stripe ${nextStripe}`,
+      label: `${currentBelt.charAt(0).toUpperCase() + currentBelt.slice(1)} Belt : Stripe ${nextStripe}`,
       techniques: getTechniquesForStripe(currentBelt, nextStripe),
     };
-  } else if (beltIdx < beltOrder.length - 1) {
+  } else if (beltIdx < beltOrder.length : 1) {
     // Next belt
     const nextBelt = beltOrder[beltIdx + 1];
     return {
       beltRank: nextBelt,
       stripe: 1,
-      label: `${nextBelt.charAt(0).toUpperCase() + nextBelt.slice(1)} Belt — Stripe 1`,
+      label: `${nextBelt.charAt(0).toUpperCase() + nextBelt.slice(1)} Belt : Stripe 1`,
       techniques: getTechniquesForStripe(nextBelt, 1),
     };
   }

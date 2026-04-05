@@ -140,7 +140,7 @@ export default async function MemberDashboardPage() {
                     </p>
                   </div>
                   <p className="text-brand-accent font-semibold text-sm">
-                    {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+                    {formatTime(cls.startTime)} to {formatTime(cls.endTime)}
                   </p>
                 </div>
               ))}

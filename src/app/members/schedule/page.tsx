@@ -95,7 +95,7 @@ export default async function MemberSchedulePage({
                     >
                       <div className="flex items-center gap-4">
                         <div className="text-brand-accent font-semibold text-sm min-w-[120px]">
-                          {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+                          {formatTime(cls.startTime)} to {formatTime(cls.endTime)}
                         </div>
                         <div>
                           <p className="text-white font-medium capitalize">

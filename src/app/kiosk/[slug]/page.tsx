@@ -121,7 +121,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
                   >
                     <div className="font-bold">{c.classType}</div>
                     <div className="text-sm text-gray-400">
-                      {formatTime(c.startTime)} - {formatTime(c.endTime)} | {c.instructor}
+                      {formatTime(c.startTime)} to {formatTime(c.endTime)} | {c.instructor}
                       {c.topic && ` | ${c.topic}`}
                     </div>
                   </button>
