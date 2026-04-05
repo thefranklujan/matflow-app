@@ -53,8 +53,8 @@ export default function CalendarFilters() {
   const pillClass = (isActive: boolean) =>
     `px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
       isActive
-        ? "bg-brand-teal text-brand-black font-bold"
-        : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-teal hover:text-white"
+        ? "bg-brand-accent text-brand-black font-bold"
+        : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-accent hover:text-white"
     }`;
 
   return (

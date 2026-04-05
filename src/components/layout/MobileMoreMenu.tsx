@@ -41,7 +41,7 @@ export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className={cn(
             "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-            pathname === "/app" ? "bg-[#0fe69b] text-black" : "text-gray-300 hover:bg-white/5"
+            pathname === "/app" ? "bg-[#c4b5a0] text-black" : "text-gray-300 hover:bg-white/5"
           )}
         >
           <Home className="h-5 w-5 shrink-0" />
@@ -60,7 +60,7 @@ export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                isActive ? "bg-[#0fe69b] text-black" : "text-gray-300 hover:bg-white/5"
+                isActive ? "bg-[#c4b5a0] text-black" : "text-gray-300 hover:bg-white/5"
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />

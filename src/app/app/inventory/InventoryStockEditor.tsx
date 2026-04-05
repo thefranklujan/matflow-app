@@ -34,14 +34,14 @@ export default function InventoryStockEditor({
           type="number"
           value={stock}
           onChange={(e) => setStock(parseInt(e.target.value) || 0)}
-          className="w-20 px-2 py-1 bg-brand-black border border-brand-gray rounded text-white text-sm focus:border-brand-teal focus:outline-none"
+          className="w-20 px-2 py-1 bg-brand-black border border-brand-gray rounded text-white text-sm focus:border-brand-accent focus:outline-none"
           min="0"
           autoFocus
         />
         <button
           onClick={handleSave}
           disabled={saving}
-          className="text-xs text-brand-teal hover:underline"
+          className="text-xs text-brand-accent hover:underline"
         >
           {saving ? "..." : "Save"}
         </button>
@@ -61,7 +61,7 @@ export default function InventoryStockEditor({
   return (
     <button
       onClick={() => setEditing(true)}
-      className={`text-sm font-medium cursor-pointer hover:text-brand-teal transition ${
+      className={`text-sm font-medium cursor-pointer hover:text-brand-accent transition ${
         currentStock <= 3 ? "text-red-400" : "text-gray-300"
       }`}
     >

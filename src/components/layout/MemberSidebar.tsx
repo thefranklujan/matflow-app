@@ -44,7 +44,7 @@ export default function MemberSidebar() {
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-gray-400 hover:text-brand-teal transition p-1 rounded hover:bg-brand-gray/50"
+            className="text-gray-400 hover:text-brand-accent transition p-1 rounded hover:bg-brand-gray/50"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (
@@ -74,7 +74,7 @@ export default function MemberSidebar() {
                   "flex items-center gap-3 rounded-lg text-sm transition",
                   collapsed ? "justify-center px-2 py-2" : "px-3 py-2",
                   isActive
-                    ? "bg-brand-teal/10 text-brand-teal border border-brand-teal/30"
+                    ? "bg-brand-accent/10 text-brand-accent border border-brand-accent/30"
                     : "text-gray-300 hover:text-white hover:bg-brand-gray/50"
                 )}
               >

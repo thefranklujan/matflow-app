@@ -87,7 +87,7 @@ export default function AdminNewCompetitionPage() {
               value={memberId}
               onChange={(e) => setMemberId(e.target.value)}
               required
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             >
               {members.length === 0 && (
                 <option value="">Loading members...</option>
@@ -107,7 +107,7 @@ export default function AdminNewCompetitionPage() {
               value={competitionName}
               onChange={(e) => setCompetitionName(e.target.value)}
               required
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -119,7 +119,7 @@ export default function AdminNewCompetitionPage() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               />
             </div>
             <div>
@@ -127,7 +127,7 @@ export default function AdminNewCompetitionPage() {
               <select
                 value={placement}
                 onChange={(e) => setPlacement(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               >
                 {placements.map((p) => (
                   <option key={p} value={p}>
@@ -145,7 +145,7 @@ export default function AdminNewCompetitionPage() {
               value={division}
               onChange={(e) => setDivision(e.target.value)}
               placeholder="e.g., Adult Blue Belt Middleweight"
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -155,7 +155,7 @@ export default function AdminNewCompetitionPage() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal resize-none"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent resize-none"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default function AdminNewCompetitionPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
             >
               {loading ? "Saving..." : "Record Result"}
             </button>

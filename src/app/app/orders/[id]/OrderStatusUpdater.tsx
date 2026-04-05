@@ -32,7 +32,7 @@ export default function OrderStatusUpdater({
       value={status}
       onChange={(e) => handleChange(e.target.value)}
       disabled={saving}
-      className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition"
+      className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
     >
       {ORDER_STATUSES.map((s) => (
         <option key={s} value={s}>

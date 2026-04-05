@@ -50,7 +50,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
         <h1 className="text-2xl font-bold text-white">Waivers</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg text-sm"
+          className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg text-sm"
         >
           {showForm ? "Cancel" : "+ New Waiver"}
         </button>
@@ -78,7 +78,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
               required
             />
           </div>
-          <button type="submit" disabled={loading} className="bg-brand-teal text-brand-black font-bold px-6 py-2 rounded-lg disabled:opacity-50">
+          <button type="submit" disabled={loading} className="bg-brand-accent text-brand-black font-bold px-6 py-2 rounded-lg disabled:opacity-50">
             {loading ? "Creating..." : "Create Waiver"}
           </button>
           <p className="text-gray-500 text-xs">Creating a new waiver will deactivate any existing active waiver.</p>
@@ -86,14 +86,14 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
       )}
 
       {activeTemplate && (
-        <div className="bg-brand-dark border border-brand-teal/30 rounded-lg p-6 mb-6">
+        <div className="bg-brand-dark border border-brand-accent/30 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-3">
             <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-medium">Active</span>
             <h2 className="text-white font-semibold">{activeTemplate.title}</h2>
           </div>
           <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-brand-teal font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
+            <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
             <span className="text-gray-600">Version {activeTemplate.version}</span>
           </div>
 

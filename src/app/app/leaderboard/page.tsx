@@ -267,7 +267,7 @@ export default async function LeaderboardPage({
           </h1>
           <a
             href="/app/leaderboard/goals"
-            className="text-sm text-brand-teal hover:text-brand-teal/80 transition font-medium"
+            className="text-sm text-brand-accent hover:text-brand-accent/80 transition font-medium"
           >
             My Goals &rarr;
           </a>

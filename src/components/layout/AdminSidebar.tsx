@@ -51,7 +51,7 @@ export default function AdminSidebar() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition",
                   isActive
-                    ? "bg-brand-teal/10 text-brand-teal border border-brand-teal/30"
+                    ? "bg-brand-accent/10 text-brand-accent border border-brand-accent/30"
                     : "text-gray-300 hover:text-white hover:bg-brand-gray/50"
                 )}
               >

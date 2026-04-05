@@ -61,8 +61,8 @@ export default async function MemberVideosPage({
                 }
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   isActive
-                    ? "bg-brand-teal text-brand-black"
-                    : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-teal hover:text-white"
+                    ? "bg-brand-accent text-brand-black"
+                    : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-accent hover:text-white"
                 }`}
               >
                 {type}
@@ -78,7 +78,7 @@ export default async function MemberVideosPage({
               <Link
                 key={video.id}
                 href={`/members/videos/${video.id}`}
-                className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden hover:border-brand-teal transition group"
+                className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden hover:border-brand-accent transition group"
               >
                 {/* YouTube Thumbnail */}
                 <div className="aspect-video bg-brand-gray/50 relative overflow-hidden">
@@ -92,7 +92,7 @@ export default async function MemberVideosPage({
                     />
                   ) : null}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition">
-                    <div className="w-14 h-14 rounded-full bg-brand-teal/80 flex items-center justify-center group-hover:bg-brand-teal transition group-hover:scale-110">
+                    <div className="w-14 h-14 rounded-full bg-brand-accent/80 flex items-center justify-center group-hover:bg-brand-accent transition group-hover:scale-110">
                       <svg
                         className="w-7 h-7 text-white ml-1"
                         fill="currentColor"
@@ -105,7 +105,7 @@ export default async function MemberVideosPage({
                 </div>
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs bg-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-brand-accent/20 text-brand-accent px-2 py-0.5 rounded-full">
                       {video.classType}
                     </span>
                     <span className="text-xs text-gray-500">

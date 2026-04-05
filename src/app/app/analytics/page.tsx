@@ -117,10 +117,10 @@ export default async function AnalyticsPage() {
                 <span className="text-gray-300 capitalize w-16">{belt}</span>
                 <div className="flex-1 bg-brand-black rounded-full h-6 overflow-hidden">
                   <div
-                    className="h-full bg-brand-teal/30 rounded-full flex items-center pl-2"
+                    className="h-full bg-brand-accent/30 rounded-full flex items-center pl-2"
                     style={{ width: `${Math.max((count / maxBeltCount) * 100, 8)}%` }}
                   >
-                    <span className="text-brand-teal text-xs font-bold">{count}</span>
+                    <span className="text-brand-accent text-xs font-bold">{count}</span>
                   </div>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default async function AnalyticsPage() {
                     <span className="text-gray-500 w-6 text-right">#{i + 1}</span>
                     <span className="text-white">{c.classType}</span>
                   </div>
-                  <span className="text-brand-teal font-bold">{c._count} check-ins</span>
+                  <span className="text-brand-accent font-bold">{c._count} check-ins</span>
                 </div>
               ))}
             </div>
@@ -154,7 +154,7 @@ export default async function AnalyticsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-gray-400 text-sm">New This Month</p>
-              <p className="text-2xl font-bold text-brand-teal">{newThisMonth}</p>
+              <p className="text-2xl font-bold text-brand-accent">{newThisMonth}</p>
             </div>
             <div>
               <p className="text-gray-400 text-sm">New Last Month</p>
@@ -189,7 +189,7 @@ export default async function AnalyticsPage() {
             </div>
             <div>
               <p className="text-gray-400 text-sm">Total Revenue</p>
-              <p className="text-2xl font-bold text-brand-teal">${(totalRevenue._sum.total || 0).toFixed(0)}</p>
+              <p className="text-2xl font-bold text-brand-accent">${(totalRevenue._sum.total || 0).toFixed(0)}</p>
             </div>
             <div>
               <p className="text-gray-400 text-sm">Orders This Month</p>

@@ -81,28 +81,28 @@ export default function BillingPage() {
           <div
             key={plan.name}
             className={`bg-brand-dark border rounded-lg p-6 ${
-              plan.popular ? "border-brand-teal" : "border-brand-gray"
+              plan.popular ? "border-brand-accent" : "border-brand-gray"
             }`}
           >
             {plan.popular && (
-              <span className="text-xs font-bold text-brand-teal uppercase tracking-wider mb-2 block">
+              <span className="text-xs font-bold text-brand-accent uppercase tracking-wider mb-2 block">
                 Most Popular
               </span>
             )}
             <h2 className="text-xl font-bold text-white">{plan.name}</h2>
-            <p className="text-3xl font-bold text-brand-teal mt-2">{plan.price}</p>
+            <p className="text-3xl font-bold text-brand-accent mt-2">{plan.price}</p>
             <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
             <ul className="space-y-2 mb-6">
               {plan.features.map((f) => (
                 <li key={f} className="text-gray-300 text-sm flex items-center gap-2">
-                  <span className="text-brand-teal">&#10003;</span> {f}
+                  <span className="text-brand-accent">&#10003;</span> {f}
                 </li>
               ))}
             </ul>
             <button
               onClick={() => handleCheckout(plan.priceId)}
               disabled={!!loading}
-              className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+              className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
             >
               {loading === plan.priceId ? "Redirecting..." : "Subscribe"}
             </button>
@@ -115,7 +115,7 @@ export default function BillingPage() {
         <button
           onClick={handlePortal}
           disabled={!!loading}
-          className="text-brand-teal font-medium text-sm hover:underline disabled:opacity-50"
+          className="text-brand-accent font-medium text-sm hover:underline disabled:opacity-50"
         >
           {loading === "portal" ? "Opening..." : "Manage billing & invoices"}
         </button>

@@ -63,13 +63,13 @@ export default async function MemberProgressPage() {
           </div>
 
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 flex flex-col items-center justify-center">
-            <p className="text-3xl font-bold text-brand-teal">{techniqueProgress.length}</p>
+            <p className="text-3xl font-bold text-brand-accent">{techniqueProgress.length}</p>
             <p className="text-gray-400 text-sm mt-1">Techniques Learned</p>
             <p className="text-[10px] text-gray-500 mt-0.5">of {totalAll} total</p>
           </div>
 
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 flex flex-col items-center justify-center">
-            <p className="text-3xl font-bold text-brand-teal">
+            <p className="text-3xl font-bold text-brand-accent">
               {totalUpTo > 0 ? Math.round((completedUpTo / totalUpTo) * 100) : 0}%
             </p>
             <p className="text-gray-400 text-sm mt-1">Current Level Mastery</p>

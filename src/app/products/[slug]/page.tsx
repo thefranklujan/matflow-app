@@ -31,11 +31,11 @@ export default async function ProductPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-400 mb-8">
-        <Link href="/" className="hover:text-brand-teal">Home</Link>
+        <Link href="/" className="hover:text-brand-accent">Home</Link>
         <span>/</span>
-        <Link href="/products" className="hover:text-brand-teal">Shop</Link>
+        <Link href="/products" className="hover:text-brand-accent">Shop</Link>
         <span>/</span>
-        <Link href={`/categories/${product.category.slug}`} className="hover:text-brand-teal">
+        <Link href={`/categories/${product.category.slug}`} className="hover:text-brand-accent">
           {product.category.name}
         </Link>
         <span>/</span>
@@ -71,13 +71,13 @@ export default async function ProductPage({
 
         {/* Product Info */}
         <div>
-          <p className="text-brand-teal text-sm uppercase tracking-wider mb-2">
+          <p className="text-brand-accent text-sm uppercase tracking-wider mb-2">
             {product.category.name}
           </p>
           <h1 className="text-3xl font-bold text-white mb-4">{product.name}</h1>
 
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-3xl font-bold text-brand-teal">
+            <span className="text-3xl font-bold text-brand-accent">
               {formatCurrency(product.price)}
             </span>
             {product.compareAt && product.compareAt > product.price && (

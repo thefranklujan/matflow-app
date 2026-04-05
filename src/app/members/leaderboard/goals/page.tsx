@@ -54,7 +54,7 @@ export default async function GoalsPage() {
           </h1>
           <Link
             href="/members/leaderboard/goals/new"
-            className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm text-center"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm text-center"
           >
             + Set New Goal
           </Link>
@@ -105,7 +105,7 @@ export default async function GoalsPage() {
                   <div className="mb-2">
                     <div className="w-full h-3 bg-brand-gray rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-brand-teal rounded-full transition-all duration-300"
+                        className="h-full bg-brand-accent rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -115,7 +115,7 @@ export default async function GoalsPage() {
                     <span className="text-sm text-gray-400">
                       {goal.currentValue}/{goal.targetValue}
                     </span>
-                    <span className="text-sm text-brand-teal font-bold">
+                    <span className="text-sm text-brand-accent font-bold">
                       {Math.round(progress)}%
                     </span>
                   </div>
@@ -128,7 +128,7 @@ export default async function GoalsPage() {
             <p className="text-gray-500 mb-4">No active goals yet.</p>
             <Link
               href="/members/leaderboard/goals/new"
-              className="text-brand-teal hover:text-brand-teal/80 transition text-sm font-medium"
+              className="text-brand-accent hover:text-brand-accent/80 transition text-sm font-medium"
             >
               Set your first goal &rarr;
             </Link>
@@ -152,7 +152,7 @@ export default async function GoalsPage() {
                   >
                     <div className="flex items-center gap-3">
                       <svg
-                        className="w-5 h-5 text-brand-teal flex-shrink-0"
+                        className="w-5 h-5 text-brand-accent flex-shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

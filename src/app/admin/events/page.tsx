@@ -15,7 +15,7 @@ const eventTypeColors: Record<string, string> = {
 };
 
 const locationColors: Record<string, string> = {
-  magnolia: "bg-brand-teal/20 text-brand-teal",
+  magnolia: "bg-brand-accent/20 text-brand-accent",
   cypress: "bg-orange-500/20 text-orange-400",
 };
 
@@ -30,7 +30,7 @@ export default async function AdminEventsPage() {
           <h1 className="text-2xl font-bold text-white">Events</h1>
           <Link
             href="/admin/events/new"
-            className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
           >
             + New Event
           </Link>
@@ -53,7 +53,7 @@ export default async function AdminEventsPage() {
                   <td className="py-3 pr-4">
                     <Link
                       href={`/admin/events/${event.id}/edit`}
-                      className="text-white hover:text-brand-teal transition font-medium"
+                      className="text-white hover:text-brand-accent transition font-medium"
                     >
                       {event.title}
                     </Link>

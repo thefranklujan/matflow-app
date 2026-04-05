@@ -21,7 +21,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group bg-brand-dark border border-brand-gray rounded-lg overflow-hidden hover:border-brand-teal transition"
+      className="group bg-brand-dark border border-brand-gray rounded-lg overflow-hidden hover:border-brand-accent transition"
     >
       <div className="aspect-square bg-brand-gray flex items-center justify-center relative">
         {firstImage ? (
@@ -40,14 +40,14 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="p-4">
-        <p className="text-xs text-brand-teal uppercase tracking-wider mb-1">
+        <p className="text-xs text-brand-accent uppercase tracking-wider mb-1">
           {product.category.name}
         </p>
-        <h3 className="text-white font-semibold group-hover:text-brand-teal transition mb-2 line-clamp-2">
+        <h3 className="text-white font-semibold group-hover:text-brand-accent transition mb-2 line-clamp-2">
           {product.name}
         </h3>
         <div className="flex items-center gap-2">
-          <p className="text-brand-teal font-bold">{formatCurrency(product.price)}</p>
+          <p className="text-brand-accent font-bold">{formatCurrency(product.price)}</p>
           {product.compareAt && product.compareAt > product.price && (
             <p className="text-gray-500 text-sm line-through">
               {formatCurrency(product.compareAt)}

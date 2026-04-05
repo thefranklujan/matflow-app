@@ -67,7 +67,7 @@ export default function AdminNewEventPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -77,7 +77,7 @@ export default function AdminNewEventPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal resize-none"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent resize-none"
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function AdminNewEventPage() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               />
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function AdminNewEventPage() {
                 type="datetime-local"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               />
             </div>
           </div>
@@ -109,7 +109,7 @@ export default function AdminNewEventPage() {
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               >
                 {eventTypes.map((type) => (
                   <option key={type} value={type}>
@@ -123,7 +123,7 @@ export default function AdminNewEventPage() {
               <select
                 value={locationSlug}
                 onChange={(e) => setLocationSlug(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               >
                 {locations.map((loc) => (
                   <option key={loc} value={loc}>
@@ -140,7 +140,7 @@ export default function AdminNewEventPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
             >
               {loading ? "Creating..." : "Create Event"}
             </button>

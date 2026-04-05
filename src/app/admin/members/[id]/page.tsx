@@ -98,7 +98,7 @@ export default async function AdminMemberDetailPage({
               </div>
               <div>
                 <dt className="text-xs text-gray-400 uppercase">Attendance Count</dt>
-                <dd className="text-brand-teal font-bold text-lg">{attendanceCount}</dd>
+                <dd className="text-brand-accent font-bold text-lg">{attendanceCount}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-400 uppercase">Joined</dt>

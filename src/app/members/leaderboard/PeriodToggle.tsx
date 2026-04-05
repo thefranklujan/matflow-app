@@ -28,8 +28,8 @@ export default function PeriodToggle() {
             onClick={() => handleClick(p.value)}
             className={
               isActive
-                ? "bg-brand-teal text-brand-black font-bold rounded-lg px-4 py-2 text-sm transition"
-                : "bg-brand-dark border border-brand-gray text-gray-300 rounded-lg px-4 py-2 text-sm transition hover:border-brand-teal hover:text-white"
+                ? "bg-brand-accent text-brand-black font-bold rounded-lg px-4 py-2 text-sm transition"
+                : "bg-brand-dark border border-brand-gray text-gray-300 rounded-lg px-4 py-2 text-sm transition hover:border-brand-accent hover:text-white"
             }
           >
             {p.label}

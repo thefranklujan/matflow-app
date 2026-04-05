@@ -80,7 +80,7 @@ export function Sidebar() {
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             pathname === "/app"
-              ? "bg-[#0fe69b] text-black"
+              ? "bg-[#c4b5a0] text-black"
               : "text-gray-400 hover:bg-white/5 hover:text-white",
             collapsed && "justify-center px-0"
           )}
@@ -105,7 +105,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[#0fe69b] text-black"
+                  ? "bg-[#c4b5a0] text-black"
                   : "text-gray-400 hover:bg-white/5 hover:text-white",
                 collapsed && "justify-center px-0"
               )}
@@ -133,7 +133,7 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-[#0fe69b] text-black"
+                    ? "bg-[#c4b5a0] text-black"
                     : "text-gray-400 hover:bg-white/5 hover:text-white",
                   collapsed && "justify-center px-0"
                 )}

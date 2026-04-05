@@ -76,7 +76,7 @@ export default function MemberWaiverPage() {
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-1 accent-brand-teal"
+            className="mt-1 accent-brand-accent"
           />
           <span className="text-gray-300 text-sm">
             I have read and agree to the terms of this waiver
@@ -98,7 +98,7 @@ export default function MemberWaiverPage() {
         <button
           type="submit"
           disabled={loading || !agreed || !signedName}
-          className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg disabled:opacity-50"
+          className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg disabled:opacity-50"
         >
           {loading ? "Signing..." : "Sign Waiver"}
         </button>

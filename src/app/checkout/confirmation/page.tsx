@@ -17,7 +17,7 @@ function ConfirmationContent() {
         <p className="text-gray-400 mb-6">
           Thank you for your order. Your order number is:
         </p>
-        <p className="text-2xl font-bold text-brand-teal mb-6">#{orderNumber}</p>
+        <p className="text-2xl font-bold text-brand-accent mb-6">#{orderNumber}</p>
 
         {/* TODO: Gym-specific location & contact info will come from the Gym model */}
         <div className="bg-brand-black border border-brand-gray rounded-lg p-4 mb-6 text-left">
@@ -31,7 +31,7 @@ function ConfirmationContent() {
 
         <Link
           href="/products"
-          className="inline-block bg-brand-teal text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-teal/90 transition"
+          className="inline-block bg-brand-accent text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-accent/90 transition"
         >
           Continue Shopping
         </Link>

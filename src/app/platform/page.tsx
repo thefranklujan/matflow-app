@@ -39,8 +39,8 @@ export default async function PlatformDashboard() {
       {/* Platform KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         <KPI label="Total Gyms" value={gyms.length} color="text-white" />
-        <KPI label="Active / Trialing" value={`${paidGyms.length} / ${trialingGyms.length}`} color="text-[#0fe69b]" />
-        <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} color="text-[#0fe69b]" />
+        <KPI label="Active / Trialing" value={`${paidGyms.length} / ${trialingGyms.length}`} color="text-[#c4b5a0]" />
+        <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} color="text-[#c4b5a0]" />
         <KPI label="Total Orders" value={totalOrders} sub={`$${(orderRevenue._sum.total || 0).toFixed(0)} revenue`} color="text-blue-400" />
         <KPI label="Total Check-ins" value={totalAttendance} color="text-purple-400" />
       </div>
@@ -78,7 +78,7 @@ export default async function PlatformDashboard() {
                   <tr key={gym.id} className="border-b border-white/5 hover:bg-white/[0.02] transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-[#0fe69b]/10 flex items-center justify-center text-[#0fe69b] text-xs font-bold">
+                        <div className="h-8 w-8 rounded-lg bg-[#c4b5a0]/10 flex items-center justify-center text-[#c4b5a0] text-xs font-bold">
                           {gym.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
                         </div>
                         <span className="text-white font-medium">{gym.name}</span>
@@ -104,7 +104,7 @@ export default async function PlatformDashboard() {
                       <div className="flex items-center gap-2 justify-center">
                         <Link
                           href={`/join/${gym.slug}`}
-                          className="text-[#0fe69b] text-xs hover:underline"
+                          className="text-[#c4b5a0] text-xs hover:underline"
                           target="_blank"
                         >
                           Join

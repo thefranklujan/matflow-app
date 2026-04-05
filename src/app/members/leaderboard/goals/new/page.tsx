@@ -68,7 +68,7 @@ export default function NewGoalPage() {
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="e.g., Train 20 classes this month"
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -79,7 +79,7 @@ export default function NewGoalPage() {
             <select
               value={goalType}
               onChange={(e) => setGoalType(e.target.value)}
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             >
               <option value="monthly-attendance">Monthly Attendance</option>
               <option value="weekly-streak">Weekly Streak</option>
@@ -99,7 +99,7 @@ export default function NewGoalPage() {
               required
               min={1}
               placeholder="e.g., 20"
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -112,7 +112,7 @@ export default function NewGoalPage() {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               required
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -124,7 +124,7 @@ export default function NewGoalPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
             />
           </div>
 
@@ -134,7 +134,7 @@ export default function NewGoalPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
             >
               {loading ? "Creating..." : "Create Goal"}
             </button>

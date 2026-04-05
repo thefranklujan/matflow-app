@@ -22,7 +22,7 @@ export default async function AdminProductsPage() {
         <h1 className="text-2xl font-bold text-white">Products</h1>
         <Link
           href="/admin/products/new"
-          className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm"
+          className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
         >
           + Add Product
         </Link>
@@ -58,7 +58,7 @@ export default async function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-400">{product.category.name}</td>
-                  <td className="px-4 py-3 text-sm text-brand-teal font-medium">{formatCurrency(product.price)}</td>
+                  <td className="px-4 py-3 text-sm text-brand-accent font-medium">{formatCurrency(product.price)}</td>
                   <td className="px-4 py-3">
                     <span className={`text-sm ${totalStock <= 3 ? "text-red-400" : "text-gray-300"}`}>
                       {totalStock}
@@ -73,7 +73,7 @@ export default async function AdminProductsPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/products/${product.id}/edit`}
-                        className="text-sm text-gray-400 hover:text-brand-teal transition"
+                        className="text-sm text-gray-400 hover:text-brand-accent transition"
                       >
                         Edit
                       </Link>

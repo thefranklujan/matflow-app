@@ -15,7 +15,7 @@ export default function CartPage() {
         <p className="text-gray-400 mb-8">Your cart is empty.</p>
         <Link
           href="/products"
-          className="inline-block bg-brand-teal text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-teal/90 transition"
+          className="inline-block bg-brand-accent text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-accent/90 transition"
         >
           Start Shopping
         </Link>
@@ -54,7 +54,7 @@ export default function CartPage() {
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <Link href={`/products/${item.slug}`} className="text-white font-semibold hover:text-brand-teal transition">
+              <Link href={`/products/${item.slug}`} className="text-white font-semibold hover:text-brand-accent transition">
                 {item.name}
               </Link>
               <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
@@ -66,7 +66,7 @@ export default function CartPage() {
                   </>
                 )}
               </div>
-              <p className="text-brand-teal font-bold mt-1">{formatCurrency(item.price)}</p>
+              <p className="text-brand-accent font-bold mt-1">{formatCurrency(item.price)}</p>
             </div>
 
             {/* Quantity */}
@@ -108,7 +108,7 @@ export default function CartPage() {
       <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <span className="text-lg text-gray-300">Subtotal</span>
-          <span className="text-2xl font-bold text-brand-teal">{formatCurrency(subtotal)}</span>
+          <span className="text-2xl font-bold text-brand-accent">{formatCurrency(subtotal)}</span>
         </div>
 
         <p className="text-gray-500 text-xs mb-4">
@@ -117,7 +117,7 @@ export default function CartPage() {
 
         <Link
           href="/checkout"
-          className="block text-center bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition mb-3"
+          className="block text-center bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition mb-3"
         >
           Proceed to Checkout
         </Link>

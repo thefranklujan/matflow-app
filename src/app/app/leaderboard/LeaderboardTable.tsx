@@ -82,7 +82,7 @@ export default function LeaderboardTable({
               >
                 <div
                   className={`w-full bg-gradient-to-b ${style.bg} border ${style.border} rounded-xl p-4 flex flex-col items-center justify-center text-center ${style.height} ${
-                    isCurrentUser ? "ring-2 ring-brand-teal" : ""
+                    isCurrentUser ? "ring-2 ring-brand-accent" : ""
                   }`}
                 >
                   <span className="text-3xl mb-1">{style.medal}</span>
@@ -117,7 +117,7 @@ export default function LeaderboardTable({
                 key={entry.memberId}
                 className={`bg-brand-dark border rounded-lg p-4 flex items-center gap-4 ${
                   isCurrentUser
-                    ? "bg-brand-teal/5 border-l-2 border-brand-teal"
+                    ? "bg-brand-accent/5 border-l-2 border-brand-accent"
                     : "border-brand-gray"
                 }`}
               >
@@ -136,7 +136,7 @@ export default function LeaderboardTable({
                   </span>
                 </div>
 
-                <span className="text-brand-teal font-bold text-sm whitespace-nowrap">
+                <span className="text-brand-accent font-bold text-sm whitespace-nowrap">
                   {entry.value} {entry.label}
                 </span>
               </div>

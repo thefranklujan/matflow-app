@@ -101,7 +101,7 @@ export default function AddToCartSection({ product, variants, sizes, colors }: P
                 }}
                 className={`px-4 py-2 rounded-lg border text-sm transition ${
                   selectedColor === color
-                    ? "border-brand-teal text-brand-teal bg-brand-teal/10"
+                    ? "border-brand-accent text-brand-accent bg-brand-accent/10"
                     : "border-brand-gray text-gray-300 hover:border-gray-500"
                 }`}
               >
@@ -131,7 +131,7 @@ export default function AddToCartSection({ product, variants, sizes, colors }: P
                     outOfStock
                       ? "border-brand-gray/50 text-gray-600 cursor-not-allowed line-through"
                       : isSelected
-                      ? "border-brand-teal text-brand-teal bg-brand-teal/10"
+                      ? "border-brand-accent text-brand-accent bg-brand-accent/10"
                       : "border-brand-gray text-gray-300 hover:border-gray-500"
                   }`}
                 >
@@ -180,7 +180,7 @@ export default function AddToCartSection({ product, variants, sizes, colors }: P
           canAdd
             ? added
               ? "bg-green-500 text-white"
-              : "bg-brand-teal text-brand-black hover:bg-brand-teal/90"
+              : "bg-brand-accent text-brand-black hover:bg-brand-accent/90"
             : "bg-brand-gray text-gray-500 cursor-not-allowed"
         }`}
       >

@@ -66,7 +66,7 @@ export default function SignInPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
               placeholder="you@yourgym.com"
               required
             />
@@ -78,7 +78,7 @@ export default function SignInPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
               placeholder="Enter password"
               required
             />
@@ -87,14 +87,14 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+            className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
 
           <p className="text-center text-gray-500 text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/sign-up" className="text-brand-teal hover:underline">
+            <Link href="/sign-up" className="text-brand-accent hover:underline">
               Start free trial
             </Link>
           </p>

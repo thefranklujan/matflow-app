@@ -17,13 +17,13 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/sign-up"
-            className="bg-brand-teal text-brand-black font-bold px-8 py-4 rounded-lg hover:bg-brand-teal/90 transition text-lg uppercase tracking-wider"
+            className="bg-brand-accent text-brand-black font-bold px-8 py-4 rounded-lg hover:bg-brand-accent/90 transition text-lg uppercase tracking-wider"
           >
             Start Free Trial
           </Link>
           <Link
             href="/sign-in"
-            className="border-2 border-brand-teal text-brand-teal font-bold px-8 py-4 rounded-lg hover:bg-brand-teal hover:text-brand-black transition text-lg uppercase tracking-wider"
+            className="border-2 border-brand-accent text-brand-accent font-bold px-8 py-4 rounded-lg hover:bg-brand-accent hover:text-brand-black transition text-lg uppercase tracking-wider"
           >
             Sign In
           </Link>

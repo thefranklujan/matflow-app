@@ -12,7 +12,7 @@ export interface GymBranding {
 const DEFAULT_BRANDING: GymBranding = {
   name: "MatFlow",
   logo: null,
-  primaryColor: "#0fe69b",
+  primaryColor: "#c4b5a0",
   secondaryColor: null,
   phone: null,
   website: null,

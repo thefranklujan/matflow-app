@@ -16,7 +16,7 @@ export function MobileHeader() {
       </span>
       <button
         onClick={signOut}
-        className="h-7 w-7 rounded-full bg-[#0fe69b] flex items-center justify-center text-black text-[10px] font-bold"
+        className="h-7 w-7 rounded-full bg-[#c4b5a0] flex items-center justify-center text-black text-[10px] font-bold"
       >
         {initials}
       </button>

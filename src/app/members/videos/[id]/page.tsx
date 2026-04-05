@@ -25,7 +25,7 @@ export default async function MemberVideoDetailPage({
       <div className="max-w-4xl mx-auto">
         <Link
           href="/members/videos"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-brand-teal transition mb-6"
+          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-brand-accent transition mb-6"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -37,7 +37,7 @@ export default async function MemberVideoDetailPage({
 
         <div className="mt-6 space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-xs bg-brand-teal/20 text-brand-teal px-3 py-1 rounded-full font-medium">
+            <span className="text-xs bg-brand-accent/20 text-brand-accent px-3 py-1 rounded-full font-medium">
               {video.classType}
             </span>
             <span className="text-sm text-gray-500">

@@ -30,9 +30,9 @@ export default async function CategoryPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <Link href="/" className="hover:text-brand-teal">Home</Link>
+        <Link href="/" className="hover:text-brand-accent">Home</Link>
         <span>/</span>
-        <Link href="/products" className="hover:text-brand-teal">Shop</Link>
+        <Link href="/products" className="hover:text-brand-accent">Shop</Link>
         <span>/</span>
         <span className="text-white">{category.name}</span>
       </nav>
@@ -48,7 +48,7 @@ export default async function CategoryPage({
       ) : (
         <div className="text-center py-16">
           <p className="text-gray-400 text-lg">No products in this category yet.</p>
-          <Link href="/products" className="text-brand-teal hover:underline mt-2 inline-block">
+          <Link href="/products" className="text-brand-accent hover:underline mt-2 inline-block">
             Browse all products
           </Link>
         </div>

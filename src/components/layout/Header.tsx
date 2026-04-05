@@ -38,7 +38,7 @@ export function Header() {
           className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition"
         >
           <span className="text-sm text-gray-400 hidden sm:block">{user?.name}</span>
-          <div className="h-8 w-8 rounded-full bg-[#0fe69b] flex items-center justify-center text-black text-xs font-bold">
+          <div className="h-8 w-8 rounded-full bg-[#c4b5a0] flex items-center justify-center text-black text-xs font-bold">
             {initials}
           </div>
         </button>

@@ -63,8 +63,8 @@ export default async function ProductsPage({
             href="/products"
             className={`px-3 py-1.5 rounded-lg text-sm transition ${
               !category
-                ? "bg-brand-teal text-brand-black font-bold"
-                : "bg-brand-dark text-gray-300 border border-brand-gray hover:border-brand-teal"
+                ? "bg-brand-accent text-brand-black font-bold"
+                : "bg-brand-dark text-gray-300 border border-brand-gray hover:border-brand-accent"
             }`}
           >
             All
@@ -75,8 +75,8 @@ export default async function ProductsPage({
               href={`/products?category=${cat.slug}`}
               className={`px-3 py-1.5 rounded-lg text-sm transition ${
                 category === cat.slug
-                  ? "bg-brand-teal text-brand-black font-bold"
-                  : "bg-brand-dark text-gray-300 border border-brand-gray hover:border-brand-teal"
+                  ? "bg-brand-accent text-brand-black font-bold"
+                  : "bg-brand-dark text-gray-300 border border-brand-gray hover:border-brand-accent"
               }`}
             >
               {cat.name}
@@ -88,19 +88,19 @@ export default async function ProductsPage({
           <span className="text-sm text-gray-400">Sort:</span>
           <Link
             href={`/products?${category ? `category=${category}&` : ""}sort=price-asc`}
-            className={`text-sm ${sort === "price-asc" ? "text-brand-teal" : "text-gray-400 hover:text-white"}`}
+            className={`text-sm ${sort === "price-asc" ? "text-brand-accent" : "text-gray-400 hover:text-white"}`}
           >
             Price Low
           </Link>
           <Link
             href={`/products?${category ? `category=${category}&` : ""}sort=price-desc`}
-            className={`text-sm ${sort === "price-desc" ? "text-brand-teal" : "text-gray-400 hover:text-white"}`}
+            className={`text-sm ${sort === "price-desc" ? "text-brand-accent" : "text-gray-400 hover:text-white"}`}
           >
             Price High
           </Link>
           <Link
             href={`/products?${category ? `category=${category}&` : ""}sort=name`}
-            className={`text-sm ${sort === "name" ? "text-brand-teal" : "text-gray-400 hover:text-white"}`}
+            className={`text-sm ${sort === "name" ? "text-brand-accent" : "text-gray-400 hover:text-white"}`}
           >
             Name
           </Link>
@@ -117,7 +117,7 @@ export default async function ProductsPage({
       ) : (
         <div className="text-center py-16">
           <p className="text-gray-400 text-lg">No products found.</p>
-          <Link href="/products" className="text-brand-teal hover:underline mt-2 inline-block">
+          <Link href="/products" className="text-brand-accent hover:underline mt-2 inline-block">
             View all products
           </Link>
         </div>

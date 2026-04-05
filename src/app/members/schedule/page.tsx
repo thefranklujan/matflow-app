@@ -64,8 +64,8 @@ export default async function MemberSchedulePage({
                 }
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   isActive
-                    ? "bg-brand-teal text-brand-black"
-                    : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-teal hover:text-white"
+                    ? "bg-brand-accent text-brand-black"
+                    : "bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-accent hover:text-white"
                 }`}
               >
                 {loc.label}
@@ -94,7 +94,7 @@ export default async function MemberSchedulePage({
                       className="px-6 py-4 flex items-center justify-between"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="text-brand-teal font-semibold text-sm min-w-[120px]">
+                        <div className="text-brand-accent font-semibold text-sm min-w-[120px]">
                           {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                         </div>
                         <div>
@@ -104,7 +104,7 @@ export default async function MemberSchedulePage({
                           <p className="text-gray-500 text-sm">
                             {cls.instructor}
                             {cls.topic && (
-                              <span className="text-brand-teal/70"> · {cls.topic}</span>
+                              <span className="text-brand-accent/70"> · {cls.topic}</span>
                             )}
                           </p>
                         </div>

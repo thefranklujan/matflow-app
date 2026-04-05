@@ -68,7 +68,7 @@ export default function SettingsPage() {
             type="text"
             value={settings.name}
             onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
           />
         </div>
 
@@ -122,7 +122,7 @@ export default function SettingsPage() {
             type="tel"
             value={settings.phone || ""}
             onChange={(e) => setSettings({ ...settings, phone: e.target.value || null })}
-            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
             placeholder="Optional"
           />
         </div>
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             type="url"
             value={settings.website || ""}
             onChange={(e) => setSettings({ ...settings, website: e.target.value || null })}
-            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
             placeholder="https://yourgym.com"
           />
         </div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
           <select
             value={settings.timezone}
             onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
-            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
           >
             <option value="America/New_York">Eastern Time</option>
             <option value="America/Chicago">Central Time</option>
@@ -155,7 +155,7 @@ export default function SettingsPage() {
         </div>
 
         {message && (
-          <p className={`text-sm ${message.includes("saved") ? "text-brand-teal" : "text-red-400"}`}>
+          <p className={`text-sm ${message.includes("saved") ? "text-brand-accent" : "text-red-400"}`}>
             {message}
           </p>
         )}
@@ -163,7 +163,7 @@ export default function SettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-brand-teal text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+          className="bg-brand-accent text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Settings"}
         </button>

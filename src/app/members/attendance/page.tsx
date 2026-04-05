@@ -84,28 +84,28 @@ export default async function MemberAttendancePage({
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <Link href="/members/attendance?filter=all" className={cn(
-            "bg-brand-dark border rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer",
-            filter === "all" ? "border-brand-teal" : "border-brand-gray"
+            "bg-brand-dark border rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer",
+            filter === "all" ? "border-brand-accent" : "border-brand-gray"
           )}>
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Total Classes
             </p>
-            <p className="text-3xl font-bold text-brand-teal">{totalCount}</p>
+            <p className="text-3xl font-bold text-brand-accent">{totalCount}</p>
           </Link>
           <Link href="/members/attendance?filter=month" className={cn(
-            "bg-brand-dark border rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer",
-            filter === "month" ? "border-brand-teal" : "border-brand-gray"
+            "bg-brand-dark border rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer",
+            filter === "month" ? "border-brand-accent" : "border-brand-gray"
           )}>
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               This Month
             </p>
             <p className="text-3xl font-bold text-white">{monthlyCount}</p>
           </Link>
-          <Link href="/members/leaderboard" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer">
+          <Link href="/members/leaderboard" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Week Streak
             </p>
-            <p className="text-3xl font-bold text-brand-teal">
+            <p className="text-3xl font-bold text-brand-accent">
               {streak} {streak === 1 ? "week" : "weeks"}
             </p>
           </Link>
@@ -130,9 +130,9 @@ export default async function MemberAttendancePage({
                   className="px-6 py-4 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-brand-teal"
+                        className="w-5 h-5 text-brand-accent"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

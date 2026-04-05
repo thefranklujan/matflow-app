@@ -77,7 +77,7 @@ export default function OnboardingPage() {
               type="text"
               value={gymName}
               onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
               placeholder="e.g. Ceconi BJJ"
               required
             />
@@ -93,7 +93,7 @@ export default function OnboardingPage() {
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                 placeholder="ceconi-bjj"
                 required
               />
@@ -110,7 +110,7 @@ export default function OnboardingPage() {
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
             >
               <option value="America/New_York">Eastern Time</option>
               <option value="America/Chicago">Central Time</option>
@@ -124,7 +124,7 @@ export default function OnboardingPage() {
           <button
             type="submit"
             disabled={loading || !gymName || !slug}
-            className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+            className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
           >
             {loading ? "Creating your gym..." : "Create Gym"}
           </button>

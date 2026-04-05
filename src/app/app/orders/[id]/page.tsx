@@ -64,7 +64,7 @@ export default async function AdminOrderDetailPage({
                   {item.variant.color ? ` / ${item.variant.color}` : ""} &middot; Qty: {item.quantity}
                 </p>
               </div>
-              <p className="text-brand-teal font-bold text-sm">
+              <p className="text-brand-accent font-bold text-sm">
                 {formatCurrency(item.unitPrice * item.quantity)}
               </p>
             </div>
@@ -72,7 +72,7 @@ export default async function AdminOrderDetailPage({
         </div>
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-brand-gray">
           <span className="text-gray-300 font-medium">Total</span>
-          <span className="text-xl font-bold text-brand-teal">{formatCurrency(order.total)}</span>
+          <span className="text-xl font-bold text-brand-accent">{formatCurrency(order.total)}</span>
         </div>
       </div>
     </div>

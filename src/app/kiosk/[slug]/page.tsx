@@ -80,7 +80,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
       <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <div className="text-6xl mb-6">&#10003;</div>
         <h1 className="text-4xl font-bold text-white mb-2">{message}</h1>
-        <p className="text-2xl text-brand-teal mb-2">{memberInfo.name}</p>
+        <p className="text-2xl text-brand-accent mb-2">{memberInfo.name}</p>
         <p className="text-xl text-gray-400 capitalize">{memberInfo.belt} Belt{memberInfo.stripes > 0 ? ` | ${memberInfo.stripes} stripe${memberInfo.stripes > 1 ? "s" : ""}` : ""}</p>
         <p className="text-gray-600 mt-8 text-sm">Screen will reset in 5 seconds...</p>
       </div>
@@ -115,7 +115,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
                     onClick={() => setSelectedClass(c.classType)}
                     className={`w-full text-left px-6 py-4 rounded-xl border-2 transition text-lg ${
                       selectedClass === c.classType
-                        ? "border-brand-teal bg-brand-teal/10 text-white"
+                        ? "border-brand-accent bg-brand-accent/10 text-white"
                         : "border-brand-gray bg-brand-dark text-gray-300 hover:border-gray-500"
                     }`}
                   >
@@ -135,7 +135,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setStatus("idle"); }}
-                className="w-full px-6 py-4 bg-brand-dark border-2 border-brand-gray rounded-xl text-white text-xl placeholder-gray-500 focus:outline-none focus:border-brand-teal"
+                className="w-full px-6 py-4 bg-brand-dark border-2 border-brand-gray rounded-xl text-white text-xl placeholder-gray-500 focus:outline-none focus:border-brand-accent"
                 placeholder="you@email.com"
                 required
                 autoFocus
@@ -145,7 +145,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
             <button
               type="submit"
               disabled={status === "loading" || !selectedClass || !email}
-              className="w-full bg-brand-teal text-brand-black font-bold py-5 rounded-xl text-2xl uppercase tracking-wider disabled:opacity-50 transition hover:bg-brand-teal/90"
+              className="w-full bg-brand-accent text-brand-black font-bold py-5 rounded-xl text-2xl uppercase tracking-wider disabled:opacity-50 transition hover:bg-brand-accent/90"
             >
               {status === "loading" ? "Checking In..." : "Check In"}
             </button>

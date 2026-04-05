@@ -102,7 +102,7 @@ export default function AdminSchedulePage() {
           <h1 className="text-2xl font-bold text-white">Class Schedule</h1>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
           >
             {showForm ? "Cancel" : "+ Add Class"}
           </button>
@@ -119,7 +119,7 @@ export default function AdminSchedulePage() {
                 <select
                   value={dayOfWeek}
                   onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 >
                   {DAYS_OF_WEEK.map((day, i) => (
                     <option key={i} value={i}>
@@ -135,7 +135,7 @@ export default function AdminSchedulePage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   required
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -145,7 +145,7 @@ export default function AdminSchedulePage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   required
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -153,7 +153,7 @@ export default function AdminSchedulePage() {
                 <select
                   value={classType}
                   onChange={(e) => setClassType(e.target.value)}
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 >
                   {CLASS_TYPES.map((ct) => (
                     <option key={ct.value} value={ct.value}>
@@ -169,7 +169,7 @@ export default function AdminSchedulePage() {
                   value={instructor}
                   onChange={(e) => setInstructor(e.target.value)}
                   required
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -177,7 +177,7 @@ export default function AdminSchedulePage() {
                 <select
                   value={locationSlug}
                   onChange={(e) => setLocationSlug(e.target.value)}
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 >
                   {LOCATIONS.map((loc) => (
                     <option key={loc.value} value={loc.value}>
@@ -191,7 +191,7 @@ export default function AdminSchedulePage() {
                 <select
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
                 >
                   <option value="">— No Topic —</option>
                   {SCHEDULE_TOPICS.map((t) => (
@@ -205,7 +205,7 @@ export default function AdminSchedulePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+                  className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
                 >
                   {submitting ? "Adding..." : "Add to Schedule"}
                 </button>
@@ -243,7 +243,7 @@ export default function AdminSchedulePage() {
                       <tbody>
                         {dayEntries.map((entry) => (
                           <tr key={entry.id} className="border-b border-brand-gray/50 hover:bg-brand-gray/20 transition">
-                            <td className="px-4 py-2 text-sm text-brand-teal font-medium">
+                            <td className="px-4 py-2 text-sm text-brand-accent font-medium">
                               {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
                             </td>
                             <td className="px-4 py-2 text-sm text-white">{classLabel(entry.classType)}</td>

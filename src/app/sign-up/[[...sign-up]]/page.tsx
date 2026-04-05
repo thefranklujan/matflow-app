@@ -116,8 +116,8 @@ function SignUpForm() {
 
         {!joinSlug && (
           <div className="flex gap-2 mb-6 justify-center">
-            <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-brand-teal" : "bg-brand-gray"}`} />
-            <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-brand-teal" : "bg-brand-gray"}`} />
+            <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-brand-accent" : "bg-brand-gray"}`} />
+            <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-brand-accent" : "bg-brand-gray"}`} />
           </div>
         )}
 
@@ -140,7 +140,7 @@ function SignUpForm() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                    className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                     placeholder="Marcus"
                     required
                   />
@@ -151,7 +151,7 @@ function SignUpForm() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                    className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                     placeholder="Vega"
                     required
                   />
@@ -164,7 +164,7 @@ function SignUpForm() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="marcus@ironlion.com"
                   required
                 />
@@ -176,7 +176,7 @@ function SignUpForm() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="Min 6 characters"
                   minLength={6}
                   required
@@ -186,7 +186,7 @@ function SignUpForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+                className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
               >
                 {joinSlug ? (loading ? "Joining..." : "Join Gym") : "Continue"}
               </button>
@@ -199,7 +199,7 @@ function SignUpForm() {
                   type="text"
                   value={gymName}
                   onChange={(e) => handleGymNameChange(e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="Iron Lion Academy"
                   required
                 />
@@ -213,7 +213,7 @@ function SignUpForm() {
                     type="text"
                     value={gymSlug}
                     onChange={(e) => setGymSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                    className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                    className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                     placeholder="iron-lion"
                     required
                   />
@@ -228,7 +228,7 @@ function SignUpForm() {
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
                 >
                   <option value="America/New_York">Eastern Time</option>
                   <option value="America/Chicago">Central Time</option>
@@ -250,7 +250,7 @@ function SignUpForm() {
                 <button
                   type="submit"
                   disabled={loading || !gymName || !gymSlug}
-                  className="flex-1 bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+                  className="flex-1 bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
                 >
                   {loading ? "Creating..." : "Launch My Gym"}
                 </button>
@@ -260,7 +260,7 @@ function SignUpForm() {
 
           <p className="text-center text-gray-500 text-sm pt-2">
             Already have an account?{" "}
-            <Link href="/sign-in" className="text-brand-teal hover:underline">
+            <Link href="/sign-in" className="text-brand-accent hover:underline">
               Sign in
             </Link>
           </p>

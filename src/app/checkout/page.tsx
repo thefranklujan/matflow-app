@@ -31,7 +31,7 @@ export default function CheckoutPage() {
         <p className="text-gray-400 mb-8">Your cart is empty.</p>
         <Link
           href="/products"
-          className="inline-block bg-brand-teal text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-teal/90 transition"
+          className="inline-block bg-brand-accent text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-accent/90 transition"
         >
           Start Shopping
         </Link>
@@ -98,7 +98,7 @@ export default function CheckoutPage() {
                   type="text"
                   value={form.customerName}
                   onChange={(e) => update("customerName", e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="Your full name"
                   required
                 />
@@ -109,7 +109,7 @@ export default function CheckoutPage() {
                   type="email"
                   value={form.customerEmail}
                   onChange={(e) => update("customerEmail", e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="your@email.com"
                   required
                 />
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
                   type="tel"
                   value={form.customerPhone}
                   onChange={(e) => update("customerPhone", e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="(optional)"
                 />
               </div>
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
                 <textarea
                   value={form.notes}
                   onChange={(e) => update("notes", e.target.value)}
-                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-teal transition resize-none"
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition resize-none"
                   rows={3}
                   placeholder="Any special requests (optional)"
                 />
@@ -171,7 +171,7 @@ export default function CheckoutPage() {
             <div className="border-t border-brand-gray pt-4 mb-6">
               <div className="flex items-center justify-between">
                 <span className="text-lg text-gray-300">Total</span>
-                <span className="text-2xl font-bold text-brand-teal">{formatCurrency(subtotal)}</span>
+                <span className="text-2xl font-bold text-brand-accent">{formatCurrency(subtotal)}</span>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+              className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
             >
               {loading ? "Placing Order..." : "Place Order"}
             </button>

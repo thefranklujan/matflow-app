@@ -30,13 +30,13 @@ export default async function JoinGymPage({ params }: Props) {
         <div className="space-y-4">
           <Link
             href={`/sign-up?join=${gym.slug}`}
-            className="block w-full bg-brand-teal text-brand-black font-bold py-3 rounded-lg hover:bg-brand-teal/90 transition text-center uppercase tracking-wider"
+            className="block w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition text-center uppercase tracking-wider"
           >
             Sign Up
           </Link>
           <Link
             href="/sign-in"
-            className="block w-full border border-brand-gray text-gray-300 font-medium py-3 rounded-lg hover:border-brand-teal hover:text-brand-teal transition text-center"
+            className="block w-full border border-brand-gray text-gray-300 font-medium py-3 rounded-lg hover:border-brand-accent hover:text-brand-accent transition text-center"
           >
             Already have an account? Sign In
           </Link>

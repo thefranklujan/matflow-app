@@ -118,7 +118,7 @@ export default function AdminAttendancePage() {
                 type="date"
                 value={classDate}
                 onChange={(e) => setClassDate(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               />
             </div>
             <div>
@@ -126,7 +126,7 @@ export default function AdminAttendancePage() {
               <select
                 value={classType}
                 onChange={(e) => setClassType(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               >
                 {CLASS_TYPES.map((ct) => (
                   <option key={ct.value} value={ct.value}>
@@ -140,7 +140,7 @@ export default function AdminAttendancePage() {
               <select
                 value={locationSlug}
                 onChange={(e) => setLocationSlug(e.target.value)}
-                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
               >
                 {LOCATIONS.map((loc) => (
                   <option key={loc.value} value={loc.value}>
@@ -160,7 +160,7 @@ export default function AdminAttendancePage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={selectAll}
-                className="text-xs text-brand-teal hover:text-brand-teal/80 transition"
+                className="text-xs text-brand-accent hover:text-brand-accent/80 transition"
               >
                 Select All
               </button>
@@ -189,7 +189,7 @@ export default function AdminAttendancePage() {
                       already
                         ? "bg-green-500/10 opacity-60"
                         : selected.has(member.id)
-                        ? "bg-brand-teal/10 border border-brand-teal/30"
+                        ? "bg-brand-accent/10 border border-brand-accent/30"
                         : "hover:bg-brand-gray/30"
                     }`}
                   >
@@ -198,7 +198,7 @@ export default function AdminAttendancePage() {
                       checked={already || selected.has(member.id)}
                       disabled={already}
                       onChange={() => toggleMember(member.id)}
-                      className="rounded border-brand-gray bg-brand-gray text-brand-teal focus:ring-brand-teal"
+                      className="rounded border-brand-gray bg-brand-gray text-brand-accent focus:ring-brand-accent"
                     />
                     <span className="text-white text-sm">
                       {member.firstName} {member.lastName}
@@ -231,7 +231,7 @@ export default function AdminAttendancePage() {
             <button
               onClick={handleSubmit}
               disabled={submitting || selected.size === 0}
-              className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
             >
               {submitting
                 ? "Recording..."

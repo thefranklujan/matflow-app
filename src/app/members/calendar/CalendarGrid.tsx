@@ -293,11 +293,11 @@ export default function CalendarGrid({
     <div>
       {/* Month Navigation */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={goToPrevMonth} className="p-2 rounded-lg bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-teal hover:text-white transition" aria-label="Previous month">
+        <button onClick={goToPrevMonth} className="p-2 rounded-lg bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-accent hover:text-white transition" aria-label="Previous month">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         </button>
         <h2 className="text-lg font-semibold text-white">{MONTH_NAMES[month - 1]} {year}</h2>
-        <button onClick={goToNextMonth} className="p-2 rounded-lg bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-teal hover:text-white transition" aria-label="Next month">
+        <button onClick={goToNextMonth} className="p-2 rounded-lg bg-brand-dark border border-brand-gray text-gray-300 hover:border-brand-accent hover:text-white transition" aria-label="Next month">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </button>
       </div>
@@ -339,7 +339,7 @@ export default function CalendarGrid({
                 onClick={() => setSelectedDay(day === selectedDay ? null : day)}
                 className={`relative border-b border-r border-brand-gray min-h-[56px] md:min-h-[90px] p-1 md:p-1.5 text-left transition hover:bg-brand-gray/20 ${
                   isSelected ? "bg-brand-gray/30" : ""
-                } ${isToday ? "ring-1 ring-inset ring-brand-teal" : ""}`}
+                } ${isToday ? "ring-1 ring-inset ring-brand-accent" : ""}`}
               >
                 <span className={`text-xs md:text-sm ${isToday ? "text-white font-bold" : "text-gray-400"}`}>
                   {day}
@@ -354,7 +354,7 @@ export default function CalendarGrid({
                         key={cls.id}
                         className={`text-[8px] px-1 py-px rounded border leading-tight ${
                           myAttended
-                            ? "bg-brand-teal/20 text-brand-teal border-brand-teal/40"
+                            ? "bg-brand-accent/20 text-brand-accent border-brand-accent/40"
                             : CLASS_TYPE_COLORS[cls.classType] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
                         }`}
                       >
@@ -369,7 +369,7 @@ export default function CalendarGrid({
 
                 {/* Mobile: compact dots */}
                 <div className="flex md:hidden flex-wrap gap-0.5 mt-0.5">
-                  {dayAttendance.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-brand-teal" />}
+                  {dayAttendance.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-brand-accent" />}
                   {dayEvents.map((evt) => (
                     <span key={evt.id} className={`w-1.5 h-1.5 rounded-full ${EVENT_DOT_COLORS[evt.eventType] || "bg-gray-400"}`} />
                   ))}
@@ -437,8 +437,8 @@ export default function CalendarGrid({
                         <div className="flex items-center justify-between py-3 px-4">
                           <div className="flex items-center gap-3">
                             {myAttended ? (
-                              <div className="w-6 h-6 rounded-full bg-brand-teal/20 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-6 h-6 rounded-full bg-brand-accent/20 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                               </div>
@@ -465,8 +465,8 @@ export default function CalendarGrid({
                               disabled={committing}
                               className={`text-xs px-3 py-1.5 rounded-lg font-medium transition ${
                                 isCommitted
-                                  ? "bg-brand-teal/20 text-brand-teal border border-brand-teal/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40"
-                                  : "bg-brand-gray/50 text-gray-300 border border-brand-gray hover:bg-brand-teal/20 hover:text-brand-teal hover:border-brand-teal/40"
+                                  ? "bg-brand-accent/20 text-brand-accent border border-brand-accent/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40"
+                                  : "bg-brand-gray/50 text-gray-300 border border-brand-gray hover:bg-brand-accent/20 hover:text-brand-accent hover:border-brand-accent/40"
                               }`}
                             >
                               {isCommitted ? "Going ✓" : "I'm Going"}
@@ -483,9 +483,9 @@ export default function CalendarGrid({
                                   key={m.id}
                                   className={`flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full ${
                                     m.status === "attended"
-                                      ? "bg-brand-teal/10 text-brand-teal"
+                                      ? "bg-brand-accent/10 text-brand-accent"
                                       : "bg-brand-gray/40 text-gray-400"
-                                  } ${m.id === currentMemberId ? "ring-1 ring-brand-teal/50" : ""}`}
+                                  } ${m.id === currentMemberId ? "ring-1 ring-brand-accent/50" : ""}`}
                                 >
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${BELT_COLORS[m.beltRank] || "bg-white"}`} />
                                   {m.firstName} {m.lastName.charAt(0)}.

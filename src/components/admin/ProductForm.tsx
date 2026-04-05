@@ -163,7 +163,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition"
+            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
             required
           />
         </div>
@@ -174,7 +174,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition resize-none"
+            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition resize-none"
             required
           />
         </div>
@@ -187,7 +187,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition"
+              className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
               required
             />
           </div>
@@ -198,7 +198,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               step="0.01"
               value={compareAt}
               onChange={(e) => setCompareAt(e.target.value)}
-              className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition"
+              className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
               placeholder="Original price for sale display"
             />
           </div>
@@ -212,7 +212,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               setCategoryId(e.target.value);
               setVariants([]);
             }}
-            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-teal focus:outline-none transition"
+            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
             required
           >
             <option value="">Select a category</option>
@@ -268,7 +268,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         )}
 
         <div>
-          <label className="block w-full border-2 border-dashed border-brand-gray rounded-lg p-8 text-center cursor-pointer hover:border-brand-teal transition">
+          <label className="block w-full border-2 border-dashed border-brand-gray rounded-lg p-8 text-center cursor-pointer hover:border-brand-accent transition">
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -291,7 +291,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               <button
                 type="button"
                 onClick={autoGenerateVariants}
-                className="text-xs text-brand-teal border border-brand-teal px-3 py-1 rounded-lg hover:bg-brand-teal/10 transition"
+                className="text-xs text-brand-accent border border-brand-accent px-3 py-1 rounded-lg hover:bg-brand-accent/10 transition"
               >
                 Auto-generate sizes
               </button>
@@ -320,7 +320,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 value={variant.size}
                 onChange={(e) => updateVariant(i, "size", e.target.value)}
                 placeholder="Size (e.g., M, A2)"
-                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-teal focus:outline-none"
+                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-accent focus:outline-none"
                 list={`sizes-${i}`}
               />
               {availableSizes.length > 0 && (
@@ -335,7 +335,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               <select
                 value={variant.color}
                 onChange={(e) => updateVariant(i, "color", e.target.value)}
-                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-teal focus:outline-none"
+                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-accent focus:outline-none"
               >
                 <option value="">No color</option>
                 {PRODUCT_COLORS.map((c) => (
@@ -349,7 +349,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 value={variant.stock}
                 onChange={(e) => updateVariant(i, "stock", parseInt(e.target.value) || 0)}
                 placeholder="Stock"
-                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-teal focus:outline-none"
+                className="w-full px-3 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm focus:border-brand-accent focus:outline-none"
                 min="0"
               />
             </div>
@@ -371,7 +371,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="bg-brand-teal text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50"
+          className="bg-brand-accent text-brand-black font-bold px-6 py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
         >
           {saving ? "Saving..." : initialData ? "Update Product" : "Create Product"}
         </button>

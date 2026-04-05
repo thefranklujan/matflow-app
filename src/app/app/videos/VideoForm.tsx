@@ -66,7 +66,7 @@ export default function VideoForm({ video }: VideoFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
         />
       </div>
 
@@ -78,7 +78,7 @@ export default function VideoForm({ video }: VideoFormProps) {
           onChange={(e) => setEmbedUrl(e.target.value)}
           required
           placeholder="https://www.youtube.com/embed/..."
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
         />
       </div>
 
@@ -88,7 +88,7 @@ export default function VideoForm({ video }: VideoFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal resize-none"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent resize-none"
         />
       </div>
 
@@ -98,7 +98,7 @@ export default function VideoForm({ video }: VideoFormProps) {
           <select
             value={classType}
             onChange={(e) => setClassType(e.target.value)}
-            className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+            className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
           >
             {CLASS_TYPES.map((ct) => (
               <option key={ct.value} value={ct.value}>
@@ -115,7 +115,7 @@ export default function VideoForm({ video }: VideoFormProps) {
             value={classDate}
             onChange={(e) => setClassDate(e.target.value)}
             required
-            className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+            className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
           />
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function VideoForm({ video }: VideoFormProps) {
           id="published"
           checked={published}
           onChange={(e) => setPublished(e.target.checked)}
-          className="rounded border-brand-gray bg-brand-gray text-brand-teal focus:ring-brand-teal"
+          className="rounded border-brand-gray bg-brand-gray text-brand-accent focus:ring-brand-accent"
         />
         <label htmlFor="published" className="text-sm text-gray-300">
           Published
@@ -139,7 +139,7 @@ export default function VideoForm({ video }: VideoFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+          className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
         >
           {loading ? "Saving..." : isEdit ? "Update Video" : "Create Video"}
         </button>

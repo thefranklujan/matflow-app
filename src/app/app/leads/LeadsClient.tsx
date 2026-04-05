@@ -58,7 +58,7 @@ export default function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) 
         <button
           onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === "all" ? "bg-brand-teal text-brand-black" : "bg-brand-dark text-gray-400 hover:text-white"
+            filter === "all" ? "bg-brand-accent text-brand-black" : "bg-brand-dark text-gray-400 hover:text-white"
           }`}
         >
           All ({initialLeads.length})
@@ -68,7 +68,7 @@ export default function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) 
             key={s}
             onClick={() => setFilter(s)}
             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
-              filter === s ? "bg-brand-teal text-brand-black" : "bg-brand-dark text-gray-400 hover:text-white"
+              filter === s ? "bg-brand-accent text-brand-black" : "bg-brand-dark text-gray-400 hover:text-white"
             }`}
           >
             {s} ({counts[s]})

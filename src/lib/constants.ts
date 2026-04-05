@@ -7,7 +7,7 @@ export const MATFLOW = {
   website: "www.mymatflow.com",
   supportEmail: "support@mymatflow.com",
   colors: {
-    primary: "#0fe69b",
+    primary: "#c4b5a0",
     black: "#0a0a0a",
     dark: "#1a1a1a",
     gray: "#2a2a2a",

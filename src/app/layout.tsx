@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "MatFlow",
   description: "Gym management platform for martial arts academies",
   manifest: "/manifest.json",
-  themeColor: "#0fe69b",
+  themeColor: "#c4b5a0",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

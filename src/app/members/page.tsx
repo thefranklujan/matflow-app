@@ -83,15 +83,15 @@ export default async function MemberDashboardPage() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link href="/members/attendance?filter=month" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer">
+          <Link href="/members/attendance?filter=month" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Classes This Month
             </p>
-            <p className="text-3xl font-bold text-brand-teal">
+            <p className="text-3xl font-bold text-brand-accent">
               {monthlyAttendance}
             </p>
           </Link>
-          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer">
+          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Current Belt
             </p>
@@ -99,11 +99,11 @@ export default async function MemberDashboardPage() {
               {member?.beltRank || "White"}
             </p>
           </Link>
-          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-teal transition group cursor-pointer">
+          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Stripes
             </p>
-            <p className="text-3xl font-bold text-brand-teal">
+            <p className="text-3xl font-bold text-brand-accent">
               {member?.stripes || 0}
             </p>
           </Link>
@@ -117,7 +117,7 @@ export default async function MemberDashboardPage() {
             </h2>
             <Link
               href="/members/schedule"
-              className="text-sm text-brand-teal hover:underline"
+              className="text-sm text-brand-accent hover:underline"
             >
               Full schedule
             </Link>
@@ -135,11 +135,11 @@ export default async function MemberDashboardPage() {
                       {cls.instructor} &middot;{" "}
                       <span className="capitalize">{cls.locationSlug}</span>
                       {cls.topic && (
-                        <span className="text-brand-teal/70"> · {cls.topic}</span>
+                        <span className="text-brand-accent/70"> · {cls.topic}</span>
                       )}
                     </p>
                   </div>
-                  <p className="text-brand-teal font-semibold text-sm">
+                  <p className="text-brand-accent font-semibold text-sm">
                     {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                   </p>
                 </div>
@@ -166,7 +166,7 @@ export default async function MemberDashboardPage() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     {a.pinned && (
-                      <span className="text-xs bg-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-brand-accent/20 text-brand-accent px-2 py-0.5 rounded-full">
                         Pinned
                       </span>
                     )}

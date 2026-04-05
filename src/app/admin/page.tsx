@@ -19,7 +19,7 @@ export default async function AdminDashboardPage() {
     ]);
 
   const stats = [
-    { label: "Active Products", value: productCount, href: "/admin/products", color: "text-brand-teal" },
+    { label: "Active Products", value: productCount, href: "/admin/products", color: "text-brand-accent" },
     { label: "Total Orders", value: orderCount, href: "/admin/orders", color: "text-blue-400" },
     { label: "Low Stock Items", value: lowStockCount, href: "/admin/inventory", color: lowStockCount > 0 ? "text-red-400" : "text-green-400" },
   ];
@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-teal transition"
+            className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition"
           >
             <p className="text-sm text-gray-400 mb-1">{stat.label}</p>
             <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
       <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
-          <Link href="/admin/orders" className="text-sm text-brand-teal hover:underline">
+          <Link href="/admin/orders" className="text-sm text-brand-accent hover:underline">
             View all
           </Link>
         </div>
@@ -66,7 +66,7 @@ export default async function AdminDashboardPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-brand-teal font-bold text-sm">{formatCurrency(order.total)}</p>
+                  <p className="text-brand-accent font-bold text-sm">{formatCurrency(order.total)}</p>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
                       order.status === "pending"

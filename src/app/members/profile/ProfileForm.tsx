@@ -76,7 +76,7 @@ export default function ProfileForm() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-brand-teal border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function ProfileForm() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
-              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-teal focus:outline-none transition"
+              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-accent focus:outline-none transition"
             />
           </div>
           <div>
@@ -157,7 +157,7 @@ export default function ProfileForm() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-teal focus:outline-none transition"
+              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-accent focus:outline-none transition"
             />
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function ProfileForm() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(555) 123-4567"
-            className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-teal focus:outline-none transition"
+            className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:border-brand-accent focus:outline-none transition"
           />
         </div>
 
@@ -205,7 +205,7 @@ export default function ProfileForm() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-brand-teal text-brand-black font-semibold py-3 rounded-lg hover:bg-brand-teal/90 transition disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+          className="w-full bg-brand-accent text-brand-black font-semibold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>

@@ -37,10 +37,10 @@ export function MobileTabBar() {
                 href={href}
                 className={cn(
                   "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
-                  isActive ? "text-[#0fe69b]" : "text-gray-500"
+                  isActive ? "text-[#c4b5a0]" : "text-gray-500"
                 )}
               >
-                <Icon className={cn("h-5 w-5", isActive && "text-[#0fe69b]")} />
+                <Icon className={cn("h-5 w-5", isActive && "text-[#c4b5a0]")} />
                 {tab.label}
               </Link>
             );
@@ -49,7 +49,7 @@ export function MobileTabBar() {
             onClick={() => setShowMore(true)}
             className={cn(
               "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
-              showMore ? "text-[#0fe69b]" : "text-gray-500"
+              showMore ? "text-[#c4b5a0]" : "text-gray-500"
             )}
           >
             <Menu className="h-5 w-5" />

@@ -16,7 +16,7 @@ export default async function AdminAnnouncementsPage() {
           <h1 className="text-2xl font-bold text-white">Announcements</h1>
           <Link
             href="/app/announcements/new"
-            className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
           >
             + New Announcement
           </Link>
@@ -32,7 +32,7 @@ export default async function AdminAnnouncementsPage() {
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-white font-medium text-sm truncate">{a.title}</h3>
                   {a.pinned && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-brand-teal/20 text-brand-teal flex-shrink-0">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-brand-accent/20 text-brand-accent flex-shrink-0">
                       Pinned
                     </span>
                   )}

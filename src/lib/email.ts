@@ -21,7 +21,7 @@ async function send(to: string, subject: string, html: string) {
 export function sendWelcomeEmail(email: string, name: string, gymName: string) {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-      <h1 style="color:#0fe69b;margin-bottom:8px;">Welcome to ${gymName}!</h1>
+      <h1 style="color:#c4b5a0;margin-bottom:8px;">Welcome to ${gymName}!</h1>
       <p>Hey ${name},</p>
       <p>Your account on MatFlow is ready. You can now:</p>
       <ul>
@@ -46,10 +46,10 @@ export function sendOrderConfirmation(
 ) {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-      <h1 style="color:#0fe69b;">Order Confirmed!</h1>
+      <h1 style="color:#c4b5a0;">Order Confirmed!</h1>
       <p>Hey ${name},</p>
       <p>Your order <strong>#${orderId.slice(-8).toUpperCase()}</strong> has been placed.</p>
-      <p style="font-size:24px;font-weight:bold;color:#0fe69b;">Total: $${total.toFixed(2)}</p>
+      <p style="font-size:24px;font-weight:bold;color:#c4b5a0;">Total: $${total.toFixed(2)}</p>
       <p>Payment will be collected at pickup or by arrangement. Contact your gym for details.</p>
       <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} &mdash; Powered by MatFlow</p>
     </div>
@@ -66,7 +66,7 @@ export function sendBeltPromotion(
 ) {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;text-align:center;">
-      <h1 style="color:#0fe69b;">Congratulations, ${name}!</h1>
+      <h1 style="color:#c4b5a0;">Congratulations, ${name}!</h1>
       <p style="font-size:20px;">You have been promoted to</p>
       <p style="font-size:32px;font-weight:bold;text-transform:uppercase;">${newBelt} Belt${stripes > 0 ? ` (${stripes} stripe${stripes > 1 ? "s" : ""})` : ""}</p>
       <p>Your hard work and dedication on the mats has paid off. Keep training!</p>
@@ -82,7 +82,7 @@ export function sendTrialExpiring(email: string, name: string, daysLeft: number)
       <h1 style="color:#FF6B35;">Your trial ends in ${daysLeft} day${daysLeft > 1 ? "s" : ""}</h1>
       <p>Hey ${name},</p>
       <p>Your MatFlow free trial is ending soon. Subscribe now to keep managing your gym with MatFlow.</p>
-      <p><a href="https://app.mymatflow.com/admin/billing" style="display:inline-block;background:#0fe69b;color:#111;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Choose a Plan</a></p>
+      <p><a href="https://app.mymatflow.com/admin/billing" style="display:inline-block;background:#c4b5a0;color:#111;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Choose a Plan</a></p>
       <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow &mdash; mymatflow.com</p>
     </div>
   `;
@@ -98,7 +98,7 @@ export function sendClassReminder(
 ) {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
-      <h1 style="color:#0fe69b;">Class Today!</h1>
+      <h1 style="color:#c4b5a0;">Class Today!</h1>
       <p>Hey ${name},</p>
       <p>You have <strong>${classType}</strong> today at <strong>${time}</strong>.</p>
       <p>See you on the mats!</p>

@@ -51,7 +51,7 @@ export default function MemberMobileNav() {
         </span>
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 text-brand-teal text-sm font-semibold uppercase tracking-wider"
+          className="flex items-center gap-2 text-brand-accent text-sm font-semibold uppercase tracking-wider"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -104,7 +104,7 @@ export default function MemberMobileNav() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition",
                   isActive
-                    ? "bg-brand-teal/10 text-brand-teal border border-brand-teal/30"
+                    ? "bg-brand-accent/10 text-brand-accent border border-brand-accent/30"
                     : "text-gray-300 hover:text-white hover:bg-brand-gray/50"
                 )}
               >

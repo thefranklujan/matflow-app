@@ -24,7 +24,7 @@ export default async function AdminCompetitionsPage() {
           <h1 className="text-2xl font-bold text-white">Competitions</h1>
           <Link
             href="/admin/competitions/new"
-            className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
           >
             + Record Result
           </Link>

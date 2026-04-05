@@ -49,7 +49,7 @@ export default function BeltPromotionForm({
         <select
           value={beltRank}
           onChange={(e) => setBeltRank(e.target.value)}
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
         >
           {BELT_RANKS.map((b) => (
             <option key={b.value} value={b.value}>
@@ -64,7 +64,7 @@ export default function BeltPromotionForm({
         <select
           value={stripes}
           onChange={(e) => setStripes(Number(e.target.value))}
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
         >
           {[0, 1, 2, 3, 4].map((s) => (
             <option key={s} value={s}>
@@ -80,7 +80,7 @@ export default function BeltPromotionForm({
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
-          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-teal resize-none"
+          className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent resize-none"
           placeholder="Optional note about the promotion..."
         />
       </div>
@@ -94,7 +94,7 @@ export default function BeltPromotionForm({
       <button
         type="submit"
         disabled={loading}
-        className="bg-brand-teal text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition text-sm disabled:opacity-50"
+        className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50"
       >
         {loading ? "Promoting..." : "Record Promotion"}
       </button>

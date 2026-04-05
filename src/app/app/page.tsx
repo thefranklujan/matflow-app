@@ -43,8 +43,8 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
     ]);
 
   const stats = [
-    { label: "Active Members", value: memberCount, href: "/app/members", color: "text-[#0fe69b]" },
-    { label: "Active Products", value: productCount, href: "/app/products", color: "text-[#0fe69b]" },
+    { label: "Active Members", value: memberCount, href: "/app/members", color: "text-[#c4b5a0]" },
+    { label: "Active Products", value: productCount, href: "/app/products", color: "text-[#c4b5a0]" },
     { label: "Total Orders", value: orderCount, href: "/app/orders", color: "text-blue-400" },
     { label: "Low Stock Items", value: lowStockCount, href: "/app/inventory", color: lowStockCount > 0 ? "text-red-400" : "text-green-400" },
   ];
@@ -58,7 +58,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
           <Link
             key={stat.label}
             href={stat.href}
-            className="bg-[#1a1a1a] border border-white/10 rounded-lg p-6 hover:border-[#0fe69b]/30 transition"
+            className="bg-[#1a1a1a] border border-white/10 rounded-lg p-6 hover:border-[#c4b5a0]/30 transition"
           >
             <p className="text-sm text-gray-400 mb-1">{stat.label}</p>
             <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -69,7 +69,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
       <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
-          <Link href="/app/orders" className="text-sm text-[#0fe69b] hover:underline">View all</Link>
+          <Link href="/app/orders" className="text-sm text-[#c4b5a0] hover:underline">View all</Link>
         </div>
         {recentOrders.length > 0 ? (
           <div className="space-y-3">
@@ -86,7 +86,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[#0fe69b] font-bold text-sm">{formatCurrency(order.total)}</p>
+                  <p className="text-[#c4b5a0] font-bold text-sm">{formatCurrency(order.total)}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     order.status === "pending" ? "bg-yellow-500/20 text-yellow-400"
                     : order.status === "confirmed" ? "bg-blue-500/20 text-blue-400"
@@ -153,7 +153,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
         </div>
         <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-5">
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Stripes</p>
-          <p className="text-2xl font-bold text-[#0fe69b]">{member.stripes}</p>
+          <p className="text-2xl font-bold text-[#c4b5a0]">{member.stripes}</p>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
       <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold text-white uppercase tracking-wider">Today&apos;s Schedule</h2>
-          <Link href="/app/schedule" className="text-[#0fe69b] text-sm hover:underline">Full schedule</Link>
+          <Link href="/app/schedule" className="text-[#c4b5a0] text-sm hover:underline">Full schedule</Link>
         </div>
         {todaySchedule.length > 0 ? (
           <div className="space-y-3">
@@ -171,7 +171,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
                   <p className="text-white font-medium">{cls.classType}</p>
                   <p className="text-gray-500 text-sm">{cls.instructor} &middot; {cls.locationSlug}{cls.topic ? ` &middot; ${cls.topic}` : ""}</p>
                 </div>
-                <p className="text-[#0fe69b] text-sm font-medium">{formatTime(cls.startTime)} - {formatTime(cls.endTime)}</p>
+                <p className="text-[#c4b5a0] text-sm font-medium">{formatTime(cls.startTime)} - {formatTime(cls.endTime)}</p>
               </div>
             ))}
           </div>

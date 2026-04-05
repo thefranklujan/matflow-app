@@ -31,7 +31,7 @@ export default async function AdminOrdersPage() {
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-brand-gray/50 hover:bg-brand-gray/20 transition">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/orders/${order.id}`} className="text-brand-teal hover:underline text-sm font-mono">
+                  <Link href={`/admin/orders/${order.id}`} className="text-brand-accent hover:underline text-sm font-mono">
                     {order.id.slice(0, 8)}...
                   </Link>
                 </td>
@@ -42,7 +42,7 @@ export default async function AdminOrdersPage() {
                 <td className="px-4 py-3 text-sm text-gray-400">
                   {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                 </td>
-                <td className="px-4 py-3 text-sm text-brand-teal font-bold">
+                <td className="px-4 py-3 text-sm text-brand-accent font-bold">
                   {formatCurrency(order.total)}
                 </td>
                 <td className="px-4 py-3">
