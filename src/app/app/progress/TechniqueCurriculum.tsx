@@ -239,7 +239,7 @@ export default function TechniqueCurriculum({
       {/* ── Full Curriculum Chart ───────────────────────── */}
       <div>
         <h3 className="text-sm text-gray-400 uppercase tracking-wider font-medium mb-4">
-          Complete Curriculum — White to Black Belt
+          Complete Curriculum: White to Black Belt
         </h3>
 
         <div className="space-y-3">

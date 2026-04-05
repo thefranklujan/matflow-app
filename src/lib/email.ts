@@ -31,7 +31,7 @@ export function sendWelcomeEmail(email: string, name: string, gymName: string) {
         <li>View your attendance history</li>
       </ul>
       <p>See you on the mats!</p>
-      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow &mdash; mymatflow.com</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow</p>
     </div>
   `;
   send(email, `Welcome to ${gymName}!`, html).catch(() => {});
@@ -51,7 +51,7 @@ export function sendOrderConfirmation(
       <p>Your order <strong>#${orderId.slice(-8).toUpperCase()}</strong> has been placed.</p>
       <p style="font-size:24px;font-weight:bold;color:#c4b5a0;">Total: $${total.toFixed(2)}</p>
       <p>Payment will be collected at pickup or by arrangement. Contact your gym for details.</p>
-      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} &mdash; Powered by MatFlow</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} . Powered by MatFlow</p>
     </div>
   `;
   send(email, `Order Confirmed #${orderId.slice(-8).toUpperCase()}`, html).catch(() => {});
@@ -70,7 +70,7 @@ export function sendBeltPromotion(
       <p style="font-size:20px;">You have been promoted to</p>
       <p style="font-size:32px;font-weight:bold;text-transform:uppercase;">${newBelt} Belt${stripes > 0 ? ` (${stripes} stripe${stripes > 1 ? "s" : ""})` : ""}</p>
       <p>Your hard work and dedication on the mats has paid off. Keep training!</p>
-      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} &mdash; Powered by MatFlow</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} . Powered by MatFlow</p>
     </div>
   `;
   send(email, `Belt Promotion: ${newBelt} Belt!`, html).catch(() => {});
@@ -83,7 +83,7 @@ export function sendTrialExpiring(email: string, name: string, daysLeft: number)
       <p>Hey ${name},</p>
       <p>Your MatFlow free trial is ending soon. Subscribe now to keep managing your gym with MatFlow.</p>
       <p><a href="https://app.mymatflow.com/admin/billing" style="display:inline-block;background:#c4b5a0;color:#111;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Choose a Plan</a></p>
-      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow &mdash; mymatflow.com</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow</p>
     </div>
   `;
   send(email, `Your MatFlow trial ends in ${daysLeft} days`, html).catch(() => {});
@@ -102,7 +102,7 @@ export function sendClassReminder(
       <p>Hey ${name},</p>
       <p>You have <strong>${classType}</strong> today at <strong>${time}</strong>.</p>
       <p>See you on the mats!</p>
-      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} &mdash; Powered by MatFlow</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName} . Powered by MatFlow</p>
     </div>
   `;
   send(email, `Reminder: ${classType} today at ${time}`, html).catch(() => {});

@@ -113,7 +113,7 @@ export default async function MemberProgressPage() {
                     <div>
                       <p className="text-white text-sm font-medium">
                         {entry.beltRank.charAt(0).toUpperCase() + entry.beltRank.slice(1)} Belt
-                        {entry.stripes > 0 ? ` — ${entry.stripes} Stripe${entry.stripes > 1 ? "s" : ""}` : ""}
+                        {entry.stripes > 0 ? `  ${entry.stripes} Stripe${entry.stripes > 1 ? "s" : ""}` : ""}
                       </p>
                       <p className="text-gray-500 text-xs">
                         {new Date(entry.awardedAt).toLocaleDateString("en-US", {

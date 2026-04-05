@@ -30,7 +30,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-gray-600 text-sm mt-8">
-          Powered by <span className="text-gray-500">{MATFLOW.name}</span> &mdash; {MATFLOW.website}
+          Powered by {MATFLOW.name}
         </p>
       </div>
     </div>
