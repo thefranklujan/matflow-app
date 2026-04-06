@@ -1,12 +1,12 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, LayoutGrid } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 export function Header() {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isPlatformAdmin } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +44,20 @@ export function Header() {
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 top-full mt-1 w-48 bg-[#141414] border border-white/10 rounded-lg shadow-xl z-50 py-1">
+          <div className="absolute right-0 top-full mt-1 w-52 bg-[#141414] border border-white/10 rounded-lg shadow-xl z-50 py-1">
+            {isPlatformAdmin && (
+              <>
+                <Link
+                  href="/platform"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-orange-400 hover:bg-orange-500/10 transition"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Platform Dashboard
+                </Link>
+                <div className="border-t border-white/5 my-1" />
+              </>
+            )}
             {!isAdmin && (
               <Link
                 href="/app/profile"

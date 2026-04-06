@@ -21,6 +21,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isAdmin: boolean;
   isMember: boolean;
+  isPlatformAdmin: boolean;
   role: "admin" | "member" | null;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextValue>({
   isLoading: true,
   isAdmin: false,
   isMember: false,
+  isPlatformAdmin: false,
   role: null,
   signOut: async () => {},
   refresh: async () => {},
@@ -40,6 +42,7 @@ const AuthContext = createContext<AuthContextValue>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [gym, setGym] = useState<GymInfo | null>(null);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
@@ -50,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user) {
           setUser(data.user);
           if (data.gym) setGym(data.gym);
+          if (data.isPlatformAdmin) setIsPlatformAdmin(true);
         }
       }
     } catch {
@@ -78,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAdmin: user?.role === "admin",
         isMember: user?.role === "member",
+        isPlatformAdmin,
         role: user?.role || null,
         signOut,
         refresh: fetchSession,
