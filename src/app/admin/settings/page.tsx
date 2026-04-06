@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 interface GymSettings {
   name: string;
@@ -18,12 +19,17 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((d) => { setSettings(d.data); setLoading(false); })
       .catch(() => setLoading(false));
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((d) => { if (d.isPlatformAdmin) setIsPlatformAdmin(true); })
+      .catch(() => {});
   }, []);
 
   async function handleSave(e: React.FormEvent) {
@@ -168,6 +174,19 @@ export default function SettingsPage() {
           {saving ? "Saving..." : "Save Settings"}
         </button>
       </form>
+
+      {isPlatformAdmin && (
+        <div className="mt-10 pt-6 border-t border-white/10">
+          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">Platform</h2>
+          <Link
+            href="/platform"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500/10 border border-orange-500/20 rounded-lg text-orange-400 hover:bg-orange-500/20 transition text-sm font-medium"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+            Platform Dashboard
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

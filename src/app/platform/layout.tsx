@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
 
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "frank@craftedsystems.io,marcus@ironlion.com").split(",").map(e => e.trim());
+const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io").split(",").map(e => e.trim());
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();

@@ -19,5 +19,8 @@ export async function GET() {
     if (g) gym = { name: g.name, logo: g.logo };
   }
 
-  return NextResponse.json({ authenticated: true, user: session, gym });
+  const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io").split(",").map(e => e.trim());
+  const isPlatformAdmin = platformAdmins.includes(session.email);
+
+  return NextResponse.json({ authenticated: true, user: session, gym, isPlatformAdmin });
 }
