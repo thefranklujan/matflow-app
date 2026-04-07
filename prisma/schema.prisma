@@ -175,6 +175,7 @@ model Student {
   nominations     GymNomination[]
   groupMemberships GymGroupMember[]
   groupPosts      GroupPost[]
+  postReports     PostReport[]
 }
 
 model GymGroup {
@@ -192,6 +193,8 @@ model GymGroupMember {
   id        String   @id @default(cuid())
   groupId   String
   studentId String
+  role      String   @default("member") // "mod" | "member"
+  status    String   @default("active") // "active" | "pending"
   joinedAt  DateTime @default(now())
   group     GymGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -201,15 +204,33 @@ model GymGroupMember {
 }
 
 model GroupPost {
-  id        String   @id @default(cuid())
-  groupId   String
-  studentId String
-  body      String
-  createdAt DateTime @default(now())
-  group     GymGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id          String       @id @default(cuid())
+  groupId     String
+  studentId   String
+  body        String
+  hidden      Boolean      @default(false)
+  hiddenAt    DateTime?
+  hiddenBy    String?
+  reportCount Int          @default(0)
+  createdAt   DateTime     @default(now())
+  group       GymGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reports     PostReport[]
 
   @@index([groupId])
+}
+
+model PostReport {
+  id         String    @id @default(cuid())
+  postId     String
+  reporterId String
+  reason     String?
+  createdAt  DateTime  @default(now())
+  post       GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporter   Student   @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, reporterId])
+  @@index([postId])
 }
 
 model TrainingSession {

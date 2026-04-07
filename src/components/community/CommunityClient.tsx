@@ -1,7 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Trash2, Users } from "lucide-react";
+import { Send, Trash2, Users, Shield, Flag, EyeOff, Check, X, Clock } from "lucide-react";
+
+interface PostItem {
+  id: string;
+  body: string;
+  createdAt: string;
+  authorId: string;
+  authorName: string;
+  authorBelt: string;
+  authorJoinedAt: string;
+  authorSessionCount: number;
+  isMine: boolean;
+  reportCount: number;
+  hidden: boolean;
+}
+
+interface MemberItem {
+  studentId: string;
+  name: string;
+  joinedAt: string;
+  role: string;
+  belt: string;
+  sessionCount: number;
+}
 
 interface GroupSummary {
   id: string;
@@ -9,40 +32,53 @@ interface GroupSummary {
   city: string | null;
   state: string | null;
   memberCount: number;
+  myRole: string;
+  myStatus: string;
+  pendingCount: number;
 }
 
-interface PostItem {
-  id: string;
-  body: string;
-  createdAt: string;
-  authorName: string;
-  authorBelt: string;
-  isMine: boolean;
+function daysAgo(iso: string) {
+  const ms = Date.now() - new Date(iso).getTime();
+  return Math.max(1, Math.floor(ms / (1000 * 60 * 60 * 24)));
 }
 
-interface MemberItem {
-  studentId: string;
-  name: string;
-  joinedAt: string;
+function initials(name: string) {
+  return name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
 }
+
+const BELT_DOT: Record<string, string> = {
+  white: "bg-white",
+  blue: "bg-blue-500",
+  purple: "bg-purple-500",
+  brown: "bg-amber-700",
+  black: "bg-black border border-white/30",
+};
 
 export default function CommunityClient({
   groups,
   selectedGroupId,
   posts: initialPosts,
   members,
+  pending,
+  isMod,
+  myStatus,
 }: {
   groups: GroupSummary[];
   selectedGroupId: string | null;
   posts: PostItem[];
   members: MemberItem[];
+  pending: MemberItem[];
+  isMod: boolean;
+  myStatus: string;
 }) {
   const [posts, setPosts] = useState<PostItem[]>(initialPosts);
+  const [pendingMembers, setPendingMembers] = useState<MemberItem[]>(pending);
+  const [activeMembers, setActiveMembers] = useState<MemberItem[]>(members);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
   const selected = groups.find((g) => g.id === selectedGroupId);
 
-  async function submit(e: React.FormEvent) {
+  async function submitPost(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedGroupId || !body.trim()) return;
     setPosting(true);
@@ -57,19 +93,77 @@ export default function CommunityClient({
         id: created.id,
         body: created.body,
         createdAt: created.createdAt,
+        authorId: "you",
         authorName: "You",
         authorBelt: "white",
+        authorJoinedAt: new Date().toISOString(),
+        authorSessionCount: 0,
         isMine: true,
+        reportCount: 0,
+        hidden: false,
       }, ...prev]);
       setBody("");
     }
     setPosting(false);
   }
 
-  async function remove(id: string) {
+  async function removePost(id: string) {
     if (!confirm("Delete this post?")) return;
     const res = await fetch(`/api/student/community/post?id=${id}`, { method: "DELETE" });
     if (res.ok) setPosts((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  async function modAction(postId: string, action: "hide" | "unhide" | "delete") {
+    if (action === "delete" && !confirm("Delete this post permanently?")) return;
+    const res = await fetch("/api/student/community/moderate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId, action }),
+    });
+    if (!res.ok) return;
+    if (action === "delete") {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } else {
+      setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, hidden: action === "hide" } : p));
+    }
+  }
+
+  async function reportPost(postId: string) {
+    const reason = prompt("Why are you reporting this post? (optional)");
+    if (reason === null) return;
+    const res = await fetch("/api/student/community/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId, reason }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.alreadyReported) {
+        alert("You've already reported this post.");
+      } else {
+        alert("Reported. Moderators will review.");
+        if (data.hidden) {
+          setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, hidden: true, reportCount: p.reportCount + 1 } : p));
+        } else {
+          setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, reportCount: p.reportCount + 1 } : p));
+        }
+      }
+    }
+  }
+
+  async function vouch(memberStudentId: string, action: "approve" | "reject") {
+    if (!selectedGroupId) return;
+    const res = await fetch("/api/student/community/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId: selectedGroupId, memberStudentId, action }),
+    });
+    if (!res.ok) return;
+    const approved = pendingMembers.find((m) => m.studentId === memberStudentId);
+    setPendingMembers((prev) => prev.filter((m) => m.studentId !== memberStudentId));
+    if (action === "approve" && approved) {
+      setActiveMembers((prev) => [...prev, { ...approved, status: "active" } as MemberItem]);
+    }
   }
 
   return (
@@ -103,11 +197,24 @@ export default function CommunityClient({
                     g.id === selectedGroupId ? "border-[#dc2626]" : "border-white/10 hover:border-white/20"
                   }`}
                 >
-                  <p className="text-white font-semibold text-sm">{g.name}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-white font-semibold text-sm flex items-center gap-1.5">
+                      {g.name}
+                      {g.myRole === "mod" && <Shield className="h-3 w-3 text-yellow-400" />}
+                    </p>
+                    {g.pendingCount > 0 && (
+                      <span className="bg-yellow-400 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">
+                        {g.pendingCount}
+                      </span>
+                    )}
+                  </div>
                   {(g.city || g.state) && (
                     <p className="text-gray-500 text-xs">{[g.city, g.state].filter(Boolean).join(", ")}</p>
                   )}
-                  <p className="text-[#dc2626] text-xs font-semibold mt-1">{g.memberCount} member{g.memberCount === 1 ? "" : "s"}</p>
+                  <p className="text-[#dc2626] text-xs font-semibold mt-1">
+                    {g.memberCount} member{g.memberCount === 1 ? "" : "s"}
+                    {g.myStatus === "pending" && <span className="ml-2 text-yellow-400">· Pending vouch</span>}
+                  </p>
                 </a>
               ))}
             </div>
@@ -119,7 +226,14 @@ export default function CommunityClient({
               <>
                 <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-4">
                   <p className="text-xs text-gray-500 uppercase tracking-wider">Group</p>
-                  <h2 className="text-2xl font-bold text-white mt-1">{selected.name}</h2>
+                  <h2 className="text-2xl font-bold text-white mt-1 flex items-center gap-2">
+                    {selected.name}
+                    {isMod && (
+                      <span className="bg-yellow-400/20 text-yellow-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded inline-flex items-center gap-1">
+                        <Shield className="h-3 w-3" /> Moderator
+                      </span>
+                    )}
+                  </h2>
                   {(selected.city || selected.state) && (
                     <p className="text-gray-500 text-sm">{[selected.city, selected.state].filter(Boolean).join(", ")}</p>
                   )}
@@ -128,71 +242,180 @@ export default function CommunityClient({
                   </p>
                 </div>
 
-                {/* Post composer */}
-                <form onSubmit={submit} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 mb-4">
-                  <textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    rows={3}
-                    placeholder="Share something with your gym crew..."
-                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#dc2626]"
-                  />
-                  <div className="flex justify-end mt-2">
-                    <button
-                      type="submit"
-                      disabled={posting || !body.trim()}
-                      className="inline-flex items-center gap-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-semibold px-4 py-2 rounded-lg text-sm transition disabled:opacity-50"
-                    >
-                      <Send className="h-4 w-4" />
-                      {posting ? "Posting..." : "Post"}
-                    </button>
+                {/* Pending state for current user */}
+                {myStatus === "pending" && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 mb-4 flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-yellow-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-yellow-300 font-semibold text-sm">Awaiting vouch from a moderator</p>
+                      <p className="text-yellow-200/80 text-xs mt-1">
+                        A moderator from this group needs to approve you before you can see the feed or post. We&apos;ll let you in as soon as someone vouches.
+                      </p>
+                    </div>
                   </div>
-                </form>
+                )}
+
+                {/* Mod: pending vouches panel */}
+                {isMod && pendingMembers.length > 0 && (
+                  <div className="bg-yellow-500/5 border border-yellow-500/30 rounded-xl p-5 mb-4">
+                    <h3 className="text-yellow-400 text-xs uppercase tracking-wider font-semibold mb-3 flex items-center gap-2">
+                      <Shield className="h-3.5 w-3.5" /> Pending Vouches ({pendingMembers.length})
+                    </h3>
+                    <div className="space-y-2">
+                      {pendingMembers.map((m) => (
+                        <div key={m.studentId} className="flex items-center justify-between bg-black/30 rounded-lg px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center text-xs font-bold">
+                              {initials(m.name)}
+                            </div>
+                            <div>
+                              <p className="text-white text-sm">{m.name}</p>
+                              <p className="text-gray-500 text-xs">{m.sessionCount} sessions logged · joined {daysAgo(m.joinedAt)}d ago</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => vouch(m.studentId, "approve")}
+                              className="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded inline-flex items-center gap-1"
+                            >
+                              <Check className="h-3 w-3" /> Vouch
+                            </button>
+                            <button
+                              onClick={() => vouch(m.studentId, "reject")}
+                              className="bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 text-xs font-bold px-3 py-1.5 rounded inline-flex items-center gap-1"
+                            >
+                              <X className="h-3 w-3" /> Reject
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Post composer (active members only) */}
+                {myStatus === "active" && (
+                  <form onSubmit={submitPost} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 mb-4">
+                    <textarea
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      rows={3}
+                      maxLength={500}
+                      placeholder="Share something with your gym crew..."
+                      className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#dc2626]"
+                    />
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-gray-600 text-xs">{body.length} / 500</span>
+                      <button
+                        type="submit"
+                        disabled={posting || !body.trim()}
+                        className="inline-flex items-center gap-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-semibold px-4 py-2 rounded-lg text-sm transition disabled:opacity-50"
+                      >
+                        <Send className="h-4 w-4" />
+                        {posting ? "Posting..." : "Post"}
+                      </button>
+                    </div>
+                  </form>
+                )}
 
                 {/* Feed */}
-                <div className="space-y-3 mb-6">
-                  {posts.length === 0 ? (
-                    <p className="text-gray-600 text-sm text-center py-8">No posts yet. Be the first.</p>
-                  ) : (
-                    posts.map((p) => (
-                      <div key={p.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="text-white font-semibold text-sm">{p.authorName}</p>
-                              <span className="text-gray-600 text-xs capitalize">{p.authorBelt} belt</span>
-                              <span className="text-gray-700 text-xs">·</span>
-                              <span className="text-gray-600 text-xs">{new Date(p.createdAt).toLocaleDateString()}</span>
+                {myStatus === "active" && (
+                  <div className="space-y-3 mb-6">
+                    {posts.length === 0 ? (
+                      <p className="text-gray-600 text-sm text-center py-8">No posts yet. Be the first.</p>
+                    ) : (
+                      posts.map((p) => (
+                        <div
+                          key={p.id}
+                          className={`bg-[#0a0a0a] border rounded-xl p-4 ${
+                            p.hidden ? "border-yellow-500/30 opacity-60" : "border-white/10"
+                          }`}
+                        >
+                          {p.hidden && (
+                            <div className="text-yellow-400 text-[10px] uppercase tracking-wider font-bold mb-2 inline-flex items-center gap-1">
+                              <EyeOff className="h-3 w-3" /> Hidden — {p.reportCount} report{p.reportCount === 1 ? "" : "s"}
                             </div>
-                            <p className="text-gray-300 text-sm mt-2 whitespace-pre-wrap">{p.body}</p>
-                          </div>
-                          {p.isMine && (
-                            <button onClick={() => remove(p.id)} className="text-gray-600 hover:text-red-400 transition">
-                              <Trash2 className="h-4 w-4" />
-                            </button>
                           )}
+                          <div className="flex items-start gap-3">
+                            <div className="h-9 w-9 rounded-full bg-white/5 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                              {initials(p.authorName)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="text-white font-semibold text-sm">{p.authorName}</p>
+                                <span className={`h-2 w-2 rounded-full ${BELT_DOT[p.authorBelt] || BELT_DOT.white}`} />
+                                <span className="text-gray-500 text-xs capitalize">{p.authorBelt} belt</span>
+                                <span className="text-gray-700 text-xs">·</span>
+                                <span className="text-gray-500 text-xs">{p.authorSessionCount} sessions</span>
+                                {p.authorJoinedAt && (
+                                  <>
+                                    <span className="text-gray-700 text-xs">·</span>
+                                    <span className="text-gray-500 text-xs">{daysAgo(p.authorJoinedAt)}d on MatFlow</span>
+                                  </>
+                                )}
+                              </div>
+                              <p className="text-gray-300 text-sm mt-2 whitespace-pre-wrap">{p.body}</p>
+                              <div className="flex items-center gap-3 mt-2 text-xs">
+                                <span className="text-gray-700">{new Date(p.createdAt).toLocaleDateString()}</span>
+                                {!p.isMine && (
+                                  <button onClick={() => reportPost(p.id)} className="text-gray-600 hover:text-red-400 inline-flex items-center gap-1">
+                                    <Flag className="h-3 w-3" /> Report
+                                  </button>
+                                )}
+                                {isMod && !p.isMine && (
+                                  <>
+                                    {!p.hidden ? (
+                                      <button onClick={() => modAction(p.id, "hide")} className="text-yellow-400/70 hover:text-yellow-400 inline-flex items-center gap-1">
+                                        <EyeOff className="h-3 w-3" /> Hide
+                                      </button>
+                                    ) : (
+                                      <button onClick={() => modAction(p.id, "unhide")} className="text-yellow-400/70 hover:text-yellow-400 inline-flex items-center gap-1">
+                                        Unhide
+                                      </button>
+                                    )}
+                                    <button onClick={() => modAction(p.id, "delete")} className="text-red-400/70 hover:text-red-400 inline-flex items-center gap-1">
+                                      <Trash2 className="h-3 w-3" /> Delete
+                                    </button>
+                                  </>
+                                )}
+                                {p.isMine && (
+                                  <button onClick={() => removePost(p.id)} className="text-gray-600 hover:text-red-400 inline-flex items-center gap-1">
+                                    <Trash2 className="h-3 w-3" /> Delete
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
+                )}
 
                 {/* Members */}
-                <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
-                    Members ({members.length})
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {members.map((m) => (
-                      <div key={m.studentId} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
-                        <div className="h-7 w-7 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center text-xs font-bold">
-                          {m.name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2)}
+                {myStatus === "active" && (
+                  <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
+                    <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
+                      Members ({activeMembers.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {activeMembers.map((m) => (
+                        <div key={m.studentId} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
+                          <div className="h-8 w-8 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center text-xs font-bold shrink-0">
+                            {initials(m.name)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-semibold flex items-center gap-1.5 truncate">
+                              {m.name}
+                              {m.role === "mod" && <Shield className="h-3 w-3 text-yellow-400 shrink-0" title="Moderator" />}
+                            </p>
+                            <p className="text-gray-500 text-[10px] capitalize">{m.belt} belt · {m.sessionCount} sessions</p>
+                          </div>
                         </div>
-                        <span className="text-white text-xs truncate">{m.name}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
               <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center text-gray-500">

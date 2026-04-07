@@ -42,13 +42,28 @@ export async function POST(req: NextRequest) {
     create: { id: groupId, name: gymName, city: city || null, state: state || null },
     update: {},
   });
+
+  // Bootstrap rule: first 3 nominators auto-trusted as active mods.
+  // After that, new joiners enter as pending until a mod approves.
+  const existingActive = await prisma.gymGroupMember.count({
+    where: { groupId, status: "active" },
+  });
+  const isBootstrap = existingActive < 3;
   await prisma.gymGroupMember.upsert({
     where: { groupId_studentId: { groupId, studentId } },
-    create: { groupId, studentId },
+    create: {
+      groupId,
+      studentId,
+      role: isBootstrap ? "mod" : "member",
+      status: isBootstrap ? "active" : "pending",
+    },
     update: {},
   });
-  // Refresh memberCount
-  const count = await prisma.gymGroupMember.count({ where: { groupId } });
+
+  // memberCount = active members only
+  const count = await prisma.gymGroupMember.count({
+    where: { groupId, status: "active" },
+  });
   await prisma.gymGroup.update({ where: { id: groupId }, data: { memberCount: count } });
 
   return NextResponse.json(nomination, { status: 201 });

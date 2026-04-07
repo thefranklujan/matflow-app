@@ -24,11 +24,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Verify membership
+  // Verify active membership (pending vouches cannot post)
   const member = await prisma.gymGroupMember.findUnique({
     where: { groupId_studentId: { groupId, studentId } },
   });
-  if (!member) return NextResponse.json({ error: "Not a group member" }, { status: 403 });
+  if (!member || member.status !== "active") {
+    return NextResponse.json({ error: "Not an active group member" }, { status: 403 });
+  }
 
   const post = await prisma.groupPost.create({
     data: { groupId, studentId, body: body.trim() },
