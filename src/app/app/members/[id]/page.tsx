@@ -7,6 +7,7 @@ import { BELT_RANKS } from "@/lib/constants";
 const LOCATIONS: { value: string; label: string }[] = [];
 import Link from "next/link";
 import BeltPromotionForm from "./BeltPromotionForm";
+import AmbassadorToggle from "./AmbassadorToggle";
 import MiniBelt from "@/components/members/MiniBelt";
 
 export const dynamic = "force-dynamic";
@@ -101,6 +102,8 @@ export default async function AdminMemberDetailPage({
               </div>
             </dl>
           </div>
+
+          <AmbassadorToggle memberId={member.id} initial={!!member.isAmbassador} />
 
           {/* Belt Promotion */}
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">

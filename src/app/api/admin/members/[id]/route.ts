@@ -53,6 +53,7 @@ export async function PUT(
     if (typeof body.active === "boolean") data.active = body.active;
     if (body.beltRank) data.beltRank = body.beltRank;
     if (typeof body.stripes === "number") data.stripes = body.stripes;
+    if (typeof body.isAmbassador === "boolean") data.isAmbassador = body.isAmbassador;
 
     const member = await prisma.member.update({
       where: { id },
