@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, createSession } from "@/lib/local-auth";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,28 @@ export async function POST(request: NextRequest) {
 
     await createSession(user);
 
+    // If student has approved memberships, auto-switch into the most recent gym
+    let autoSwitchedToGym = false;
+    if (user.userType === "student" && user.studentId) {
+      const member = await prisma.member.findFirst({
+        where: { studentId: user.studentId, approved: true, active: true },
+        orderBy: { createdAt: "desc" },
+      });
+      if (member) {
+        await createSession({
+          userId: member.clerkUserId,
+          email: member.email,
+          name: `${member.firstName} ${member.lastName}`,
+          role: "member",
+          gymId: member.gymId,
+          memberId: member.id,
+          userType: "member",
+          studentId: user.studentId,
+        });
+        autoSwitchedToGym = true;
+      }
+    }
+
     const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "")
       .split(",")
       .map(e => e.trim().toLowerCase());
@@ -26,7 +49,7 @@ export async function POST(request: NextRequest) {
       success: true,
       user: { email: user.email, name: user.name, role: user.role },
       isPlatformAdmin,
-      isStudent: user.userType === "student",
+      isStudent: user.userType === "student" && !autoSwitchedToGym,
     });
   } catch (error) {
     console.error("Login error:", error);
