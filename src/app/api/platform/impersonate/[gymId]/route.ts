@@ -5,11 +5,11 @@ import { getSession, createSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 
 const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",").map(e => e.trim());
+  .split(",").map(e => e.trim().toLowerCase());
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ gymId: string }> }) {
   const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email)) {
+  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

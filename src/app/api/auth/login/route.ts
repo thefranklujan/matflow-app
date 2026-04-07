@@ -17,8 +17,10 @@ export async function POST(request: NextRequest) {
 
     await createSession(user);
 
-    const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "").split(",").map(e => e.trim());
-    const isPlatformAdmin = platformAdmins.includes(user.email);
+    const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "")
+      .split(",")
+      .map(e => e.trim().toLowerCase());
+    const isPlatformAdmin = platformAdmins.includes(user.email.trim().toLowerCase());
 
     return NextResponse.json({
       success: true,

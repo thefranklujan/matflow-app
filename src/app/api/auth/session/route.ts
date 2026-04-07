@@ -19,8 +19,10 @@ export async function GET() {
     if (g) gym = { name: g.name, logo: g.logo };
   }
 
-  const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io").split(",").map(e => e.trim());
-  const isPlatformAdmin = platformAdmins.includes(session.email);
+  const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+    .split(",")
+    .map(e => e.trim().toLowerCase());
+  const isPlatformAdmin = platformAdmins.includes(session.email.trim().toLowerCase());
 
   return NextResponse.json({ authenticated: true, user: session, gym, isPlatformAdmin });
 }

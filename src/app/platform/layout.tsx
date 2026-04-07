@@ -2,12 +2,14 @@ import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
 import PlatformNav from "./PlatformNav";
 
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io").split(",").map(e => e.trim());
+const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+  .split(",")
+  .map(e => e.trim().toLowerCase());
 
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
-  if (!session || !PLATFORM_ADMINS.includes(session.email)) {
+  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
     redirect("/sign-in");
   }
 
