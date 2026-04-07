@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 import { BELT_RANKS } from "@/lib/constants";
@@ -10,7 +11,9 @@ import MemberActions from "./MemberActions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminMembersPage() {
+  const { gymId } = await requireAdmin();
   const members = await prisma.member.findMany({
+    where: { gymId },
     orderBy: { createdAt: "desc" },
   });
 

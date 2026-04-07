@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 import DeleteAnnouncementButton from "./DeleteAnnouncementButton";
@@ -6,7 +7,9 @@ import DeleteAnnouncementButton from "./DeleteAnnouncementButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminAnnouncementsPage() {
+  const { gymId } = await requireAdmin();
   const announcements = await prisma.announcement.findMany({
+    where: { gymId },
     orderBy: [{ pinned: "desc" }, { publishedAt: "desc" }],
   });
 

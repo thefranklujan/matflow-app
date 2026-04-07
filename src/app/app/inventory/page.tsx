@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import InventoryStockEditor from "./InventoryStockEditor";
 
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminInventoryPage() {
+  const { gymId } = await requireAdmin();
   const variants = await prisma.productVariant.findMany({
+    where: { product: { gymId } },
     include: { product: { include: { category: true } } },
     orderBy: { stock: "asc" },
   });

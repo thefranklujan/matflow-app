@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
@@ -7,7 +8,9 @@ import DeleteProductButton from "./DeleteProductButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
+  const { gymId } = await requireAdmin();
   const products = await prisma.product.findMany({
+    where: { gymId },
     include: {
       category: true,
       images: { take: 1, orderBy: { sortOrder: "asc" } },

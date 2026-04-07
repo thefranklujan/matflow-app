@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 import DeleteEventButton from "./DeleteEventButton";
@@ -20,7 +21,9 @@ const locationColors: Record<string, string> = {
 };
 
 export default async function AdminEventsPage() {
+  const { gymId } = await requireAdmin();
   const events = await prisma.event.findMany({
+    where: { gymId },
     orderBy: { date: "desc" },
   });
 

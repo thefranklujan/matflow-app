@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 import DeleteCompetitionButton from "./DeleteCompetitionButton";
@@ -13,7 +14,9 @@ const placementColors: Record<string, string> = {
 };
 
 export default async function AdminCompetitionsPage() {
+  const { gymId } = await requireAdmin();
   const results = await prisma.competitionResult.findMany({
+    where: { gymId },
     include: { member: true },
     orderBy: { date: "desc" },
   });

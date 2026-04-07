@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
 
 import { CLASS_TYPES } from "@/lib/constants";
@@ -7,7 +8,9 @@ import DeleteVideoButton from "./DeleteVideoButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminVideosPage() {
+  const { gymId } = await requireAdmin();
   const videos = await prisma.video.findMany({
+    where: { gymId },
     orderBy: { classDate: "desc" },
   });
 
