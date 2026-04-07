@@ -407,7 +407,11 @@ export default function CommunityClient({
                           <div className="flex-1 min-w-0">
                             <p className="text-white text-xs font-semibold flex items-center gap-1.5 truncate">
                               {m.name}
-                              {m.role === "mod" && <Shield className="h-3 w-3 text-yellow-400 shrink-0" title="Moderator" />}
+                              {m.role === "mod" && (
+                                <span title="Moderator" className="inline-flex">
+                                  <Shield className="h-3 w-3 text-yellow-400 shrink-0" />
+                                </span>
+                              )}
                             </p>
                             <p className="text-gray-500 text-[10px] capitalize">{m.belt} belt · {m.sessionCount} sessions</p>
                           </div>

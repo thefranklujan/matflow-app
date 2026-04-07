@@ -167,6 +167,10 @@ model Student {
   lastName        String
   phone           String?
   passwordHash    String
+  homeGym         String?
+  beltRank        String            @default("white")
+  stripes         Int               @default(0)
+  trainingSince   DateTime?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   joinRequests    JoinRequest[]
