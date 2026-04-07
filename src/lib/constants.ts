@@ -1,9 +1,9 @@
-// MatFlow — Gym management SaaS for martial arts academies
+// MatFlow — Gym management SaaS for Jiu Jitsu academies
 // These are platform defaults. Per-gym branding comes from the Gym model.
 
 export const MATFLOW = {
   name: "MatFlow",
-  tagline: "Gym Management for Martial Arts",
+  tagline: "Gym Management for Jiu Jitsu",
   website: "www.mymatflow.com",
   supportEmail: "support@mymatflow.com",
   colors: {

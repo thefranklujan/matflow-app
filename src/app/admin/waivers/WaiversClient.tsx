@@ -25,7 +25,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("Liability Waiver & Release of Claims");
   const [content, setContent] = useState(
-    `I, the undersigned, hereby acknowledge that martial arts training involves inherent risks including but not limited to physical injury. I voluntarily assume all risks associated with participation in classes, open mats, and events at this academy.\n\nI release and hold harmless the academy, its instructors, staff, and affiliates from any claims, damages, or liabilities arising from my participation.\n\nI confirm that I am in good health and have no medical conditions that would prevent safe participation. I agree to follow all safety rules and instructor guidance.\n\nI understand this waiver remains in effect for the duration of my membership.`
+    `I, the undersigned, hereby acknowledge that Jiu Jitsu training involves inherent risks including but not limited to physical injury. I voluntarily assume all risks associated with participation in classes, open mats, and events at this academy.\n\nI release and hold harmless the academy, its instructors, staff, and affiliates from any claims, damages, or liabilities arising from my participation.\n\nI confirm that I am in good health and have no medical conditions that would prevent safe participation. I agree to follow all safety rules and instructor guidance.\n\nI understand this waiver remains in effect for the duration of my membership.`
   );
   const [loading, setLoading] = useState(false);
 

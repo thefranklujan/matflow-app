@@ -10,7 +10,7 @@ export default function HomePage() {
         </h1>
         <p className="text-xl text-gray-400 mb-2">{MATFLOW.tagline}</p>
         <p className="text-gray-500 mb-10 max-w-lg mx-auto">
-          The all-in-one platform for martial arts academies. Manage members, track attendance,
+          The all-in-one platform for Jiu Jitsu academies. Manage members, track attendance,
           run your pro shop, and grow your gym.
         </p>
 
