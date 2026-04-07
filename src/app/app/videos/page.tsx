@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import Link from "next/link";
 
 import { CLASS_TYPES } from "@/lib/constants";
@@ -7,10 +7,11 @@ import DeleteVideoButton from "./DeleteVideoButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminVideosPage() {
-  const { gymId } = await requireAdmin();
+export default async function VideosPage() {
+  const { gymId, orgRole } = await requireMember();
+  const isAdmin = orgRole === "org:admin";
   const videos = await prisma.video.findMany({
-    where: { gymId },
+    where: { gymId, ...(isAdmin ? {} : { published: true }) },
     orderBy: { classDate: "desc" },
   });
 
@@ -22,12 +23,14 @@ export default async function AdminVideosPage() {
       <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Videos</h1>
-          <Link
-            href="/app/videos/new"
-            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
-          >
-            + Add Video
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/app/videos/new"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
+            >
+              + Add Video
+            </Link>
+          )}
         </div>
 
         <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden">
@@ -55,15 +58,21 @@ export default async function AdminVideosPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/videos/${video.id}/edit`}
-                        className="text-sm text-gray-400 hover:text-brand-accent transition"
-                      >
-                        Edit
-                      </Link>
-                      <DeleteVideoButton videoId={video.id} />
-                    </div>
+                    {isAdmin ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/app/videos/${video.id}/edit`}
+                          className="text-sm text-gray-400 hover:text-brand-accent transition"
+                        >
+                          Edit
+                        </Link>
+                        <DeleteVideoButton videoId={video.id} />
+                      </div>
+                    ) : (
+                      <a href={video.embedUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-accent hover:underline">
+                        Watch &rarr;
+                      </a>
+                    )}
                   </td>
                 </tr>
               ))}

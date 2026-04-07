@@ -1,0 +1,259 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { CLASS_TYPES } from "@/lib/constants";
+import { formatTime } from "@/lib/utils";
+
+interface ScheduleItem {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  classType: string;
+  instructor: string;
+  topic: string | null;
+  locationSlug: string;
+}
+
+interface Commitment {
+  id?: string;
+  classDate: string;
+  classType: string;
+  locationSlug: string;
+}
+
+const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
+
+const CLASS_COLORS: Record<string, { bg: string; bar: string; text: string; label: string }> = {
+  gi:           { bg: "bg-blue-500/15",   bar: "bg-blue-500",   text: "text-blue-300",   label: "Gi" },
+  nogi:         { bg: "bg-red-500/15",    bar: "bg-red-500",    text: "text-red-300",    label: "No-Gi" },
+  kids:         { bg: "bg-yellow-500/15", bar: "bg-yellow-500", text: "text-yellow-300", label: "Kids" },
+  fundamentals: { bg: "bg-green-500/15",  bar: "bg-green-500",  text: "text-green-300",  label: "Fundamentals" },
+  competition:  { bg: "bg-purple-500/15", bar: "bg-purple-500", text: "text-purple-300", label: "Competition" },
+  womens:       { bg: "bg-pink-500/15",   bar: "bg-pink-500",   text: "text-pink-300",   label: "Women's" },
+  "self-defense": { bg: "bg-orange-500/15", bar: "bg-orange-500", text: "text-orange-300", label: "Self-Defense" },
+  openmat:      { bg: "bg-cyan-500/15",   bar: "bg-cyan-500",   text: "text-cyan-300",   label: "Open Mat" },
+  default:      { bg: "bg-white/5",       bar: "bg-gray-400",   text: "text-gray-300",   label: "Other" },
+};
+
+function colorFor(classType: string) {
+  const key = classType.toLowerCase().replace(/\s/g, "");
+  const normalized = key === "no-gi" ? "nogi" : key === "openmat" ? "openmat" : key;
+  return CLASS_COLORS[normalized] || CLASS_COLORS.default;
+}
+
+function classLabel(value: string) {
+  return CLASS_TYPES.find((c) => c.value === value)?.label ?? value;
+}
+
+function dateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export default function CalendarClient({
+  schedule,
+  initialCommitments,
+}: {
+  schedule: ScheduleItem[];
+  initialCommitments: Commitment[];
+}) {
+  const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
+  const [cursor, setCursor] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const calendarCells = useMemo(() => {
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth();
+    const startWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells: (Date | null)[] = [];
+    for (let i = 0; i < startWeekday; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [cursor]);
+
+  const today = new Date();
+  function isSameDay(a: Date, b: Date) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+  function classesForDate(date: Date) {
+    return schedule
+      .filter((e) => e.dayOfWeek === date.getDay())
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }
+  function isCommitted(date: Date, classType: string) {
+    const k = dateKey(date);
+    return commitments.some((c) => c.classDate.slice(0, 10) === k && c.classType === classType);
+  }
+
+  async function toggleCommit(date: Date, classItem: ScheduleItem) {
+    const k = dateKey(date);
+    const rowKey = `${k}-${classItem.classType}`;
+    if (busy === rowKey) return;
+    setBusy(rowKey);
+    const committed = isCommitted(date, classItem.classType);
+    const body = JSON.stringify({
+      classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(),
+      classType: classItem.classType,
+      locationSlug: classItem.locationSlug,
+    });
+    try {
+      const res = await fetch("/api/members/calendar/commit", {
+        method: committed ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (res.ok) {
+        if (committed) {
+          setCommitments((prev) =>
+            prev.filter((c) => !(c.classDate.slice(0, 10) === k && c.classType === classItem.classType))
+          );
+        } else {
+          setCommitments((prev) => [
+            ...prev,
+            { classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(), classType: classItem.classType, locationSlug: classItem.locationSlug },
+          ]);
+        }
+      }
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const selectedClasses = classesForDate(selectedDate);
+  const legendTypes = Array.from(new Set(schedule.map((e) => e.classType))).map((ct) => ({
+    classType: ct,
+    ...colorFor(ct),
+    display: classLabel(ct),
+  }));
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-white mb-6">Calendar</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Calendar */}
+        <div className="lg:col-span-2 bg-brand-dark border border-brand-gray rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+              className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <h2 className="text-lg font-bold text-white">{monthLabel}</h2>
+            <button
+              onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+              className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+
+          {legendTypes.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 pb-4 border-b border-white/5">
+              {legendTypes.map((t) => (
+                <div key={t.classType} className="flex items-center gap-2">
+                  <span className={`h-2.5 w-2.5 rounded-full ${t.bar}`} />
+                  <span className="text-xs text-gray-300">{t.display}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {DAY_INITIALS.map((d, i) => (
+              <div key={i} className="text-center text-xs text-gray-500 font-semibold py-1">{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendarCells.map((date, i) => {
+              if (!date) return <div key={i} />;
+              const dayClasses = classesForDate(date);
+              const isToday = isSameDay(date, today);
+              const isSelected = isSameDay(date, selectedDate);
+              const uniqueColors = Array.from(new Set(dayClasses.map((c) => colorFor(c.classType).bar))).slice(0, 4);
+              const hasCommitment = dayClasses.some((c) => isCommitted(date, c.classType));
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedDate(date)}
+                  className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition border ${
+                    isSelected
+                      ? "bg-brand-accent/20 border-brand-accent text-white"
+                      : isToday
+                      ? "bg-white/5 border-white/30 text-white"
+                      : dayClasses.length > 0
+                      ? "border-white/5 text-white hover:bg-white/5"
+                      : "border-transparent text-gray-500 hover:bg-white/5"
+                  }`}
+                >
+                  <span className={isToday ? "font-bold" : ""}>{date.getDate()}</span>
+                  {uniqueColors.length > 0 && (
+                    <span className="mt-1 flex items-center gap-0.5">
+                      {uniqueColors.map((bar, idx) => (
+                        <span key={idx} className={`h-1.5 w-1.5 rounded-full ${bar}`} />
+                      ))}
+                    </span>
+                  )}
+                  {hasCommitment && <Check className="h-3 w-3 text-green-400 mt-0.5" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Day detail */}
+        <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">
+            {selectedDate.toLocaleDateString("en-US", { weekday: "long" })}
+          </h2>
+          <p className="text-white text-lg font-bold mb-4">
+            {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+          </p>
+          {selectedClasses.length === 0 ? (
+            <p className="text-gray-500 text-sm">No classes scheduled.</p>
+          ) : (
+            <div className="space-y-3">
+              {selectedClasses.map((c) => {
+                const color = colorFor(c.classType);
+                const committed = isCommitted(selectedDate, c.classType);
+                return (
+                  <div key={c.id} className={`rounded-lg p-3 ${color.bg} border-l-4`} style={{ borderLeftColor: "currentColor" }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className={color.text}>
+                          <p className="text-sm font-semibold">{formatTime(c.startTime)} – {formatTime(c.endTime)}</p>
+                        </div>
+                        <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
+                        <p className="text-gray-500 text-xs">{c.instructor}</p>
+                      </div>
+                      <button
+                        onClick={() => toggleCommit(selectedDate, c)}
+                        disabled={busy === `${dateKey(selectedDate)}-${c.classType}`}
+                        className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center border transition ${
+                          committed
+                            ? "bg-green-500 border-green-500 text-white"
+                            : "border-white/20 text-gray-400 hover:border-white/40 hover:text-white"
+                        } disabled:opacity-50`}
+                        title={committed ? "Going — click to remove" : "Mark as going"}
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
