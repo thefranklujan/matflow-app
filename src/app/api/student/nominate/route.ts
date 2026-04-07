@@ -4,9 +4,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(req: NextRequest) {
+async function effectiveStudentId() {
   const session = await getSession();
-  if (!session?.studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return null;
+  if (session.studentId) return session.studentId;
+  if (session.memberId) {
+    const m = await prisma.member.findUnique({ where: { id: session.memberId }, select: { studentId: true } });
+    return m?.studentId || null;
+  }
+  return null;
+}
+
+export async function POST(req: NextRequest) {
+  const studentId = await effectiveStudentId();
+  if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const { gymName, city, state, ownerEmail, ownerPhone, notes } = body;
@@ -14,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   const nomination = await prisma.gymNomination.create({
     data: {
-      studentId: session.studentId,
+      studentId,
       gymName,
       city: city || null,
       state: state || null,
