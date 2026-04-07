@@ -66,7 +66,7 @@ export default async function NominationsPage() {
                           {n.student.firstName} {n.student.lastName}
                         </p>
                         <p className="text-gray-500 text-xs">{n.student.email}</p>
-                        {n.notes && <p className="text-gray-400 text-xs mt-1 italic">"{n.notes}"</p>}
+                        {n.notes && <p className="text-gray-400 text-xs mt-1 italic">&ldquo;{n.notes}&rdquo;</p>}
                       </div>
                       <div className="text-right shrink-0">
                         {n.ownerEmail && (

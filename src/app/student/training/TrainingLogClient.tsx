@@ -186,7 +186,7 @@ export default function TrainingLogClient({ initialSessions }: { initialSessions
                   </div>
                   {s.techniques && <p className="text-gray-300 text-sm mt-2">{s.techniques}</p>}
                   {s.partners && <p className="text-gray-500 text-xs mt-1">Partners: {s.partners}</p>}
-                  {s.notes && <p className="text-gray-400 text-sm mt-2 italic">"{s.notes}"</p>}
+                  {s.notes && <p className="text-gray-400 text-sm mt-2 italic">&ldquo;{s.notes}&rdquo;</p>}
                 </div>
                 <button onClick={() => remove(s.id)} className="text-gray-600 hover:text-red-400 transition">
                   <Trash2 className="h-4 w-4" />

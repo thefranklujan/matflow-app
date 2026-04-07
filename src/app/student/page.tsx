@@ -196,8 +196,8 @@ export default async function StudentDashboardPage() {
           <Link href="/student/nominate" className="block bg-gradient-to-br from-[#dc2626]/20 to-black border border-[#dc2626]/30 rounded-xl p-6 hover:border-[#dc2626] transition">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-white font-bold text-lg mb-1">Your gym isn't on MatFlow yet?</p>
-                <p className="text-gray-400 text-sm">Nominate your academy. When enough students nominate, we'll reach out to the owner and activate it for free.</p>
+                <p className="text-white font-bold text-lg mb-1">Your gym isn&apos;t on MatFlow yet?</p>
+                <p className="text-gray-400 text-sm">Nominate your academy. When enough students nominate, we&apos;ll reach out to the owner and activate it for free.</p>
               </div>
               <span className="text-[#dc2626] text-2xl">→</span>
             </div>
