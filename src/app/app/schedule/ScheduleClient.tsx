@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
-import { CLASS_TYPES } from "@/lib/constants";
+import { useState, useMemo, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Check, Trash2 } from "lucide-react";
+import { CLASS_TYPES, DAYS_OF_WEEK, SCHEDULE_TOPICS } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
 
 interface ScheduleItem {
@@ -51,14 +51,64 @@ function dateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default function CalendarClient({
-  schedule,
+export default function ScheduleClient({
+  schedule: initialSchedule,
   initialCommitments,
+  isAdmin,
 }: {
   schedule: ScheduleItem[];
   initialCommitments: Commitment[];
+  isAdmin: boolean;
 }) {
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
+  const [showAdminForm, setShowAdminForm] = useState(false);
+  const [adminDay, setAdminDay] = useState(1);
+  const [adminStart, setAdminStart] = useState("09:00");
+  const [adminEnd, setAdminEnd] = useState("10:00");
+  const [adminClassType, setAdminClassType] = useState<string>(CLASS_TYPES[0].value);
+  const [adminInstructor, setAdminInstructor] = useState("");
+  const [adminTopic, setAdminTopic] = useState("");
+  const [adminSubmitting, setAdminSubmitting] = useState(false);
+
+  async function reloadSchedule() {
+    const res = await fetch("/api/admin/schedule");
+    if (res.ok) {
+      const data = await res.json();
+      setSchedule(data);
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    setAdminSubmitting(true);
+    const res = await fetch("/api/admin/schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dayOfWeek: adminDay,
+        startTime: adminStart,
+        endTime: adminEnd,
+        classType: adminClassType,
+        instructor: adminInstructor,
+        topic: adminTopic || null,
+      }),
+    });
+    if (res.ok) {
+      setAdminInstructor("");
+      setAdminTopic("");
+      setShowAdminForm(false);
+      await reloadSchedule();
+    }
+    setAdminSubmitting(false);
+  }
+
+  async function handleDeleteEntry(id: string) {
+    if (!confirm("Delete this schedule entry?")) return;
+    await fetch(`/api/admin/schedule/${id}`, { method: "DELETE" });
+    await reloadSchedule();
+  }
+
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -136,7 +186,62 @@ export default function CalendarClient({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Calendar</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Schedule</h1>
+        {isAdmin && (
+          <button
+            onClick={() => setShowAdminForm(!showAdminForm)}
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
+          >
+            {showAdminForm ? "Cancel" : "+ Add Class"}
+          </button>
+        )}
+      </div>
+
+      {isAdmin && showAdminForm && (
+        <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 mb-6">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">New Schedule Entry</h2>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Day</label>
+              <select value={adminDay} onChange={(e) => setAdminDay(Number(e.target.value))} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+                {DAYS_OF_WEEK.map((day, i) => (<option key={i} value={i}>{day}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Start Time</label>
+              <input type="time" value={adminStart} onChange={(e) => setAdminStart(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">End Time</label>
+              <input type="time" value={adminEnd} onChange={(e) => setAdminEnd(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Class Type</label>
+              <select value={adminClassType} onChange={(e) => setAdminClassType(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+                {CLASS_TYPES.map((ct) => (<option key={ct.value} value={ct.value}>{ct.label}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Instructor</label>
+              <input type="text" value={adminInstructor} onChange={(e) => setAdminInstructor(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Topic (Optional)</label>
+              <select value={adminTopic} onChange={(e) => setAdminTopic(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+                <option value="">No Topic</option>
+                {SCHEDULE_TOPICS.map((t) => (<option key={t} value={t}>{t}</option>))}
+              </select>
+            </div>
+            <div className="md:col-span-3">
+              <button type="submit" disabled={adminSubmitting} className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm disabled:opacity-50">
+                {adminSubmitting ? "Adding..." : "Add to Schedule"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
         <div className="lg:col-span-2 bg-brand-dark border border-brand-gray rounded-lg p-6">
@@ -234,18 +339,28 @@ export default function CalendarClient({
                         <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
                         <p className="text-gray-500 text-xs">{c.instructor}</p>
                       </div>
-                      <button
-                        onClick={() => toggleCommit(selectedDate, c)}
-                        disabled={busy === `${dateKey(selectedDate)}-${c.classType}`}
-                        className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center border transition ${
-                          committed
-                            ? "bg-green-500 border-green-500 text-white"
-                            : "border-white/20 text-gray-400 hover:border-white/40 hover:text-white"
-                        } disabled:opacity-50`}
-                        title={committed ? "Going — click to remove" : "Mark as going"}
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
+                      {isAdmin ? (
+                        <button
+                          onClick={() => handleDeleteEntry(c.id)}
+                          className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
+                          title="Delete class"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toggleCommit(selectedDate, c)}
+                          disabled={busy === `${dateKey(selectedDate)}-${c.classType}`}
+                          className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center border transition ${
+                            committed
+                              ? "bg-green-500 border-green-500 text-white"
+                              : "border-white/20 text-gray-400 hover:border-white/40 hover:text-white"
+                          } disabled:opacity-50`}
+                          title={committed ? "Going — click to remove" : "Mark as going"}
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
