@@ -19,6 +19,25 @@ interface ScheduleEntry {
 
 const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
 
+const CLASS_COLORS: Record<string, { bg: string; bar: string; text: string; label: string }> = {
+  gi:           { bg: "bg-blue-500/15",   bar: "bg-blue-500",   text: "text-blue-300",   label: "Gi" },
+  nogi:         { bg: "bg-red-500/15",    bar: "bg-red-500",    text: "text-red-300",    label: "No-Gi" },
+  kids:         { bg: "bg-yellow-500/15", bar: "bg-yellow-500", text: "text-yellow-300", label: "Kids" },
+  fundamentals: { bg: "bg-green-500/15",  bar: "bg-green-500",  text: "text-green-300",  label: "Fundamentals" },
+  competition:  { bg: "bg-purple-500/15", bar: "bg-purple-500", text: "text-purple-300", label: "Competition" },
+  womens:       { bg: "bg-pink-500/15",   bar: "bg-pink-500",   text: "text-pink-300",   label: "Women's" },
+  "self-defense": { bg: "bg-orange-500/15", bar: "bg-orange-500", text: "text-orange-300", label: "Self-Defense" },
+  openmat:      { bg: "bg-cyan-500/15",   bar: "bg-cyan-500",   text: "text-cyan-300",   label: "Open Mat" },
+  default:      { bg: "bg-white/5",       bar: "bg-gray-400",   text: "text-gray-300",   label: "Other" },
+};
+
+function colorFor(classType: string) {
+  const key = classType.toLowerCase().replace(/[\s-]/g, (m) => (m === "-" ? "-" : ""));
+  // Map common variants
+  const normalized = key === "no-gi" ? "nogi" : key === "open mat" || key === "openmat" ? "openmat" : key;
+  return CLASS_COLORS[normalized] || CLASS_COLORS.default;
+}
+
 export default function SchedulePage() {
   const { isAdmin } = useAuth();
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
@@ -105,6 +124,10 @@ export default function SchedulePage() {
   const selectedClasses = classesForDate(selectedDate);
   const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
+  // Build legend from class types actually used in the schedule
+  const legendTypes = Array.from(new Set(entries.map((e) => e.classType)))
+    .map((ct) => ({ classType: ct, ...colorFor(ct), display: classLabel(ct) }));
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -189,12 +212,26 @@ export default function SchedulePage() {
                 <div key={i} className="text-center text-xs text-gray-500 font-semibold py-1">{d}</div>
               ))}
             </div>
+            {legendTypes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 pb-4 border-b border-white/5">
+                {legendTypes.map((t) => (
+                  <div key={t.classType} className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${t.bar}`} />
+                    <span className="text-xs text-gray-300">{t.display}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="grid grid-cols-7 gap-1">
               {calendarCells.map((date, i) => {
                 if (!date) return <div key={i} />;
-                const classCount = classesForDate(date).length;
+                const dayClasses = classesForDate(date);
                 const isToday = isSameDay(date, today);
                 const isSelected = isSameDay(date, selectedDate);
+                // De-duplicate class type colors so each cell shows a palette, not duplicates
+                const uniqueColors = Array.from(
+                  new Set(dayClasses.map((c) => colorFor(c.classType).bar))
+                ).slice(0, 4);
                 return (
                   <button
                     key={i}
@@ -203,13 +240,19 @@ export default function SchedulePage() {
                       isSelected
                         ? "bg-brand-accent/20 border-brand-accent text-white"
                         : isToday
-                        ? "bg-white/5 border-white/20 text-white"
-                        : "border-transparent text-gray-300 hover:bg-white/5"
+                        ? "bg-white/5 border-white/30 text-white"
+                        : dayClasses.length > 0
+                        ? "border-white/5 text-white hover:bg-white/5"
+                        : "border-transparent text-gray-500 hover:bg-white/5"
                     }`}
                   >
                     <span className={isToday ? "font-bold" : ""}>{date.getDate()}</span>
-                    {classCount > 0 && (
-                      <span className="mt-0.5 h-1 w-1 rounded-full bg-brand-accent" />
+                    {uniqueColors.length > 0 && (
+                      <span className="mt-1 flex items-center gap-0.5">
+                        {uniqueColors.map((bar, idx) => (
+                          <span key={idx} className={`h-1.5 w-1.5 rounded-full ${bar}`} />
+                        ))}
+                      </span>
                     )}
                   </button>
                 );
@@ -229,20 +272,23 @@ export default function SchedulePage() {
               <p className="text-gray-500 text-sm">No classes scheduled.</p>
             ) : (
               <div className="space-y-3">
-                {selectedClasses.map((c) => (
-                  <div key={c.id} className="border-l-2 border-brand-accent pl-3 py-1">
-                    <p className="text-brand-accent text-sm font-semibold">
-                      {formatTime(c.startTime)} – {formatTime(c.endTime)}
-                    </p>
-                    <p className="text-white text-sm">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
-                    <p className="text-gray-500 text-xs">{c.instructor}</p>
-                    {isAdmin && (
-                      <button onClick={() => handleDelete(c.id)} className="text-red-400 text-xs mt-1 hover:underline">
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {selectedClasses.map((c) => {
+                  const color = colorFor(c.classType);
+                  return (
+                    <div key={c.id} className={`rounded-lg p-3 ${color.bg} border-l-4`} style={{ borderLeftColor: "currentColor" }}>
+                      <div className={color.text}>
+                        <p className="text-sm font-semibold">{formatTime(c.startTime)} – {formatTime(c.endTime)}</p>
+                      </div>
+                      <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
+                      <p className="text-gray-500 text-xs">{c.instructor}</p>
+                      {isAdmin && (
+                        <button onClick={() => handleDelete(c.id)} className="text-red-400 text-xs mt-1 hover:underline">
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
