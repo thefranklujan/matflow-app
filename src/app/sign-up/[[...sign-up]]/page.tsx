@@ -10,7 +10,7 @@ function SignUpForm() {
   const searchParams = useSearchParams();
   const joinSlug = searchParams.get("join");
   const [step, setStep] = useState(1);
-  const [role, setRole] = useState<"owner" | "student" | null>(null);
+  const [role, setRole] = useState<"owner" | "student" | "instructor" | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -82,13 +82,13 @@ function SignUpForm() {
         setStep(3);
         return;
       }
-      // Student path: register and go straight to /student
+      // Student / Instructor path: register and go straight to /student
       setLoading(true);
       try {
         const res = await fetch("/api/auth/student-signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firstName, lastName, email, password }),
+          body: JSON.stringify({ firstName, lastName, email, password, role }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -157,7 +157,7 @@ function SignUpForm() {
           <div className="flex gap-2 mb-6 justify-center">
             <div className={`h-1 w-12 rounded-full ${step >= 1 ? "bg-brand-accent" : "bg-brand-gray"}`} />
             <div className={`h-1 w-12 rounded-full ${step >= 2 ? "bg-brand-accent" : "bg-brand-gray"}`} />
-            {role !== "student" && (
+            {role !== "student" && role !== "instructor" && (
               <div className={`h-1 w-12 rounded-full ${step >= 3 ? "bg-brand-accent" : "bg-brand-gray"}`} />
             )}
           </div>
@@ -175,7 +175,7 @@ function SignUpForm() {
 
           {step === 2 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
                   onClick={() => setRole("owner")}
@@ -188,6 +188,19 @@ function SignUpForm() {
                   <div className="text-2xl mb-2">🥋</div>
                   <div className="text-white font-semibold mb-1">Academy Owner</div>
                   <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("instructor")}
+                  className={`text-left p-5 rounded-lg border transition ${
+                    role === "instructor"
+                      ? "border-brand-accent bg-brand-accent/10"
+                      : "border-brand-gray hover:border-brand-accent/50"
+                  }`}
+                >
+                  <div className="text-2xl mb-2">🥇</div>
+                  <div className="text-white font-semibold mb-1">Instructor</div>
+                  <div className="text-gray-500 text-xs">Teach at one or more gyms, manage classes and students.</div>
                 </button>
                 <button
                   type="button"
