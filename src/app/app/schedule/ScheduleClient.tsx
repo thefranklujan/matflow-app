@@ -81,7 +81,7 @@ export default function ScheduleClient({
   initialCommitments,
   attendees = [],
   events = [],
-  videos = [],
+  videos: _videos = [],
   isAdmin,
 }: {
   schedule: ScheduleItem[];
@@ -91,7 +91,8 @@ export default function ScheduleClient({
   videos?: VideoItem[];
   isAdmin: boolean;
 }) {
-  const [openClass, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
+  void _videos;
+  const [, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
   const [showAdminForm, setShowAdminForm] = useState(false);
