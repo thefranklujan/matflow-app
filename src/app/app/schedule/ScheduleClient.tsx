@@ -16,6 +16,14 @@ interface ScheduleItem {
   locationSlug: string;
 }
 
+interface VideoItem {
+  id: string;
+  title: string;
+  description: string | null;
+  embedUrl: string;
+  classType: string;
+}
+
 interface Attendee {
   classDate: string;
   classType: string;
@@ -73,14 +81,17 @@ export default function ScheduleClient({
   initialCommitments,
   attendees = [],
   events = [],
+  videos = [],
   isAdmin,
 }: {
   schedule: ScheduleItem[];
   initialCommitments: Commitment[];
   attendees?: Attendee[];
   events?: EventItem[];
+  videos?: VideoItem[];
   isAdmin: boolean;
 }) {
+  const [openClass, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
   const [showAdminForm, setShowAdminForm] = useState(false);
@@ -395,7 +406,12 @@ export default function ScheduleClient({
                 const committed = isCommitted(selectedDate, c);
                 const going = attendeesFor(selectedDate, c);
                 return (
-                  <div key={c.id} className={`rounded-lg p-3 ${color.bg} border-l-4`} style={{ borderLeftColor: "currentColor" }}>
+                  <div
+                    key={c.id}
+                    onClick={() => setOpenClass({ date: selectedDate, classItem: c })}
+                    className={`rounded-lg p-3 ${color.bg} border-l-4 cursor-pointer hover:brightness-125 transition`}
+                    style={{ borderLeftColor: "currentColor" }}
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className={color.text}>
@@ -421,7 +437,7 @@ export default function ScheduleClient({
                       </div>
                       {isAdmin ? (
                         <button
-                          onClick={() => handleDeleteEntry(c.id)}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteEntry(c.id); }}
                           className="shrink-0 h-7 w-7 rounded-md flex items-center justify-center border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
                           title="Delete class"
                         >
@@ -429,7 +445,7 @@ export default function ScheduleClient({
                         </button>
                       ) : (
                         <button
-                          onClick={() => toggleCommit(selectedDate, c)}
+                          onClick={(e) => { e.stopPropagation(); toggleCommit(selectedDate, c); }}
                           disabled={busy === `${dateKey(selectedDate)}-${commitKey(c)}`}
                           className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center border transition ${
                             committed

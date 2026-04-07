@@ -82,7 +82,7 @@ export default function SettingsPage() {
 
   async function viewAsStudent() {
     const res = await fetch("/api/admin/view-as-student", { method: "POST" });
-    if (res.ok) window.location.href = "/student";
+    if (res.ok) window.location.href = "/app";
   }
 
   return (
