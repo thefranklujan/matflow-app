@@ -11,12 +11,16 @@ import MiniBelt from "@/components/members/MiniBelt";
 
 export const dynamic = "force-dynamic";
 
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+  .split(",").map(e => e.trim().toLowerCase());
+
 export default async function AdminMembersPage() {
   const { gymId } = await requireAdmin();
-  const members = await prisma.member.findMany({
+  const allMembers = await prisma.member.findMany({
     where: { gymId },
     orderBy: { createdAt: "desc" },
   });
+  const members = allMembers.filter((m) => !PLATFORM_ADMIN_EMAILS.includes(m.email.trim().toLowerCase()));
 
   function beltLabel(value: string) {
     return BELT_RANKS.find((b) => b.value === value)?.label ?? value;

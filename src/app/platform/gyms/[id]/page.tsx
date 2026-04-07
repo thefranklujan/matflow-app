@@ -5,6 +5,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ImpersonateButton from "./ImpersonateButton";
 
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+  .split(",").map(e => e.trim().toLowerCase());
+
+function isPlatformAdmin(email: string) {
+  return PLATFORM_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
+
 export default async function GymDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -17,6 +24,9 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
   });
 
   if (!gym) notFound();
+
+  // Hide platform admins from member listing/counts
+  gym.members = gym.members.filter((m) => !isPlatformAdmin(m.email));
 
   const owner = gym.members[0];
   const totalRevenue = await prisma.order.aggregate({

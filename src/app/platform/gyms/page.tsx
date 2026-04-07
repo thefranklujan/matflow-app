@@ -4,13 +4,21 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DeleteGymButton from "./DeleteGymButton";
 
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+  .split(",").map(e => e.trim().toLowerCase());
+
 export default async function GymsListPage() {
-  const gyms = await prisma.gym.findMany({
+  const gymsRaw = await prisma.gym.findMany({
     include: {
-      _count: { select: { members: true, products: true, orders: true } },
+      members: { select: { email: true } },
+      _count: { select: { products: true, orders: true } },
     },
     orderBy: { createdAt: "desc" },
   });
+  const gyms = gymsRaw.map((g) => ({
+    ...g,
+    memberCount: g.members.filter((m) => !PLATFORM_ADMIN_EMAILS.includes(m.email.trim().toLowerCase())).length,
+  }));
 
   return (
     <div>
@@ -50,7 +58,7 @@ export default async function GymsListPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm font-mono">{gym.slug}</td>
-                  <td className="px-6 py-4 text-center text-white">{gym._count.members}</td>
+                  <td className="px-6 py-4 text-center text-white">{gym.memberCount}</td>
                   <td className="px-6 py-4 text-center text-white">{gym._count.products}</td>
                   <td className="px-6 py-4 text-center text-white">{gym._count.orders}</td>
                   <td className="px-6 py-4 text-center">
