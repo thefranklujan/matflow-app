@@ -52,7 +52,12 @@ export default async function AdminMembersPage() {
               {members.map((member) => (
                 <tr key={member.id} className="border-b border-brand-gray/50 hover:bg-brand-gray/20 transition">
                   <td className="px-4 py-3 text-sm text-white font-medium">
-                    {member.firstName} {member.lastName}
+                    <span className="inline-flex items-center gap-1.5">
+                      {member.firstName} {member.lastName}
+                      {member.isAmbassador && (
+                        <span title="Gym Ambassador" className="text-yellow-400">👑</span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-400">{member.email}</td>
                   <td className="px-4 py-3 text-sm text-gray-300">

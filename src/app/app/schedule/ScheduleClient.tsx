@@ -16,6 +16,14 @@ interface ScheduleItem {
   locationSlug: string;
 }
 
+interface Attendee {
+  classDate: string;
+  classType: string;
+  firstName: string;
+  lastName: string;
+  beltRank: string;
+}
+
 interface EventItem {
   id: string;
   title: string;
@@ -63,11 +71,13 @@ function dateKey(d: Date) {
 export default function ScheduleClient({
   schedule: initialSchedule,
   initialCommitments,
+  attendees = [],
   events = [],
   isAdmin,
 }: {
   schedule: ScheduleItem[];
   initialCommitments: Commitment[];
+  attendees?: Attendee[];
   events?: EventItem[];
   isAdmin: boolean;
 }) {
@@ -147,6 +157,11 @@ export default function ScheduleClient({
     return schedule
       .filter((e) => e.dayOfWeek === date.getDay())
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }
+  function attendeesFor(date: Date, classItem: ScheduleItem) {
+    const k = dateKey(date);
+    const ck = commitKey(classItem);
+    return attendees.filter((a) => a.classDate.slice(0, 10) === k && a.classType === ck);
   }
   function eventsForDate(date: Date) {
     return events.filter((ev) => {
@@ -378,6 +393,7 @@ export default function ScheduleClient({
               {selectedClasses.map((c) => {
                 const color = colorFor(c.classType);
                 const committed = isCommitted(selectedDate, c);
+                const going = attendeesFor(selectedDate, c);
                 return (
                   <div key={c.id} className={`rounded-lg p-3 ${color.bg} border-l-4`} style={{ borderLeftColor: "currentColor" }}>
                     <div className="flex items-start justify-between gap-3">
@@ -387,6 +403,21 @@ export default function ScheduleClient({
                         </div>
                         <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
                         <p className="text-gray-500 text-xs">{c.instructor}</p>
+                        {going.length > 0 && (
+                          <div className="mt-2 pt-2 border-t border-white/5">
+                            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">{going.length} going</p>
+                            <div className="flex flex-wrap gap-1">
+                              {going.slice(0, 8).map((a, idx) => (
+                                <span key={idx} className="text-[11px] bg-white/5 text-gray-300 px-1.5 py-0.5 rounded">
+                                  {a.firstName} {a.lastName.slice(0, 1)}.
+                                </span>
+                              ))}
+                              {going.length > 8 && (
+                                <span className="text-[11px] text-gray-500 px-1.5 py-0.5">+{going.length - 8} more</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       {isAdmin ? (
                         <button

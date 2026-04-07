@@ -8,7 +8,7 @@ export default async function SchedulePage() {
   const { gymId, memberId, orgRole } = await requireMember();
   const isAdmin = orgRole === "org:admin";
 
-  const [schedule, commitments, events] = await Promise.all([
+  const [schedule, commitments, allCommitments, events] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { gymId, active: true },
       orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
@@ -19,6 +19,14 @@ export default async function SchedulePage() {
           orderBy: { classDate: "asc" },
         })
       : Promise.resolve([]),
+    // All commitments across the gym, with member info, for the "who's going" list
+    prisma.scheduleCommitment.findMany({
+      where: { gymId },
+      include: {
+        member: { select: { firstName: true, lastName: true, beltRank: true } },
+      },
+      orderBy: { classDate: "asc" },
+    }),
     prisma.event.findMany({
       where: { gymId, active: true },
       orderBy: { date: "asc" },
@@ -43,6 +51,13 @@ export default async function SchedulePage() {
         classDate: c.classDate.toISOString(),
         classType: c.classType,
         locationSlug: c.locationSlug,
+      }))}
+      attendees={allCommitments.map((c) => ({
+        classDate: c.classDate.toISOString(),
+        classType: c.classType,
+        firstName: c.member?.firstName || "",
+        lastName: c.member?.lastName || "",
+        beltRank: c.member?.beltRank || "white",
       }))}
       events={events.map((e) => ({
         id: e.id,
