@@ -9,10 +9,6 @@ import BeltDisplay from "@/components/members/BeltDisplay";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",")
-  .map(e => e.trim().toLowerCase());
-
 export default async function DashboardPage() {
   let ctx;
   try {
@@ -22,13 +18,6 @@ export default async function DashboardPage() {
   }
 
   if (!ctx.gymId) redirect("/sign-in");
-
-  // Auto-redirect platform admins to /platform
-  // (covers cases where session was created before this fix)
-  const session = await import("@/lib/local-auth").then(m => m.getSession());
-  if (session && PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
-    redirect("/platform");
-  }
 
   const isAdmin = ctx.orgRole === "org:admin";
 

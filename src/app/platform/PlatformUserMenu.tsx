@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, ArrowLeft } from "lucide-react";
 
 export default function PlatformUserMenu({ name, email }: { name: string; email: string }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +43,14 @@ export default function PlatformUserMenu({ name, email }: { name: string; email:
               Platform Admin
             </span>
           </div>
+          <a
+            href="/app"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition w-full text-left"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to App
+          </a>
+          <div className="border-t border-white/5" />
           <button
             onClick={signOut}
             className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 transition w-full text-left"
