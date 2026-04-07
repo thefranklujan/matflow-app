@@ -29,8 +29,7 @@ export async function POST(req: NextRequest) {
       !startTime ||
       !endTime ||
       !classType ||
-      !instructor ||
-      !locationSlug
+      !instructor
     ) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
         endTime,
         classType,
         instructor,
-        locationSlug,
+        locationSlug: locationSlug || "main",
         topic: topic || null,
         gymId,
       },

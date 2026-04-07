@@ -173,20 +173,6 @@ export default function AdminSchedulePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Location</label>
-                <select
-                  value={locationSlug}
-                  onChange={(e) => setLocationSlug(e.target.value)}
-                  className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
-                >
-                  {LOCATIONS.map((loc) => (
-                    <option key={loc.value} value={loc.value}>
-                      {loc.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
                 <label className="block text-sm text-gray-400 mb-1">Topic (Optional)</label>
                 <select
                   value={topic}
@@ -235,7 +221,6 @@ export default function AdminSchedulePage() {
                           <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Time</th>
                           <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Class</th>
                           <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Instructor</th>
-                          <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Location</th>
                           <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Topic</th>
                           <th className="text-right text-xs text-gray-400 uppercase tracking-wider px-4 py-2">Actions</th>
                         </tr>
@@ -248,7 +233,6 @@ export default function AdminSchedulePage() {
                             </td>
                             <td className="px-4 py-2 text-sm text-white">{classLabel(entry.classType)}</td>
                             <td className="px-4 py-2 text-sm text-gray-300">{entry.instructor}</td>
-                            <td className="px-4 py-2 text-sm text-gray-400">{locLabel(entry.locationSlug)}</td>
                             <td className="px-4 py-2 text-sm text-gray-400">{entry.topic || "—"}</td>
                             <td className="px-4 py-2 text-right">
                               <button
