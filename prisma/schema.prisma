@@ -161,18 +161,20 @@ model Member {
 }
 
 model Student {
-  id              String            @id @default(cuid())
-  email           String            @unique
-  firstName       String
-  lastName        String
-  phone           String?
-  passwordHash    String
-  homeGym         String?
-  beltRank        String            @default("white")
-  stripes         Int               @default(0)
-  trainingSince   DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  email               String            @unique
+  firstName           String
+  lastName            String
+  phone               String?
+  passwordHash        String
+  homeGym             String?
+  beltRank            String            @default("white")
+  stripes             Int               @default(0)
+  trainingSince       DateTime?
+  shareSchedule       Boolean           @default(false)
+  showFriendsSchedule Boolean           @default(true)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   joinRequests    JoinRequest[]
   memberships     Member[]
   trainingSessions TrainingSession[]
@@ -187,6 +189,10 @@ model StudentTrainingPlan {
   id        String   @id @default(cuid())
   studentId String
   date      DateTime @db.Date
+  morning   Boolean  @default(false)
+  noon      Boolean  @default(false)
+  afternoon Boolean  @default(false)
+  gym       String?
   createdAt DateTime @default(now())
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 

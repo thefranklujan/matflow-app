@@ -166,6 +166,25 @@ export default function CommunityClient({
     }
   }
 
+  async function promoteOrDemote(memberStudentId: string, action: "promote" | "demote") {
+    if (!selectedGroupId) return;
+    const res = await fetch("/api/student/community/promote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId: selectedGroupId, memberStudentId, action }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed");
+      return;
+    }
+    setActiveMembers((prev) =>
+      prev.map((m) =>
+        m.studentId === memberStudentId ? { ...m, role: action === "promote" ? "mod" : "member" } : m
+      )
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -415,6 +434,23 @@ export default function CommunityClient({
                             </p>
                             <p className="text-gray-500 text-[10px] capitalize">{m.belt} belt · {m.sessionCount} sessions</p>
                           </div>
+                          {isMod && m.role !== "mod" && (
+                            <button
+                              onClick={() => promoteOrDemote(m.studentId, "promote")}
+                              className="text-[10px] text-yellow-400 hover:text-yellow-300 font-bold uppercase tracking-wider px-2 py-1 rounded bg-yellow-400/10 hover:bg-yellow-400/20"
+                            >
+                              + Mod
+                            </button>
+                          )}
+                          {isMod && m.role === "mod" && (
+                            <button
+                              onClick={() => promoteOrDemote(m.studentId, "demote")}
+                              className="text-[10px] text-gray-500 hover:text-gray-300 font-bold uppercase tracking-wider px-2 py-1 rounded hover:bg-white/5"
+                              title="Demote to member"
+                            >
+                              − Mod
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

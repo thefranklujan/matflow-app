@@ -8,20 +8,45 @@ export async function POST(req: NextRequest) {
   const studentId = await effectiveStudentId();
   if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date } = await req.json();
+  const { date, morning, noon, afternoon, gym } = await req.json();
   if (!date) return NextResponse.json({ error: "Missing date" }, { status: 400 });
 
   const day = new Date(date);
   day.setUTCHours(0, 0, 0, 0);
 
-  // Toggle: delete if exists, otherwise create
-  const existing = await prisma.studentTrainingPlan.findUnique({
-    where: { studentId_date: { studentId, date: day } },
-  });
-  if (existing) {
-    await prisma.studentTrainingPlan.delete({ where: { id: existing.id } });
-    return NextResponse.json({ marked: false });
+  const data = {
+    morning: !!morning,
+    noon: !!noon,
+    afternoon: !!afternoon,
+    gym: gym || null,
+  };
+
+  // If no time blocks selected, treat as deletion
+  if (!data.morning && !data.noon && !data.afternoon) {
+    await prisma.studentTrainingPlan.deleteMany({ where: { studentId, date: day } });
+    return NextResponse.json({ deleted: true });
   }
-  await prisma.studentTrainingPlan.create({ data: { studentId, date: day } });
-  return NextResponse.json({ marked: true });
+
+  const plan = await prisma.studentTrainingPlan.upsert({
+    where: { studentId_date: { studentId, date: day } },
+    create: { studentId, date: day, ...data },
+    update: data,
+  });
+
+  return NextResponse.json({ plan });
+}
+
+export async function DELETE(req: NextRequest) {
+  const studentId = await effectiveStudentId();
+  if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { searchParams } = new URL(req.url);
+  const date = searchParams.get("date");
+  if (!date) return NextResponse.json({ error: "Missing date" }, { status: 400 });
+
+  const day = new Date(date);
+  day.setUTCHours(0, 0, 0, 0);
+
+  await prisma.studentTrainingPlan.deleteMany({ where: { studentId, date: day } });
+  return NextResponse.json({ success: true });
 }
