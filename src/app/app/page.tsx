@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrency, formatTime } from "@/lib/utils";
-import BeltDisplay from "@/components/members/BeltDisplay";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -139,7 +138,6 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
             {DAY_NAMES[now.getDay()]}, {now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
         </div>
-        <BeltDisplay beltRank={member.beltRank} stripes={member.stripes} />
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
