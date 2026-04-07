@@ -74,7 +74,7 @@ export default async function AdminMembersPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/admin/members/${member.id}`}
+                        href={`/app/members/${member.id}`}
                         className="text-sm text-gray-400 hover:text-brand-accent transition"
                       >
                         View
