@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ImpersonateButton from "./ImpersonateButton";
 
-const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com")
   .split(",").map(e => e.trim().toLowerCase());
 
 function isPlatformAdmin(email: string) {

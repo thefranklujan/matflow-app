@@ -11,7 +11,7 @@ import MiniBelt from "@/components/members/MiniBelt";
 
 export const dynamic = "force-dynamic";
 
-const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com")
   .split(",").map(e => e.trim().toLowerCase());
 
 export default async function AdminMembersPage() {

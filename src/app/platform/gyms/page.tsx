@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DeleteGymButton from "./DeleteGymButton";
 
-const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com")
   .split(",").map(e => e.trim().toLowerCase());
 
 export default async function GymsListPage() {
