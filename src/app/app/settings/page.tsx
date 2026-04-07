@@ -57,9 +57,69 @@ export default function SettingsPage() {
     return <div className="p-8 text-red-400">Failed to load settings</div>;
   }
 
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !settings) return;
+    setMessage("Uploading logo...");
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      setMessage("Logo upload failed");
+      return;
+    }
+    const { url } = await res.json();
+    const next = { ...settings, logo: url };
+    setSettings(next);
+    // persist immediately
+    await fetch("/api/admin/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(next),
+    });
+    setMessage("Logo updated!");
+  }
+
+  async function viewAsStudent() {
+    const res = await fetch("/api/admin/view-as-student", { method: "POST" });
+    if (res.ok) window.location.href = "/app";
+  }
+
   return (
     <div className="p-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-white mb-6">Gym Settings</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Gym Settings</h1>
+        <button
+          type="button"
+          onClick={viewAsStudent}
+          className="bg-yellow-500 text-black font-bold px-4 py-2 rounded-lg hover:bg-yellow-400 transition text-sm"
+        >
+          👀 View as Student
+        </button>
+      </div>
+
+      <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 mb-6">
+        <label className="block text-sm font-medium text-gray-300 mb-3">Gym Logo</label>
+        <div className="flex items-center gap-4">
+          <div className="h-20 w-20 rounded-lg bg-brand-black border border-brand-gray flex items-center justify-center overflow-hidden">
+            {settings.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={settings.logo} alt="Gym logo" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-gray-600 text-xs">No logo</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleLogoUpload}
+              className="block text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-brand-accent file:text-brand-black hover:file:bg-brand-accent/90"
+            />
+            <p className="text-gray-600 text-xs mt-1">PNG, JPG, or WebP. Max 5MB.</p>
+          </div>
+        </div>
+      </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         <div>

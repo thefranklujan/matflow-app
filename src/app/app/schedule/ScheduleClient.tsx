@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Check, Trash2 } from "lucide-react";
 import { CLASS_TYPES, DAYS_OF_WEEK, SCHEDULE_TOPICS } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
