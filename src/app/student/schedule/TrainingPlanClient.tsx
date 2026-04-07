@@ -235,66 +235,64 @@ export default function TrainingPlanClient({
         </button>
       </div>
 
-      {/* Day detail editor — pinned above the calendar so it's always visible */}
+      {/* Day detail editor — compact, pinned above the calendar */}
       {selectedDate && (
-        <div className="bg-[#0a0a0a] border border-[#dc2626]/40 rounded-xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">{selectedDate.toLocaleDateString("en-US", { weekday: "long" })}</p>
-              <h3 className="text-white text-lg font-bold">{selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</h3>
+        <div className="bg-[#0a0a0a] border border-[#dc2626]/40 rounded-lg p-3 mb-4 max-w-2xl">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-baseline gap-2 min-w-0">
+              <p className="text-white text-sm font-bold truncate">
+                {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+              </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
               {selPlan && (
-                <button onClick={clearDay} disabled={saving} className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-xs">
-                  <Trash2 className="h-3 w-3" /> Clear day
+                <button onClick={clearDay} disabled={saving} className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider">
+                  <Trash2 className="h-3 w-3" /> Clear
                 </button>
               )}
-              <button onClick={() => setSelectedDate(null)} className="text-gray-500 hover:text-white text-2xl leading-none">×</button>
+              <button onClick={() => setSelectedDate(null)} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <BlockToggle label="Morning" icon={<Sunrise className="h-4 w-4" />} active={draftMorning} onClick={() => setDraftMorning(!draftMorning)} />
-            <BlockToggle label="Noon" icon={<Sun className="h-4 w-4" />} active={draftNoon} onClick={() => setDraftNoon(!draftNoon)} />
-            <BlockToggle label="Afternoon" icon={<Sunset className="h-4 w-4" />} active={draftAfternoon} onClick={() => setDraftAfternoon(!draftAfternoon)} />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Gym</label>
+          <div className="flex items-center gap-2 mb-2">
+            <CompactBlock label="AM" icon={<Sunrise className="h-3 w-3" />} active={draftMorning} onClick={() => setDraftMorning(!draftMorning)} />
+            <CompactBlock label="Noon" icon={<Sun className="h-3 w-3" />} active={draftNoon} onClick={() => setDraftNoon(!draftNoon)} />
+            <CompactBlock label="PM" icon={<Sunset className="h-3 w-3" />} active={draftAfternoon} onClick={() => setDraftAfternoon(!draftAfternoon)} />
             {myGyms.length > 0 ? (
               <select
                 value={draftGym}
                 onChange={(e) => setDraftGym(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                className="flex-1 bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
               >
-                <option value="">— Choose gym —</option>
+                <option value="">— Gym —</option>
                 {myGyms.map((g) => (<option key={g.id} value={g.name}>{g.name}</option>))}
-                <option value="__other">Other / type below</option>
+                <option value="__other">Other</option>
               </select>
             ) : (
               <input
                 type="text"
                 value={draftGym}
                 onChange={(e) => setDraftGym(e.target.value)}
-                placeholder="Where you'll train"
-                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-              />
-            )}
-            {draftGym === "__other" && (
-              <input
-                type="text"
-                autoFocus
-                onChange={(e) => setDraftGym(e.target.value)}
-                placeholder="Type a gym name..."
-                className="w-full mt-2 bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                placeholder="Gym"
+                className="flex-1 bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
               />
             )}
           </div>
 
+          {draftGym === "__other" && (
+            <input
+              type="text"
+              autoFocus
+              onChange={(e) => setDraftGym(e.target.value)}
+              placeholder="Type a gym name..."
+              className="w-full mb-2 bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
+            />
+          )}
+
           <button
             onClick={saveDraft}
             disabled={saving}
-            className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold py-2.5 rounded-lg text-sm disabled:opacity-50"
+            className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-semibold py-1.5 rounded text-xs disabled:opacity-50"
           >
             {saving ? "Saving..." : selPlan ? "Update" : "Mark as training day"}
           </button>
@@ -390,16 +388,16 @@ export default function TrainingPlanClient({
   );
 }
 
-function BlockToggle({ label, icon, active, onClick }: { label: string; icon: React.ReactNode; active: boolean; onClick: () => void }) {
+function CompactBlock({ label, icon, active, onClick }: { label: string; icon: React.ReactNode; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 rounded-lg border py-3 transition ${
+      className={`inline-flex items-center gap-1 rounded border px-2 py-1.5 text-xs font-semibold transition ${
         active ? "bg-[#dc2626]/20 border-[#dc2626] text-white" : "bg-white/5 border-white/10 text-gray-400 hover:border-white/20"
       }`}
     >
       {icon}
-      <span className="text-xs font-semibold">{label}</span>
+      <span>{label}</span>
     </button>
   );
 }

@@ -134,6 +134,21 @@ export function sendJoinRequestApprovedToStudent(email: string, studentName: str
   send(email, `You are approved at ${gymName}!`, html).catch(() => {});
 }
 
+export function notifyAdminOfNewStudent(student: { firstName: string; lastName: string; email: string; phone?: string | null }) {
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#111;">
+      <h2 style="margin-bottom:16px;">New MatFlow Student</h2>
+      <table cellpadding="6" style="font-size:14px;">
+        <tr><td><strong>Name</strong></td><td>${student.firstName} ${student.lastName}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${student.email}</td></tr>
+        <tr><td><strong>Phone</strong></td><td>${student.phone || "—"}</td></tr>
+        <tr><td><strong>When</strong></td><td>${new Date().toLocaleString()}</td></tr>
+      </table>
+    </div>
+  `;
+  send("franklujan@gmail.com", `New MatFlow Student: ${student.firstName} ${student.lastName}`, html).catch(() => {});
+}
+
 export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
