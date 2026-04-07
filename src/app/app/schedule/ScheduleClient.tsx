@@ -81,7 +81,7 @@ export default function ScheduleClient({
   initialCommitments,
   attendees = [],
   events = [],
-  videos: _videos = [],
+  videos = [],
   isAdmin,
 }: {
   schedule: ScheduleItem[];
@@ -91,8 +91,7 @@ export default function ScheduleClient({
   videos?: VideoItem[];
   isAdmin: boolean;
 }) {
-  void _videos;
-  const [, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
+  const [openClass, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
   const [showAdminForm, setShowAdminForm] = useState(false);
@@ -466,6 +465,100 @@ export default function ScheduleClient({
           )}
         </div>
       </div>
+
+      {openClass && (() => {
+        const c = openClass.classItem;
+        const date = openClass.date;
+        const color = colorFor(c.classType);
+        const committed = isCommitted(date, c);
+        const going = attendeesFor(date, c);
+        const matchingVideos = videos.filter((v) => v.classType.toLowerCase() === c.classType.toLowerCase()).slice(0, 2);
+        return (
+          <div
+            onClick={() => setOpenClass(null)}
+            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0a0a0a] border border-white/10 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className={`p-6 ${color.bg} border-b border-white/10`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className={`text-xs uppercase tracking-wider ${color.text} font-semibold`}>{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
+                    <h2 className="text-2xl font-bold text-white mt-1">{formatTime(c.startTime)} – {formatTime(c.endTime)}</h2>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                    </p>
+                    <p className="text-gray-500 text-xs mt-2">Instructor: {c.instructor}</p>
+                  </div>
+                  <button
+                    onClick={() => setOpenClass(null)}
+                    className="text-gray-400 hover:text-white text-2xl leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+                {!isAdmin && (
+                  <button
+                    onClick={() => toggleCommit(date, c)}
+                    className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                      committed
+                        ? "bg-green-500 text-white hover:bg-green-600"
+                        : "bg-white text-black hover:bg-gray-200"
+                    }`}
+                  >
+                    <Check className="h-4 w-4" />
+                    {committed ? "You're going" : "Mark as going"}
+                  </button>
+                )}
+              </div>
+
+              {matchingVideos.length > 0 && (
+                <div className="p-6 border-b border-white/10">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">Related Videos</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {matchingVideos.map((v) => (
+                      <a
+                        key={v.id}
+                        href={v.embedUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/20 transition"
+                      >
+                        <p className="text-white text-sm font-semibold">{v.title}</p>
+                        {v.description && <p className="text-gray-500 text-xs mt-1 line-clamp-2">{v.description}</p>}
+                        <p className="text-brand-accent text-xs mt-2">Watch →</p>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="p-6">
+                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
+                  Going ({going.length})
+                </h3>
+                {going.length === 0 ? (
+                  <p className="text-gray-600 text-sm">No one is going yet. Be the first.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {going.map((a, idx) => (
+                      <div key={idx} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
+                        <div className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-white font-semibold">
+                          {a.firstName[0]}{a.lastName[0]}
+                        </div>
+                        <span className="text-sm text-white flex-1">{a.firstName} {a.lastName}</span>
+                        <span className="text-xs text-gray-500 capitalize">{a.beltRank} belt</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
