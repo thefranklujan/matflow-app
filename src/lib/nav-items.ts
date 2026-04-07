@@ -13,7 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "requests", label: "Join Requests", icon: "UserPlus", roles: ["admin"], section: "main" },
   { slug: "members", label: "Members", icon: "Users", roles: ["admin"], section: "main" },
   // Shared
-  { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin", "member"], section: "main" },
+  { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin"], section: "main" },
   { slug: "attendance", label: "Attendance", icon: "CheckSquare", roles: ["admin", "member"], section: "main" },
   { slug: "videos", label: "Videos", icon: "Video", roles: ["admin", "member"], section: "main" },
   // Admin-only
@@ -36,6 +36,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 export const MOBILE_TABS: { slug: string; label: string; icon: string; roles: ("admin" | "member")[] }[] = [
   { slug: "", label: "Home", icon: "Home", roles: ["admin", "member"] },
-  { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin", "member"] },
+  { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin"] },
+  { slug: "calendar", label: "Calendar", icon: "CalendarCheck", roles: ["member"] },
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"] },
 ];
