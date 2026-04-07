@@ -8,6 +8,13 @@ export default async function SchedulePage() {
   const { gymId, memberId, orgRole } = await requireMember();
   const isAdmin = orgRole === "org:admin";
 
+  const me = memberId
+    ? await prisma.member.findUnique({
+        where: { id: memberId },
+        select: { firstName: true, lastName: true, beltRank: true, isAmbassador: true },
+      })
+    : null;
+
   const [schedule, commitments, allCommitments, events, videos] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { gymId, active: true },
@@ -40,6 +47,12 @@ export default async function SchedulePage() {
   return (
     <ScheduleClient
       isAdmin={isAdmin}
+      currentMember={me ? {
+        firstName: me.firstName,
+        lastName: me.lastName,
+        beltRank: me.beltRank,
+        isAmbassador: me.isAmbassador,
+      } : null}
       schedule={schedule.map((s) => ({
         id: s.id,
         dayOfWeek: s.dayOfWeek,

@@ -80,10 +80,11 @@ function dateKey(d: Date) {
 export default function ScheduleClient({
   schedule: initialSchedule,
   initialCommitments,
-  attendees = [],
+  attendees: initialAttendees = [],
   events = [],
   videos = [],
   isAdmin,
+  currentMember = null,
 }: {
   schedule: ScheduleItem[];
   initialCommitments: Commitment[];
@@ -91,7 +92,9 @@ export default function ScheduleClient({
   events?: EventItem[];
   videos?: VideoItem[];
   isAdmin: boolean;
+  currentMember?: { firstName: string; lastName: string; beltRank: string; isAmbassador: boolean } | null;
 }) {
+  const [attendees, setAttendees] = useState<Attendee[]>(initialAttendees);
   const [openClass, setOpenClass] = useState<{ date: Date; classItem: ScheduleItem } | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [commitments, setCommitments] = useState<Commitment[]>(initialCommitments);
@@ -215,15 +218,42 @@ export default function ScheduleClient({
         body,
       });
       if (res.ok) {
+        const isoDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
         if (committed) {
           setCommitments((prev) =>
             prev.filter((c) => !(c.classDate.slice(0, 10) === k && c.classType === ck))
           );
+          if (currentMember) {
+            setAttendees((prev) =>
+              prev.filter(
+                (a) =>
+                  !(
+                    a.classDate.slice(0, 10) === k &&
+                    a.classType === ck &&
+                    a.firstName === currentMember.firstName &&
+                    a.lastName === currentMember.lastName
+                  )
+              )
+            );
+          }
         } else {
           setCommitments((prev) => [
             ...prev,
-            { classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(), classType: ck, locationSlug: classItem.locationSlug },
+            { classDate: isoDate, classType: ck, locationSlug: classItem.locationSlug },
           ]);
+          if (currentMember) {
+            setAttendees((prev) => [
+              ...prev,
+              {
+                classDate: isoDate,
+                classType: ck,
+                firstName: currentMember.firstName,
+                lastName: currentMember.lastName,
+                beltRank: currentMember.beltRank,
+                isAmbassador: currentMember.isAmbassador,
+              },
+            ]);
+          }
         }
       }
     } finally {
