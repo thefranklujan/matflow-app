@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getSession } from "@/lib/local-auth";
+import { getSession, createSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -15,9 +15,30 @@ export default async function StudentDashboardPage() {
   const viewAsStudent = cookieStore.get("view_as_student")?.value === "1";
 
   // Allow admin into the student dashboard via view-as-student mode.
-  // Synthesize a single membership for the admin's current gym so the page renders.
   const studentId = session.studentId;
   if (!studentId && !viewAsStudent) redirect("/sign-in");
+
+  // If a real student has at least one approved membership, switch them straight
+  // into that gym's member portal — they should never see this find-a-gym landing.
+  if (studentId && !viewAsStudent) {
+    const firstMember = await prisma.member.findFirst({
+      where: { studentId, approved: true, active: true },
+      orderBy: { createdAt: "desc" },
+    });
+    if (firstMember) {
+      await createSession({
+        userId: firstMember.clerkUserId,
+        email: firstMember.email,
+        name: `${firstMember.firstName} ${firstMember.lastName}`,
+        role: "member",
+        gymId: firstMember.gymId,
+        memberId: firstMember.id,
+        userType: "member",
+        studentId,
+      });
+      redirect("/app");
+    }
+  }
 
   const [memberships, requests, suggestedGyms] = await Promise.all([
     studentId
