@@ -13,7 +13,7 @@ export default async function StudentDashboardPage() {
   const studentId = session.studentId;
 
   // If a real student has at least one approved membership, switch them straight
-  // into that gym's member portal — they should never see this find-a-gym landing.
+  // into that gym's member portal. they should never see this find-a-gym landing.
   const firstMember = await prisma.member.findFirst({
     where: { studentId, approved: true, active: true },
     orderBy: { createdAt: "desc" },
@@ -239,7 +239,7 @@ export default async function StudentDashboardPage() {
                   <p className="text-white text-sm font-medium">{c.classType}{c.topic ? ` · ${c.topic}` : ""}</p>
                   <p className="text-gray-500 text-xs">{c.gym.name} · {c.instructor}</p>
                 </div>
-                <p className="text-[#dc2626] text-sm font-medium">{c.startTime} – {c.endTime}</p>
+                <p className="text-[#dc2626] text-sm font-medium">{c.startTime} to {c.endTime}</p>
               </div>
             ))}
           </div>

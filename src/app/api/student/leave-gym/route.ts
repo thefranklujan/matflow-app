@@ -12,7 +12,7 @@ export async function POST() {
   // Delete the member record so the underlying Student is no longer affiliated
   await prisma.member.delete({ where: { id: session.memberId } }).catch(() => null);
 
-  // Clear session — they need to sign in again
+  // Clear session. they need to sign in again
   const c = await cookies();
   c.delete("matflow-session");
   return NextResponse.json({ success: true });

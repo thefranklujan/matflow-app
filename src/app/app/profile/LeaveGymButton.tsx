@@ -19,7 +19,7 @@ export default function LeaveGymButton() {
     <div className="bg-brand-dark border border-red-500/20 rounded-lg p-6 mt-6">
       <h2 className="text-lg font-bold text-white mb-1">Leave Gym</h2>
       <p className="text-gray-500 text-sm mb-4">
-        Remove your affiliation with this gym. Your Student account stays — you can find a new gym
+        Remove your affiliation with this gym. Your Student account stays, and you can find a new gym
         afterwards or stay unaffiliated.
       </p>
       <button

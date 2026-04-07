@@ -352,7 +352,7 @@ export default function CommunityClient({
                         >
                           {p.hidden && (
                             <div className="text-yellow-400 text-[10px] uppercase tracking-wider font-bold mb-2 inline-flex items-center gap-1">
-                              <EyeOff className="h-3 w-3" /> Hidden — {p.reportCount} report{p.reportCount === 1 ? "" : "s"}
+                              <EyeOff className="h-3 w-3" /> Hidden. {p.reportCount} report{p.reportCount === 1 ? "" : "s"}
                             </div>
                           )}
                           <div className="flex items-start gap-3">

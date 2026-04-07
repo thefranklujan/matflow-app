@@ -23,7 +23,7 @@ export default async function MemberNominatePage() {
       <h1 className="text-3xl font-bold text-white mb-2">Nominate Your Gym</h1>
       <p className="text-gray-500 mb-6 text-sm max-w-xl">
         Know another gym that should be on MatFlow? Drop the academy here. When enough students from
-        the same gym nominate, we&apos;ll reach out and activate it — free for the owner.
+        the same gym nominate, we&apos;ll reach out and activate it free for the owner.
       </p>
 
       <NominateForm />

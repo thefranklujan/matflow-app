@@ -451,7 +451,7 @@ export default function ScheduleClient({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className={color.text}>
-                          <p className="text-sm font-semibold">{formatTime(c.startTime)} – {formatTime(c.endTime)}</p>
+                          <p className="text-sm font-semibold">{formatTime(c.startTime)} to {formatTime(c.endTime)}</p>
                         </div>
                         <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
                         <p className="text-gray-500 text-xs">{c.instructor}</p>
@@ -473,7 +473,7 @@ export default function ScheduleClient({
                               ? "bg-green-500 border-green-500 text-white"
                               : "border-white/20 text-gray-400 hover:border-white/40 hover:text-white"
                           } disabled:opacity-50`}
-                          title={committed ? "Going — click to remove" : "Mark as going"}
+                          title={committed ? "Click to remove" : "Mark as going"}
                         >
                           <Check className="h-4 w-4" />
                         </button>
@@ -507,7 +507,7 @@ export default function ScheduleClient({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className={`text-xs uppercase tracking-wider ${color.text} font-semibold`}>{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
-                    <h2 className="text-2xl font-bold text-white mt-1">{formatTime(c.startTime)} – {formatTime(c.endTime)}</h2>
+                    <h2 className="text-2xl font-bold text-white mt-1">{formatTime(c.startTime)} to {formatTime(c.endTime)}</h2>
                     <p className="text-gray-400 text-sm mt-1">
                       {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                     </p>

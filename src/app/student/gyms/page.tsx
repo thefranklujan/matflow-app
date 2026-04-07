@@ -147,7 +147,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
                 {!card.isActive && (
                   <p className="text-gray-500 text-xs">
                     {card.memberCount ?? 0} student{(card.memberCount ?? 0) === 1 ? "" : "s"} have nominated this gym.
-                    Nominate it too to grow the group — we&apos;ll reach out to the owner.
+                    Nominate it too to grow the group, we&apos;ll reach out to the owner.
                   </p>
                 )}
               </div>

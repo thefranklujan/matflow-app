@@ -235,7 +235,7 @@ export default function TrainingPlanClient({
         </button>
       </div>
 
-      {/* Day detail editor — compact, pinned above the calendar */}
+      {/* Day detail editor. compact, pinned above the calendar */}
       {selectedDate && (
         <div className="bg-[#0a0a0a] border border-[#dc2626]/40 rounded-lg p-3 mb-4 max-w-2xl">
           <div className="flex items-center justify-between gap-3 mb-2">
@@ -264,7 +264,7 @@ export default function TrainingPlanClient({
                 onChange={(e) => setDraftGym(e.target.value)}
                 className="flex-1 bg-black border border-white/10 rounded px-2 py-1.5 text-white text-xs"
               >
-                <option value="">— Gym —</option>
+                <option value=""> Gym </option>
                 {myGyms.map((g) => (<option key={g.id} value={g.name}>{g.name}</option>))}
                 <option value="__other">Other</option>
               </select>

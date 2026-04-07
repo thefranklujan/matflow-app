@@ -1,5 +1,5 @@
 /**
- * Auth helpers — uses local auth for development.
+ * Auth helpers. uses local auth for development.
  * The interface stays the same so all API routes work unchanged.
  * Swap to Clerk imports when going to production.
  */

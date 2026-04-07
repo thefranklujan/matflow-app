@@ -33,7 +33,7 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Nav — hidden inside member portal */}
+          {/* Desktop Nav. hidden inside member portal */}
           {!inMemberPortal && (
             <div className="hidden md:flex items-center gap-8">
               <Link href="/" className="text-sm font-medium text-gray-300 hover:text-brand-accent transition uppercase tracking-wider">
