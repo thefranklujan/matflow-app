@@ -35,7 +35,7 @@ export default async function PlatformDashboard() {
     }),
   ]);
 
-  const [nominationCount, totalStudents, hotNominations] = await Promise.all([
+  const [nominationCount, totalStudents, hotNominations, totalGroupMembers, topGroups, totalGroupPosts] = await Promise.all([
     prisma.gymNomination.count(),
     prisma.student.count(),
     prisma.gymNomination.groupBy({
@@ -45,6 +45,14 @@ export default async function PlatformDashboard() {
       orderBy: { _count: { gymName: "desc" } },
       take: 5,
     }),
+    prisma.gymGroupMember.count({ where: { status: "active" } }),
+    prisma.gymGroup.findMany({
+      where: { memberCount: { gt: 0 } },
+      orderBy: { memberCount: "desc" },
+      take: 6,
+      select: { id: true, name: true, city: true, state: true, memberCount: true },
+    }),
+    prisma.groupPost.count(),
   ]);
 
   const trialingGyms = gyms.filter(g => g.subscriptionStatus === "trialing");
@@ -66,14 +74,38 @@ export default async function PlatformDashboard() {
       <p className="text-gray-500 mb-8">Operational view of MatFlow</p>
 
       {/* Top KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <KPI label="Total Gyms" value={gyms.length} sub={`+${newGymsThisMonth} this month`} />
         <KPI label="Paying" value={paidGyms.length} sub={`${trialingGyms.length} on trial`} color="text-green-400" />
         <KPI label="MRR" value={`$${mrr}`} sub={`$${arr.toLocaleString()} ARR`} color="text-orange-400" />
         <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <KPI label="Students" value={totalStudents} sub={`${nominationCount} nominations`} color="text-cyan-400" />
+        <KPI label="Community Members" value={totalGroupMembers} sub={`${topGroups.length} groups active`} color="text-cyan-400" />
+        <KPI label="Group Posts" value={totalGroupPosts} sub="across all gym communities" color="text-cyan-400" />
         <KPI label="Check-ins (7d)" value={attendanceLast7} sub={`${totalAttendance} all-time`} color="text-purple-400" />
       </div>
+
+      {topGroups.length > 0 && (
+        <div className="bg-[#111] border border-cyan-500/20 rounded-lg p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-white font-semibold">👥 Top Gym Communities</h2>
+            <a href="/platform/nominations" className="text-cyan-400 text-sm hover:underline">View nominations →</a>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {topGroups.map((g) => (
+              <div key={g.id} className="bg-cyan-500/5 border border-cyan-500/15 rounded-lg p-3">
+                <p className="text-white font-semibold">{g.name}</p>
+                {(g.city || g.state) && (
+                  <p className="text-gray-500 text-xs mt-0.5">{g.city}{g.city && g.state ? ", " : ""}{g.state}</p>
+                )}
+                <p className="text-cyan-400 text-xs mt-1 font-semibold">{g.memberCount} active member{g.memberCount === 1 ? "" : "s"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {hotNominations.length > 0 && (
         <div className="bg-[#111] border border-orange-500/30 rounded-lg p-5 mb-6">
