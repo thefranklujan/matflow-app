@@ -133,7 +133,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white uppercase tracking-wide">
-            Welcome back, {member.firstName}
+            Welcome back
           </h1>
           <p className="text-gray-400 text-sm">
             {DAY_NAMES[now.getDay()]}, {now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
