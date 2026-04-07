@@ -4,7 +4,16 @@ import { prisma } from "@/lib/prisma";
 import StudentsClient from "./StudentsClient";
 
 export default async function StudentsPage() {
+  // Hide demo / sample students from this list (they live only inside the demo gym)
   const students = await prisma.student.findMany({
+    where: {
+      NOT: {
+        OR: [
+          { email: { endsWith: "@matflow-sample.com" } },
+          { email: { endsWith: "@example.com" } },
+        ],
+      },
+    },
     include: {
       memberships: { include: { gym: { select: { id: true, name: true } } } },
       joinRequests: { include: { gym: { select: { id: true, name: true } } } },

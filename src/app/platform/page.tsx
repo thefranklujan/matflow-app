@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import DemoModeButton from "./DemoModeButton";
 
 export default async function PlatformDashboard() {
   const now = new Date();
@@ -70,8 +71,13 @@ export default async function PlatformDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-2">Platform Dashboard</h1>
-      <p className="text-gray-500 mb-8">Operational view of MatFlow</p>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Platform Dashboard</h1>
+          <p className="text-gray-500">Operational view of MatFlow</p>
+        </div>
+        <DemoModeButton />
+      </div>
 
       {/* Top KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
