@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone } from "lucide-react";
+import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/student", label: "Home", icon: Home },
   { href: "/student/training", label: "Training Log", icon: ClipboardList },
+  { href: "/student/community", label: "Community", icon: Users },
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
   { href: "/student/nominate", label: "Nominate Gym", icon: Megaphone },
   { href: "/student/requests", label: "My Requests", icon: Inbox },

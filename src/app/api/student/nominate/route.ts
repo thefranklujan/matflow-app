@@ -34,5 +34,22 @@ export async function POST(req: NextRequest) {
       notes: notes || null,
     },
   });
+
+  // Auto-create or join the GymGroup keyed by normalized gym name
+  const groupId = gymName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  await prisma.gymGroup.upsert({
+    where: { id: groupId },
+    create: { id: groupId, name: gymName, city: city || null, state: state || null },
+    update: {},
+  });
+  await prisma.gymGroupMember.upsert({
+    where: { groupId_studentId: { groupId, studentId } },
+    create: { groupId, studentId },
+    update: {},
+  });
+  // Refresh memberCount
+  const count = await prisma.gymGroupMember.count({ where: { groupId } });
+  await prisma.gymGroup.update({ where: { id: groupId }, data: { memberCount: count } });
+
   return NextResponse.json(nomination, { status: 201 });
 }

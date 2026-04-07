@@ -173,6 +173,43 @@ model Student {
   memberships     Member[]
   trainingSessions TrainingSession[]
   nominations     GymNomination[]
+  groupMemberships GymGroupMember[]
+  groupPosts      GroupPost[]
+}
+
+model GymGroup {
+  id          String           @id
+  name        String
+  city        String?
+  state       String?
+  memberCount Int              @default(0)
+  createdAt   DateTime         @default(now())
+  members     GymGroupMember[]
+  posts       GroupPost[]
+}
+
+model GymGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  studentId String
+  joinedAt  DateTime @default(now())
+  group     GymGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, studentId])
+  @@index([studentId])
+}
+
+model GroupPost {
+  id        String   @id @default(cuid())
+  groupId   String
+  studentId String
+  body      String
+  createdAt DateTime @default(now())
+  group     GymGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
 }
 
 model TrainingSession {
