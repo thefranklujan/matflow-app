@@ -10,6 +10,7 @@ function SignUpForm() {
   const searchParams = useSearchParams();
   const joinSlug = searchParams.get("join");
   const [step, setStep] = useState(1);
+  const [role, setRole] = useState<"owner" | "student" | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -71,6 +72,38 @@ function SignUpForm() {
       return;
     }
 
+    if (step === 2) {
+      if (!role) {
+        setError("Please choose an option");
+        return;
+      }
+      setError("");
+      if (role === "owner") {
+        setStep(3);
+        return;
+      }
+      // Student path: register and go straight to /student
+      setLoading(true);
+      try {
+        const res = await fetch("/api/auth/student-signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName, lastName, email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Registration failed");
+          setLoading(false);
+          return;
+        }
+        router.push("/student");
+      } catch {
+        setError("Something went wrong. Please try again.");
+        setLoading(false);
+      }
+      return;
+    }
+
     setError("");
     setLoading(true);
 
@@ -110,14 +143,23 @@ function SignUpForm() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">MatFlow</h1>
           <p className="text-gray-400">
-            {joinSlug ? "Join your gym" : step === 1 ? "Create your account" : "Set up your gym"}
+            {joinSlug
+              ? "Join your gym"
+              : step === 1
+              ? "Create your account"
+              : step === 2
+              ? "I am signing up as..."
+              : "Set up your gym"}
           </p>
         </div>
 
         {!joinSlug && (
           <div className="flex gap-2 mb-6 justify-center">
-            <div className={`h-1 w-16 rounded-full ${step >= 1 ? "bg-brand-accent" : "bg-brand-gray"}`} />
-            <div className={`h-1 w-16 rounded-full ${step >= 2 ? "bg-brand-accent" : "bg-brand-gray"}`} />
+            <div className={`h-1 w-12 rounded-full ${step >= 1 ? "bg-brand-accent" : "bg-brand-gray"}`} />
+            <div className={`h-1 w-12 rounded-full ${step >= 2 ? "bg-brand-accent" : "bg-brand-gray"}`} />
+            {role !== "student" && (
+              <div className={`h-1 w-12 rounded-full ${step >= 3 ? "bg-brand-accent" : "bg-brand-gray"}`} />
+            )}
           </div>
         )}
 
@@ -131,7 +173,54 @@ function SignUpForm() {
             </div>
           )}
 
-          {step === 1 ? (
+          {step === 2 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRole("owner")}
+                  className={`text-left p-5 rounded-lg border transition ${
+                    role === "owner"
+                      ? "border-brand-accent bg-brand-accent/10"
+                      : "border-brand-gray hover:border-brand-accent/50"
+                  }`}
+                >
+                  <div className="text-2xl mb-2">🥋</div>
+                  <div className="text-white font-semibold mb-1">Academy Owner</div>
+                  <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("student")}
+                  className={`text-left p-5 rounded-lg border transition ${
+                    role === "student"
+                      ? "border-brand-accent bg-brand-accent/10"
+                      : "border-brand-gray hover:border-brand-accent/50"
+                  }`}
+                >
+                  <div className="text-2xl mb-2">🎓</div>
+                  <div className="text-white font-semibold mb-1">Student</div>
+                  <div className="text-gray-500 text-xs">Find a gym, track your training, follow your belt journey.</div>
+                </button>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex-1 border border-brand-gray text-gray-300 font-bold py-3 rounded-lg hover:bg-brand-gray/20 transition"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={!role || loading}
+                  className="flex-1 bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
+                >
+                  {loading ? "Creating..." : "Continue"}
+                </button>
+              </div>
+            </>
+          ) : step === 1 ? (
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -242,7 +331,7 @@ function SignUpForm() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="flex-1 border border-brand-gray text-gray-300 font-bold py-3 rounded-lg hover:bg-brand-gray/20 transition"
                 >
                   Back
