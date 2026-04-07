@@ -10,7 +10,6 @@ const NAV = [
   { href: "/student", label: "Home", icon: Home },
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
   { href: "/student/requests", label: "My Requests", icon: Inbox },
-  { href: "/student/profile", label: "Profile", icon: User },
 ];
 
 export default function StudentShell({ name, children }: { name: string; children: React.ReactNode }) {
@@ -83,6 +82,23 @@ export default function StudentShell({ name, children }: { name: string; childre
               );
             })}
           </nav>
+
+          <div className="border-t border-white/5 px-2 py-2">
+            <Link
+              href="/student/profile"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname.startsWith("/student/profile")
+                  ? "bg-[#dc2626] text-white"
+                  : "text-gray-400 hover:bg-white/5 hover:text-white",
+                collapsed && "justify-center px-0"
+              )}
+              title={collapsed ? "Profile" : undefined}
+            >
+              <User className="h-4 w-4 shrink-0" />
+              {!collapsed && <span>Profile</span>}
+            </Link>
+          </div>
         </aside>
 
         <div className="flex flex-1 flex-col overflow-hidden">
