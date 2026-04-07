@@ -46,6 +46,7 @@ export default async function GymsListPage() {
               const statusColor =
                 gym.subscriptionStatus === "active" ? "bg-green-500/20 text-green-400"
                 : gym.subscriptionStatus === "trialing" ? "bg-yellow-500/20 text-yellow-400"
+                : gym.subscriptionStatus === "free" ? "bg-cyan-500/20 text-cyan-400"
                 : "bg-gray-500/20 text-gray-400";
               return (
                 <tr key={gym.id} className="border-b border-white/5 hover:bg-white/[0.02] transition">

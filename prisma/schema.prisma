@@ -161,16 +161,52 @@ model Member {
 }
 
 model Student {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  firstName    String
-  lastName     String
-  phone        String?
-  passwordHash String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  joinRequests JoinRequest[]
-  memberships  Member[]
+  id              String            @id @default(cuid())
+  email           String            @unique
+  firstName       String
+  lastName        String
+  phone           String?
+  passwordHash    String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  joinRequests    JoinRequest[]
+  memberships     Member[]
+  trainingSessions TrainingSession[]
+  nominations     GymNomination[]
+}
+
+model TrainingSession {
+  id          String   @id @default(cuid())
+  studentId   String
+  date        DateTime
+  duration    Int      @default(60)
+  sessionType String
+  techniques  String?
+  partners    String?
+  notes       String?
+  rollsWon    Int      @default(0)
+  rollsLost   Int      @default(0)
+  createdAt   DateTime @default(now())
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
+
+model GymNomination {
+  id         String   @id @default(cuid())
+  studentId  String
+  gymName    String
+  city       String?
+  state      String?
+  ownerEmail String?
+  ownerPhone String?
+  notes      String?
+  status     String   @default("new")
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([gymName])
+  @@index([studentId])
 }
 
 model JoinRequest {

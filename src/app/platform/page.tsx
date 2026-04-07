@@ -35,6 +35,18 @@ export default async function PlatformDashboard() {
     }),
   ]);
 
+  const [nominationCount, totalStudents, hotNominations] = await Promise.all([
+    prisma.gymNomination.count(),
+    prisma.student.count(),
+    prisma.gymNomination.groupBy({
+      by: ["gymName"],
+      _count: { gymName: true },
+      having: { gymName: { _count: { gte: 3 } } },
+      orderBy: { _count: { gymName: "desc" } },
+      take: 5,
+    }),
+  ]);
+
   const trialingGyms = gyms.filter(g => g.subscriptionStatus === "trialing");
   const paidGyms = gyms.filter(g => g.subscriptionStatus === "active");
   const newGymsThisMonth = gyms.filter(g => g.createdAt >= startOfMonth).length;
@@ -54,13 +66,34 @@ export default async function PlatformDashboard() {
       <p className="text-gray-500 mb-8">Operational view of MatFlow</p>
 
       {/* Top KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
         <KPI label="Total Gyms" value={gyms.length} sub={`+${newGymsThisMonth} this month`} />
         <KPI label="Paying" value={paidGyms.length} sub={`${trialingGyms.length} on trial`} color="text-green-400" />
         <KPI label="MRR" value={`$${mrr}`} sub={`$${arr.toLocaleString()} ARR`} color="text-orange-400" />
         <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} />
+        <KPI label="Students" value={totalStudents} sub={`${nominationCount} nominations`} color="text-cyan-400" />
         <KPI label="Check-ins (7d)" value={attendanceLast7} sub={`${totalAttendance} all-time`} color="text-purple-400" />
       </div>
+
+      {hotNominations.length > 0 && (
+        <div className="bg-[#111] border border-orange-500/30 rounded-lg p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-white font-semibold flex items-center gap-2">
+              🔥 Hot Gym Nominations
+              <span className="text-xs text-gray-500 font-normal">— 3+ students nominating the same gym</span>
+            </h2>
+            <a href="/platform/nominations" className="text-orange-400 text-sm hover:underline">View all →</a>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {hotNominations.map((n) => (
+              <div key={n.gymName} className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3">
+                <p className="text-white font-semibold">{n.gymName}</p>
+                <p className="text-orange-400 text-xs mt-1">{n._count.gymName} students nominating</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Trial Ending Soon */}
