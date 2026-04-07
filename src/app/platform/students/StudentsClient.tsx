@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Trash2, Eye } from "lucide-react";
 
 type Row = {
   id: string;
@@ -19,8 +19,29 @@ type Row = {
 type SortKey = "name" | "email" | "createdAt" | "gymCount" | "pendingCount" | "status";
 type GroupKey = "none" | "status" | "gym";
 
-export default function StudentsClient({ rows }: { rows: Row[] }) {
+export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
+  const [rows, setRows] = useState(initialRows);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+
+  async function deleteStudent(r: Row) {
+    const name = `${r.firstName} ${r.lastName}`;
+    const c = window.prompt(`Permanently delete "${name}" and all their data. Type the full name to confirm:`);
+    if (c !== name) { if (c !== null) alert("Name did not match. Cancelled."); return; }
+    setBusyId(r.id);
+    const res = await fetch(`/api/platform/students/${r.id}`, { method: "DELETE" });
+    setBusyId(null);
+    if (!res.ok) { alert("Failed to delete"); return; }
+    setRows((prev) => prev.filter((x) => x.id !== r.id));
+  }
+
+  async function viewAsStudent(r: Row) {
+    setBusyId(r.id);
+    const res = await fetch(`/api/platform/impersonate-student/${r.id}`, { method: "POST" });
+    if (!res.ok) { setBusyId(null); alert("Failed to impersonate"); return; }
+    window.location.href = "/student";
+  }
+
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [groupBy, setGroupBy] = useState<GroupKey>("none");
@@ -172,6 +193,7 @@ export default function StudentsClient({ rows }: { rows: Row[] }) {
                   <Th label="Pending" onClick={() => toggleSort("pendingCount")} center />
                   <Th label="Status" onClick={() => toggleSort("status")} center />
                   <Th label="Joined" onClick={() => toggleSort("createdAt")} />
+                  <th className="text-right px-6 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -197,12 +219,30 @@ export default function StudentsClient({ rows }: { rows: Row[] }) {
                       <td className="px-6 py-4 text-gray-500 text-xs">
                         {new Date(r.createdAt).toLocaleDateString()}
                       </td>
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => viewAsStudent(r)}
+                          disabled={busyId === r.id}
+                          className="text-orange-400 hover:text-orange-300 disabled:opacity-50 mr-3"
+                          title="View as student"
+                        >
+                          <Eye className="h-4 w-4 inline" />
+                        </button>
+                        <button
+                          onClick={() => deleteStudent(r)}
+                          disabled={busyId === r.id}
+                          className="text-red-400 hover:text-red-300 disabled:opacity-50"
+                          title="Delete student"
+                        >
+                          <Trash2 className="h-4 w-4 inline" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
                 {g.rows.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-600 text-sm">
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-600 text-sm">
                       No students.
                     </td>
                   </tr>
