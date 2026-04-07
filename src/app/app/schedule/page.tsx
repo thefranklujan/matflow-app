@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 
 import { CLASS_TYPES, DAYS_OF_WEEK, SCHEDULE_TOPICS } from "@/lib/constants";
 
-// TODO: Locations will come from the Gym model
-const LOCATIONS: { value: string; label: string }[] = [];
 import { formatTime } from "@/lib/utils";
 
 interface ScheduleEntry {
@@ -30,7 +28,6 @@ export default function AdminSchedulePage() {
   const [endTime, setEndTime] = useState("10:00");
   const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
   const [instructor, setInstructor] = useState("");
-  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0]?.value ?? "");
   const [topic, setTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -61,7 +58,6 @@ export default function AdminSchedulePage() {
         endTime,
         classType,
         instructor,
-        locationSlug,
         topic: topic || null,
       }),
     });
@@ -83,10 +79,6 @@ export default function AdminSchedulePage() {
 
   function classLabel(value: string) {
     return CLASS_TYPES.find((c) => c.value === value)?.label ?? value;
-  }
-
-  function locLabel(value: string) {
-    return LOCATIONS.find((l) => l.value === value)?.label ?? value;
   }
 
   // Group entries by day
