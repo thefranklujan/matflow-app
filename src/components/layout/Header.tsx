@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { LogOut, User, LayoutGrid } from "lucide-react";
+import { LogOut, User, LayoutGrid, GraduationCap } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
@@ -45,6 +45,19 @@ export function Header() {
 
         {showMenu && (
           <div className="absolute right-0 top-full mt-1 w-52 bg-[#141414] border border-white/10 rounded-lg shadow-xl z-50 py-1">
+            {user?.studentId && (
+              <>
+                <Link
+                  href="/student"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#dc2626] hover:bg-red-500/10 transition"
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  Student Portal
+                </Link>
+                <div className="border-t border-white/5 my-1" />
+              </>
+            )}
             {isPlatformAdmin && (
               <>
                 <Link

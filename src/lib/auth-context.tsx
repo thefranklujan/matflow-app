@@ -8,6 +8,8 @@ interface AuthUser {
   role: "admin" | "member";
   gymId: string;
   memberId: string;
+  studentId?: string;
+  userType?: "student" | "member";
 }
 
 interface GymInfo {

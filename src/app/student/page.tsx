@@ -4,7 +4,7 @@ import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Search, Inbox, Building2 } from "lucide-react";
+import { Search, Inbox, Building2, Calendar, Video, Megaphone, ShoppingBag } from "lucide-react";
 
 export default async function StudentDashboardPage() {
   const session = await getSession();
@@ -29,6 +29,38 @@ export default async function StudentDashboardPage() {
   ]);
 
   const pendingCount = requests.filter((r) => r.status === "pending").length;
+
+  // Pull a snapshot of content from each approved gym
+  const gymIds = memberships.map((m) => m.gymId);
+  const todayDow = new Date().getDay();
+  const [todaysClasses, recentVideos, recentAnnouncements, recentProducts] = gymIds.length
+    ? await Promise.all([
+        prisma.classSchedule.findMany({
+          where: { gymId: { in: gymIds }, dayOfWeek: todayDow, active: true },
+          orderBy: { startTime: "asc" },
+          take: 6,
+          include: { gym: { select: { name: true } } },
+        }),
+        prisma.video.findMany({
+          where: { gymId: { in: gymIds } },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+          include: { gym: { select: { name: true } } },
+        }),
+        prisma.announcement.findMany({
+          where: { gymId: { in: gymIds } },
+          orderBy: [{ pinned: "desc" }, { publishedAt: "desc" }],
+          take: 4,
+          include: { gym: { select: { name: true } } },
+        }),
+        prisma.product.findMany({
+          where: { gymId: { in: gymIds }, active: true },
+          orderBy: { createdAt: "desc" },
+          take: 6,
+          include: { gym: { select: { name: true } } },
+        }),
+      ])
+    : [[], [], [], []] as const;
 
   return (
     <div>
@@ -89,6 +121,82 @@ export default async function StudentDashboardPage() {
                   <p className="text-white text-sm">{r.gym.name}</p>
                 </div>
                 <span className="text-xs text-yellow-400 font-medium">Awaiting approval</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Today's Schedule across all gyms */}
+      {todaysClasses.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Calendar className="h-4 w-4" /> Today at Your Gyms
+          </h2>
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl divide-y divide-white/5">
+            {todaysClasses.map((c) => (
+              <div key={c.id} className="flex items-center justify-between px-5 py-3">
+                <div>
+                  <p className="text-white text-sm font-medium">{c.classType}{c.topic ? ` · ${c.topic}` : ""}</p>
+                  <p className="text-gray-500 text-xs">{c.gym.name} · {c.instructor}</p>
+                </div>
+                <p className="text-[#dc2626] text-sm font-medium">{c.startTime} – {c.endTime}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Announcements */}
+      {recentAnnouncements.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Megaphone className="h-4 w-4" /> Announcements
+          </h2>
+          <div className="space-y-3">
+            {recentAnnouncements.map((a) => (
+              <div key={a.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  {a.pinned && <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded font-semibold uppercase">Pinned</span>}
+                  <p className="text-white text-sm font-semibold">{a.title}</p>
+                </div>
+                <p className="text-gray-400 text-sm">{a.content}</p>
+                <p className="text-gray-600 text-xs mt-1">{a.gym.name}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Latest Videos */}
+      {recentVideos.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Video className="h-4 w-4" /> Latest Videos
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {recentVideos.map((v) => (
+              <div key={v.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+                <p className="text-white text-sm font-semibold">{v.title}</p>
+                <p className="text-gray-500 text-xs mt-1">{v.gym.name}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Products */}
+      {recentProducts.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <ShoppingBag className="h-4 w-4" /> Gym Store
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {recentProducts.map((p) => (
+              <div key={p.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+                <p className="text-white text-sm font-semibold">{p.name}</p>
+                <p className="text-[#dc2626] text-sm font-bold mt-1">${p.price.toFixed(2)}</p>
+                <p className="text-gray-600 text-xs mt-1">{p.gym.name}</p>
               </div>
             ))}
           </div>
