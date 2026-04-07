@@ -7,9 +7,13 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
   const { q } = await searchParams;
   const search = q?.trim() || "";
 
+  // Hide internal/platform-only gyms from the discovery list
+  const HIDDEN_GYM_IDS = ["platform-owner-gym", "platform-admin-gym"];
+
   const [activeGyms, nominationGroups] = await Promise.all([
     prisma.gym.findMany({
       where: {
+        id: { notIn: HIDDEN_GYM_IDS },
         subscriptionStatus: { not: "cancelled" },
         ...(search
           ? {
