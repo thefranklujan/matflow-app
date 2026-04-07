@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import Link from "next/link";
 
 import DeleteAnnouncementButton from "./DeleteAnnouncementButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminAnnouncementsPage() {
-  const { gymId } = await requireAdmin();
+export default async function AnnouncementsPage() {
+  const { gymId, orgRole } = await requireMember();
+  const isAdmin = orgRole === "org:admin";
   const announcements = await prisma.announcement.findMany({
     where: { gymId },
     orderBy: [{ pinned: "desc" }, { publishedAt: "desc" }],
@@ -17,12 +18,14 @@ export default async function AdminAnnouncementsPage() {
       <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Announcements</h1>
-          <Link
-            href="/app/announcements/new"
-            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
-          >
-            + New Announcement
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/app/announcements/new"
+              className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
+            >
+              + New Announcement
+            </Link>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -45,7 +48,7 @@ export default async function AdminAnnouncementsPage() {
                   {new Date(a.publishedAt).toLocaleDateString()}
                 </p>
               </div>
-              <DeleteAnnouncementButton announcementId={a.id} />
+              {isAdmin && <DeleteAnnouncementButton announcementId={a.id} />}
             </div>
           ))}
           {announcements.length === 0 && (

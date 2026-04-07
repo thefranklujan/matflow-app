@@ -411,7 +411,6 @@ export default function ScheduleClient({
               {selectedClasses.map((c) => {
                 const color = colorFor(c.classType);
                 const committed = isCommitted(selectedDate, c);
-                const going = attendeesFor(selectedDate, c);
                 return (
                   <div
                     key={c.id}
@@ -426,21 +425,6 @@ export default function ScheduleClient({
                         </div>
                         <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
                         <p className="text-gray-500 text-xs">{c.instructor}</p>
-                        {going.length > 0 && (
-                          <div className="mt-2 pt-2 border-t border-white/5">
-                            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">{going.length} going</p>
-                            <div className="flex flex-wrap gap-1">
-                              {going.slice(0, 8).map((a, idx) => (
-                                <span key={idx} className="text-[11px] bg-white/5 text-gray-300 px-1.5 py-0.5 rounded">
-                                  {a.firstName} {a.lastName.slice(0, 1)}.
-                                </span>
-                              ))}
-                              {going.length > 8 && (
-                                <span className="text-[11px] text-gray-500 px-1.5 py-0.5">+{going.length - 8} more</span>
-                              )}
-                            </div>
-                          </div>
-                        )}
                       </div>
                       {isAdmin ? (
                         <button

@@ -20,7 +20,7 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "products", label: "Products", icon: "Package", roles: ["admin"], section: "main" },
   { slug: "orders", label: "Orders", icon: "ShoppingBag", roles: ["admin"], section: "main" },
   { slug: "inventory", label: "Inventory", icon: "ClipboardList", roles: ["admin"], section: "main" },
-  { slug: "announcements", label: "Announcements", icon: "Megaphone", roles: ["admin"], section: "main" },
+  { slug: "announcements", label: "Announcements", icon: "Megaphone", roles: ["admin", "member"], section: "main" },
   { slug: "waivers", label: "Waivers", icon: "FileText", roles: ["admin"], section: "main" },
   { slug: "events", label: "Events", icon: "CalendarDays", roles: ["admin"], section: "main" },
   { slug: "competitions", label: "Competitions", icon: "Trophy", roles: ["admin"], section: "main" },
