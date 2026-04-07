@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
+import PlatformNav from "./PlatformNav";
 
 const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io").split(",").map(e => e.trim());
 
@@ -24,6 +25,7 @@ export default async function PlatformLayout({ children }: { children: React.Rea
           </div>
         </div>
       </header>
+      <PlatformNav />
       <main className="p-6 max-w-7xl mx-auto">{children}</main>
     </div>
   );

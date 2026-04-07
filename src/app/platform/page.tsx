@@ -6,127 +6,163 @@ import Link from "next/link";
 export default async function PlatformDashboard() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const [
     gyms,
     totalMembers,
     newMembersThisMonth,
-    totalOrders,
-    orderRevenue,
     totalAttendance,
+    attendanceLast7,
+    trialEnding,
   ] = await Promise.all([
     prisma.gym.findMany({
-      include: {
-        _count: { select: { members: true, products: true, orders: true, classSchedules: true } },
-      },
+      include: { _count: { select: { members: true } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.member.count({ where: { active: true } }),
     prisma.member.count({ where: { createdAt: { gte: startOfMonth } } }),
-    prisma.order.count(),
-    prisma.order.aggregate({ _sum: { total: true } }),
     prisma.attendance.count(),
+    prisma.attendance.count({ where: { classDate: { gte: sevenDaysAgo } } }),
+    prisma.gym.findMany({
+      where: {
+        subscriptionStatus: "trialing",
+        trialEndsAt: { lte: sevenDaysFromNow, gte: now },
+      },
+      include: { members: { take: 1, orderBy: { createdAt: "asc" } } },
+      orderBy: { trialEndsAt: "asc" },
+    }),
   ]);
 
   const trialingGyms = gyms.filter(g => g.subscriptionStatus === "trialing");
   const paidGyms = gyms.filter(g => g.subscriptionStatus === "active");
+  const newGymsThisMonth = gyms.filter(g => g.createdAt >= startOfMonth).length;
+
+  // Inactive: gyms with only the owner (1 member) and created over 3 days ago
+  const stuckGyms = gyms.filter(g =>
+    g._count.members <= 1 && g.createdAt < new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
+  );
+
+  // MRR estimate: Basic = $49, Pro = $99, default Basic for active without plan
+  const mrr = paidGyms.length * 49; // simplified
+  const arr = mrr * 12;
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Platform Dashboard</h1>
-      <p className="text-gray-500 mb-8">Overview of all gyms and platform metrics</p>
+      <p className="text-gray-500 mb-8">Operational view of MatFlow</p>
 
-      {/* Platform KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
-        <KPI label="Total Gyms" value={gyms.length} color="text-white" />
-        <KPI label="Active / Trialing" value={`${paidGyms.length} / ${trialingGyms.length}`} color="text-[#c4b5a0]" />
-        <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} color="text-[#c4b5a0]" />
-        <KPI label="Total Orders" value={totalOrders} sub={`$${(orderRevenue._sum.total || 0).toFixed(0)} revenue`} color="text-blue-400" />
-        <KPI label="Total Check-ins" value={totalAttendance} color="text-purple-400" />
+      {/* Top KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <KPI label="Total Gyms" value={gyms.length} sub={`+${newGymsThisMonth} this month`} />
+        <KPI label="Paying" value={paidGyms.length} sub={`${trialingGyms.length} on trial`} color="text-green-400" />
+        <KPI label="MRR" value={`$${mrr}`} sub={`$${arr.toLocaleString()} ARR`} color="text-orange-400" />
+        <KPI label="Total Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} />
+        <KPI label="Check-ins (7d)" value={attendanceLast7} sub={`${totalAttendance} all-time`} color="text-purple-400" />
       </div>
 
-      {/* Gym Table */}
-      <div className="bg-[#111] border border-white/10 rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h2 className="text-lg font-semibold text-white">All Gyms</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5 text-xs text-gray-500 uppercase tracking-wider">
-                <th className="text-left px-6 py-3">Gym</th>
-                <th className="text-left px-6 py-3">Slug</th>
-                <th className="text-center px-6 py-3">Members</th>
-                <th className="text-center px-6 py-3">Products</th>
-                <th className="text-center px-6 py-3">Orders</th>
-                <th className="text-center px-6 py-3">Classes</th>
-                <th className="text-center px-6 py-3">Status</th>
-                <th className="text-left px-6 py-3">Trial Ends</th>
-                <th className="text-left px-6 py-3">Created</th>
-                <th className="text-center px-6 py-3">Links</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gyms.map((gym) => {
-                const statusColor =
-                  gym.subscriptionStatus === "active" ? "bg-green-500/20 text-green-400"
-                  : gym.subscriptionStatus === "trialing" ? "bg-yellow-500/20 text-yellow-400"
-                  : gym.subscriptionStatus === "cancelled" ? "bg-red-500/20 text-red-400"
-                  : "bg-gray-500/20 text-gray-400";
-
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Trial Ending Soon */}
+        <div className="bg-[#111] border border-yellow-500/30 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-semibold">Trials Ending Soon</h2>
+              <p className="text-gray-500 text-xs">Within the next 7 days</p>
+            </div>
+            <span className="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-2 py-1 rounded">{trialEnding.length}</span>
+          </div>
+          <div className="divide-y divide-white/5">
+            {trialEnding.length === 0 ? (
+              <p className="px-6 py-8 text-gray-500 text-sm text-center">No trials ending in the next 7 days</p>
+            ) : (
+              trialEnding.map((gym) => {
+                const owner = gym.members[0];
+                const daysLeft = gym.trialEndsAt
+                  ? Math.ceil((new Date(gym.trialEndsAt).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                  : 0;
                 return (
-                  <tr key={gym.id} className="border-b border-white/5 hover:bg-white/[0.02] transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-[#c4b5a0]/10 flex items-center justify-center text-[#c4b5a0] text-xs font-bold">
-                          {gym.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-white font-medium">{gym.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-sm font-mono">{gym.slug}</td>
-                    <td className="px-6 py-4 text-center text-white">{gym._count.members}</td>
-                    <td className="px-6 py-4 text-center text-white">{gym._count.products}</td>
-                    <td className="px-6 py-4 text-center text-white">{gym._count.orders}</td>
-                    <td className="px-6 py-4 text-center text-white">{gym._count.classSchedules}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${statusColor}`}>
-                        {gym.subscriptionStatus}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-sm">
-                      {gym.trialEndsAt ? new Date(gym.trialEndsAt).toLocaleDateString() : "N/A"}
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-sm">
-                      {new Date(gym.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center gap-2 justify-center">
-                        <Link
-                          href={`/join/${gym.slug}`}
-                          className="text-[#c4b5a0] text-xs hover:underline"
-                          target="_blank"
-                        >
-                          Join
-                        </Link>
-                        <Link
-                          href={`/kiosk/${gym.slug}`}
-                          className="text-blue-400 text-xs hover:underline"
-                          target="_blank"
-                        >
-                          Kiosk
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
+                  <Link
+                    key={gym.id}
+                    href={`/platform/gyms/${gym.id}`}
+                    className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition"
+                  >
+                    <div>
+                      <p className="text-white text-sm font-medium">{gym.name}</p>
+                      <p className="text-gray-500 text-xs">{owner?.email || "No owner"}</p>
+                    </div>
+                    <span className="text-yellow-400 text-xs font-bold">{daysLeft}d left</span>
+                  </Link>
                 );
-              })}
-            </tbody>
-          </table>
+              })
+            )}
+          </div>
         </div>
-        {gyms.length === 0 && (
-          <div className="px-6 py-12 text-center text-gray-500">No gyms registered yet.</div>
-        )}
+
+        {/* Stuck Gyms (signed up but no activity) */}
+        <div className="bg-[#111] border border-red-500/30 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-semibold">Needs Onboarding Help</h2>
+              <p className="text-gray-500 text-xs">Created 3+ days ago, no members added</p>
+            </div>
+            <span className="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">{stuckGyms.length}</span>
+          </div>
+          <div className="divide-y divide-white/5">
+            {stuckGyms.length === 0 ? (
+              <p className="px-6 py-8 text-gray-500 text-sm text-center">All gyms are active</p>
+            ) : (
+              stuckGyms.slice(0, 5).map((gym) => (
+                <Link
+                  key={gym.id}
+                  href={`/platform/gyms/${gym.id}`}
+                  className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition"
+                >
+                  <div>
+                    <p className="text-white text-sm font-medium">{gym.name}</p>
+                    <p className="text-gray-500 text-xs">Created {new Date(gym.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <span className="text-red-400 text-xs">Stuck</span>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Signups */}
+      <div className="bg-[#111] border border-white/10 rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+          <h2 className="text-white font-semibold">Recent Signups</h2>
+          <Link href="/platform/gyms" className="text-orange-400 text-sm hover:underline">View all gyms &rarr;</Link>
+        </div>
+        <div className="divide-y divide-white/5">
+          {gyms.slice(0, 5).map((gym) => (
+            <Link
+              key={gym.id}
+              href={`/platform/gyms/${gym.id}`}
+              className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded bg-[#c4b5a0]/10 flex items-center justify-center text-[#c4b5a0] text-xs font-bold">
+                  {gym.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-white text-sm font-medium">{gym.name}</p>
+                  <p className="text-gray-500 text-xs">{gym._count.members} member{gym._count.members !== 1 ? "s" : ""}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-400 text-xs">{new Date(gym.createdAt).toLocaleDateString()}</p>
+                <span className={`text-xs font-medium capitalize ${
+                  gym.subscriptionStatus === "active" ? "text-green-400"
+                  : gym.subscriptionStatus === "trialing" ? "text-yellow-400"
+                  : "text-gray-500"
+                }`}>{gym.subscriptionStatus}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
