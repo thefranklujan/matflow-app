@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
 import PlatformNav from "./PlatformNav";
+import PlatformUserMenu from "./PlatformUserMenu";
 
 const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
   .split(",")
@@ -20,12 +21,7 @@ export default async function PlatformLayout({ children }: { children: React.Rea
           <span className="text-white font-bold text-lg">MatFlow</span>
           <span className="bg-orange-500/20 text-orange-400 text-xs font-semibold px-2 py-0.5 rounded">Platform Admin</span>
         </div>
-        <div className="flex items-center gap-4">
-          <a href="/app" className="text-gray-400 text-sm hover:text-white transition">Back to App</a>
-          <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
-            {session.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-          </div>
-        </div>
+        <PlatformUserMenu name={session.name} email={session.email} />
       </header>
       <PlatformNav />
       <main className="p-6 max-w-7xl mx-auto">{children}</main>
