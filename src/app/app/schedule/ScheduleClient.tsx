@@ -30,6 +30,7 @@ interface Attendee {
   firstName: string;
   lastName: string;
   beltRank: string;
+  isAmbassador?: boolean;
 }
 
 interface EventItem {
@@ -345,6 +346,9 @@ export default function ScheduleClient({
               const isSelected = isSameDay(date, selectedDate);
               const uniqueColors = Array.from(new Set(dayClasses.map((c) => colorFor(c.classType).bar))).slice(0, 4);
               const hasCommitment = dayClasses.some((c) => isCommitted(date, c));
+              const hasAmbassador = dayClasses.some((c) =>
+                attendeesFor(date, c).some((a) => a.isAmbassador)
+              );
               return (
                 <button
                   key={i}
@@ -362,6 +366,9 @@ export default function ScheduleClient({
                   <span className={isToday ? "font-bold" : ""}>{date.getDate()}</span>
                   {dayEvents.length > 0 && (
                     <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  )}
+                  {hasAmbassador && (
+                    <span className="absolute top-0.5 left-1 text-[10px] leading-none" title="Ambassador attending">👑</span>
                   )}
                   {uniqueColors.length > 0 && (
                     <span className="mt-1 flex items-center gap-0.5">

@@ -23,7 +23,7 @@ export default async function SchedulePage() {
     prisma.scheduleCommitment.findMany({
       where: { gymId },
       include: {
-        member: { select: { firstName: true, lastName: true, beltRank: true } },
+        member: { select: { firstName: true, lastName: true, beltRank: true, isAmbassador: true } },
       },
       orderBy: { classDate: "asc" },
     }),
@@ -62,6 +62,7 @@ export default async function SchedulePage() {
         firstName: c.member?.firstName || "",
         lastName: c.member?.lastName || "",
         beltRank: c.member?.beltRank || "white",
+        isAmbassador: !!c.member?.isAmbassador,
       }))}
       videos={videos.map((v) => ({
         id: v.id,
