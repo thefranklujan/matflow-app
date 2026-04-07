@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       success: true,
       user: { email: user.email, name: user.name, role: user.role },
       isPlatformAdmin,
+      isStudent: user.userType === "student",
     });
   } catch (error) {
     console.error("Login error:", error);

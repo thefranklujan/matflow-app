@@ -19,6 +19,8 @@ export interface SessionUser {
   role: "admin" | "member";
   gymId: string;
   memberId: string;
+  userType?: "student" | "member";
+  studentId?: string;
 }
 
 // ── JWT helpers ───────────────────────────────────────
@@ -152,12 +154,66 @@ export async function registerMember(data: {
   return { member: { id: member.id, gymId: gym.id } };
 }
 
+// ── Register Student ─────────────────────────────────
+
+export async function registerStudent(data: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}): Promise<{ id: string; email: string; firstName: string; lastName: string }> {
+  const existing = await prisma.student.findUnique({ where: { email: data.email } });
+  if (existing) throw new Error("An account with this email already exists");
+
+  const passwordHash = await bcrypt.hash(data.password, 10);
+  const student = await prisma.student.create({
+    data: {
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone || null,
+      passwordHash,
+    },
+  });
+
+  return { id: student.id, email: student.email, firstName: student.firstName, lastName: student.lastName };
+}
+
+// ── Authenticate Student ─────────────────────────────
+
+export async function authenticateStudent(
+  email: string,
+  password: string
+): Promise<SessionUser | null> {
+  const student = await prisma.student.findUnique({ where: { email } });
+  if (!student) return null;
+
+  const valid = await bcrypt.compare(password, student.passwordHash);
+  if (!valid) return null;
+
+  return {
+    userId: `student-${student.id}`,
+    email: student.email,
+    name: `${student.firstName} ${student.lastName}`,
+    role: "member",
+    gymId: "",
+    memberId: "",
+    userType: "student",
+    studentId: student.id,
+  };
+}
+
 // ── Login handler ─────────────────────────────────────
 
 export async function authenticateUser(
   email: string,
   password: string
 ): Promise<SessionUser | null> {
+  // Try Student first (direct sign-ups go here)
+  const studentSession = await authenticateStudent(email, password);
+  if (studentSession) return studentSession;
+
   // Find member by email (could be in any gym)
   const member = await prisma.member.findFirst({
     where: { email },
@@ -185,6 +241,7 @@ export async function authenticateUser(
     role: isAdmin ? "admin" : "member",
     gymId: member.gymId,
     memberId: member.id,
+    userType: "member",
   };
 }
 

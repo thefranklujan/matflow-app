@@ -107,3 +107,43 @@ export function sendClassReminder(
   `;
   send(email, `Reminder: ${classType} today at ${time}`, html).catch(() => {});
 }
+
+export function sendJoinRequestSubmittedToAdmin(email: string, studentName: string, gymName: string) {
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+      <h1 style="color:#c4b5a0;">New Join Request</h1>
+      <p><strong>${studentName}</strong> has requested to join <strong>${gymName}</strong> on MatFlow.</p>
+      <p><a href="https://app.mymatflow.com/app/requests" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Review Request</a></p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">${gymName}. Powered by MatFlow</p>
+    </div>
+  `;
+  send(email, `New join request from ${studentName}`, html).catch(() => {});
+}
+
+export function sendJoinRequestApprovedToStudent(email: string, studentName: string, gymName: string) {
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+      <h1 style="color:#c4b5a0;">You are in!</h1>
+      <p>Hey ${studentName},</p>
+      <p>Your request to join <strong>${gymName}</strong> has been approved. You can now access the full member portal: schedule, attendance, belt progression, videos, and more.</p>
+      <p><a href="https://app.mymatflow.com/student" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Open MatFlow</a></p>
+      <p>See you on the mats!</p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow</p>
+    </div>
+  `;
+  send(email, `You are approved at ${gymName}!`, html).catch(() => {});
+}
+
+export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;">
+      <h1 style="color:#c4b5a0;">Update on your request</h1>
+      <p>Hey ${studentName},</p>
+      <p>Your request to join <strong>${gymName}</strong> was not approved at this time. You can still reach out to the gym directly to learn more.</p>
+      <p>You can browse other gyms on MatFlow and request to join them.</p>
+      <p><a href="https://app.mymatflow.com/student/gyms" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Find Other Gyms</a></p>
+      <p style="color:#888;font-size:12px;margin-top:32px;">Powered by MatFlow</p>
+    </div>
+  `;
+  send(email, `Update from ${gymName}`, html).catch(() => {});
+}

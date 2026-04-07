@@ -10,6 +10,7 @@ export const NAV_ITEMS: NavItem[] = [
   // Admin-only
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"], section: "main" },
   { slug: "leads", label: "Leads", icon: "Target", roles: ["admin"], section: "main" },
+  { slug: "requests", label: "Join Requests", icon: "UserPlus", roles: ["admin"], section: "main" },
   { slug: "members", label: "Members", icon: "Users", roles: ["admin"], section: "main" },
   // Shared
   { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin", "member"], section: "main" },

@@ -33,6 +33,8 @@ export default function SignInPage() {
 
       if (data.isPlatformAdmin) {
         router.push("/platform");
+      } else if (data.isStudent) {
+        router.push("/student");
       } else {
         router.push("/app");
       }

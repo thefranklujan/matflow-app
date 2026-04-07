@@ -18,6 +18,9 @@ model Gym {
   secondaryColor     String?
   phone              String?
   website            String?
+  description        String?
+  city               String?
+  state              String?
   timezone           String          @default("America/Chicago")
   stripeCustomerId   String?
   stripePriceId      String?
@@ -29,6 +32,7 @@ model Gym {
   categories         Category[]
   classSchedules     ClassSchedule[]
   events             Event[]
+  joinRequests       JoinRequest[]
   leads              Lead[]
   members            Member[]
   orders             Order[]
@@ -132,6 +136,7 @@ model Member {
   lastName            String
   phone               String?
   passwordHash        String?
+  studentId           String?
   status              String               @default("active")
   beltRank            String               @default("white")
   stripes             Int                  @default(0)
@@ -144,6 +149,7 @@ model Member {
   beltHistory         BeltProgress[]
   competitionResults  CompetitionResult[]
   gym                 Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  student             Student?             @relation(fields: [studentId], references: [id], onDelete: SetNull)
   personalGoals       PersonalGoal[]
   scheduleCommitments ScheduleCommitment[]
   techniqueProgress   TechniqueProgress[]
@@ -151,6 +157,34 @@ model Member {
 
   @@unique([gymId, clerkUserId])
   @@unique([gymId, email])
+}
+
+model Student {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  firstName    String
+  lastName     String
+  phone        String?
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  joinRequests JoinRequest[]
+  memberships  Member[]
+}
+
+model JoinRequest {
+  id        String    @id @default(cuid())
+  studentId String
+  gymId     String
+  status    String    @default("pending")
+  message   String?
+  decidedAt DateTime?
+  decidedBy String?
+  createdAt DateTime  @default(now())
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  gym       Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, gymId])
 }
 
 model Video {
