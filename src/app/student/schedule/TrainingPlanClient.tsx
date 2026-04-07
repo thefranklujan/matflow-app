@@ -235,6 +235,72 @@ export default function TrainingPlanClient({
         </button>
       </div>
 
+      {/* Day detail editor — pinned above the calendar so it's always visible */}
+      {selectedDate && (
+        <div className="bg-[#0a0a0a] border border-[#dc2626]/40 rounded-xl p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider">{selectedDate.toLocaleDateString("en-US", { weekday: "long" })}</p>
+              <h3 className="text-white text-lg font-bold">{selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              {selPlan && (
+                <button onClick={clearDay} disabled={saving} className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-xs">
+                  <Trash2 className="h-3 w-3" /> Clear day
+                </button>
+              )}
+              <button onClick={() => setSelectedDate(null)} className="text-gray-500 hover:text-white text-2xl leading-none">×</button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <BlockToggle label="Morning" icon={<Sunrise className="h-4 w-4" />} active={draftMorning} onClick={() => setDraftMorning(!draftMorning)} />
+            <BlockToggle label="Noon" icon={<Sun className="h-4 w-4" />} active={draftNoon} onClick={() => setDraftNoon(!draftNoon)} />
+            <BlockToggle label="Afternoon" icon={<Sunset className="h-4 w-4" />} active={draftAfternoon} onClick={() => setDraftAfternoon(!draftAfternoon)} />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Gym</label>
+            {myGyms.length > 0 ? (
+              <select
+                value={draftGym}
+                onChange={(e) => setDraftGym(e.target.value)}
+                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+              >
+                <option value="">— Choose gym —</option>
+                {myGyms.map((g) => (<option key={g.id} value={g.name}>{g.name}</option>))}
+                <option value="__other">Other / type below</option>
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={draftGym}
+                onChange={(e) => setDraftGym(e.target.value)}
+                placeholder="Where you'll train"
+                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+              />
+            )}
+            {draftGym === "__other" && (
+              <input
+                type="text"
+                autoFocus
+                onChange={(e) => setDraftGym(e.target.value)}
+                placeholder="Type a gym name..."
+                className="w-full mt-2 bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+              />
+            )}
+          </div>
+
+          <button
+            onClick={saveDraft}
+            disabled={saving}
+            className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold py-2.5 rounded-lg text-sm disabled:opacity-50"
+          >
+            {saving ? "Saving..." : selPlan ? "Update" : "Mark as training day"}
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
         <div className="lg:col-span-2 bg-[#0a0a0a] border border-white/10 rounded-xl p-6">
@@ -287,69 +353,6 @@ export default function TrainingPlanClient({
               );
             })}
           </div>
-
-          {/* Day detail editor */}
-          {selectedDate && (
-            <div className="mt-6 pt-6 border-t border-white/5">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{selectedDate.toLocaleDateString("en-US", { weekday: "long" })}</p>
-                  <h3 className="text-white text-lg font-bold">{selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</h3>
-                </div>
-                {selPlan && (
-                  <button onClick={clearDay} disabled={saving} className="text-red-400 hover:text-red-300 inline-flex items-center gap-1 text-xs">
-                    <Trash2 className="h-3 w-3" /> Clear day
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                <BlockToggle label="Morning" icon={<Sunrise className="h-4 w-4" />} active={draftMorning} onClick={() => setDraftMorning(!draftMorning)} />
-                <BlockToggle label="Noon" icon={<Sun className="h-4 w-4" />} active={draftNoon} onClick={() => setDraftNoon(!draftNoon)} />
-                <BlockToggle label="Afternoon" icon={<Sunset className="h-4 w-4" />} active={draftAfternoon} onClick={() => setDraftAfternoon(!draftAfternoon)} />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Gym</label>
-                {myGyms.length > 0 ? (
-                  <select
-                    value={draftGym}
-                    onChange={(e) => setDraftGym(e.target.value)}
-                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-                  >
-                    <option value="">— Choose gym —</option>
-                    {myGyms.map((g) => (<option key={g.id} value={g.name}>{g.name}</option>))}
-                    <option value="__other">Other / type below</option>
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={draftGym}
-                    onChange={(e) => setDraftGym(e.target.value)}
-                    placeholder="Where you'll train"
-                    className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-                  />
-                )}
-                {draftGym === "__other" && (
-                  <input
-                    type="text"
-                    autoFocus
-                    onChange={(e) => setDraftGym(e.target.value)}
-                    placeholder="Type a gym name..."
-                    className="w-full mt-2 bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-                  />
-                )}
-              </div>
-
-              <button
-                onClick={saveDraft}
-                disabled={saving}
-                className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold py-2.5 rounded-lg text-sm disabled:opacity-50"
-              >
-                {saving ? "Saving..." : selPlan ? "Update" : "Mark as training day"}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Side panel */}
