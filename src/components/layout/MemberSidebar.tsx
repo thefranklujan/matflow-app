@@ -10,7 +10,6 @@ const links = [
   { href: "/members", label: "Dashboard", icon: "🏠" },
   { href: "/members/videos", label: "Videos", icon: "🎥" },
   { href: "/members/schedule", label: "Schedule", icon: "📅" },
-  { href: "/members/progress", label: "Progress", icon: "🥋" },
   { href: "/members/attendance", label: "Attendance", icon: "✅" },
   { href: "/members/calendar", label: "Calendar", icon: "📆" },
   { href: "/members/leaderboard", label: "Leaderboard", icon: "🏆" },

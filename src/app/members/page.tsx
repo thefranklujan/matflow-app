@@ -91,22 +91,22 @@ export default async function MemberDashboardPage() {
               {monthlyAttendance}
             </p>
           </Link>
-          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
+          <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Current Belt
             </p>
             <p className="text-3xl font-bold text-white capitalize">
               {member?.beltRank || "White"}
             </p>
-          </Link>
-          <Link href="/members/progress" className="bg-brand-dark border border-brand-gray rounded-lg p-6 hover:border-brand-accent transition group cursor-pointer">
+          </div>
+          <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
             <p className="text-sm text-gray-400 uppercase tracking-wider mb-1 group-hover:text-gray-300 transition">
               Stripes
             </p>
             <p className="text-3xl font-bold text-brand-accent">
               {member?.stripes || 0}
             </p>
-          </Link>
+          </div>
         </div>
 
         {/* Today's Schedule */}
