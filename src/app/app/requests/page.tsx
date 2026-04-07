@@ -2,10 +2,17 @@ export const dynamic = "force-dynamic";
 
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import RequestsClient from "./RequestsClient";
 
 export default async function AdminRequestsPage() {
-  const { gymId } = await requireAdmin();
+  let gymId: string;
+  try {
+    const ctx = await requireAdmin();
+    gymId = ctx.gymId;
+  } catch {
+    redirect("/sign-in");
+  }
 
   const requests = await prisma.joinRequest.findMany({
     where: { gymId },
