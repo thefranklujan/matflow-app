@@ -16,7 +16,25 @@ const NAV = [
   { href: "/student/requests", label: "My Requests", icon: Inbox },
 ];
 
-export default function StudentShell({ name, children }: { name: string; children: React.ReactNode }) {
+const BELT_DOT: Record<string, string> = {
+  white: "bg-white",
+  blue: "bg-blue-500",
+  purple: "bg-purple-500",
+  brown: "bg-amber-700",
+  black: "bg-black border border-white/40",
+};
+
+export default function StudentShell({
+  name,
+  beltRank = "white",
+  stripes = 0,
+  children,
+}: {
+  name: string;
+  beltRank?: string;
+  stripes?: number;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -93,7 +111,20 @@ export default function StudentShell({ name, children }: { name: string; childre
           <header className="flex h-14 items-center justify-end border-b border-white/10 bg-[#0a0a0a] px-6">
             <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
-                <span className="text-sm text-gray-400 hidden sm:block">{name}</span>
+                <div className="flex flex-col items-end leading-tight hidden sm:flex">
+                  <span className="text-sm text-gray-300">{name}</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 capitalize">
+                    <span className={`h-2 w-2 rounded-full ${BELT_DOT[beltRank] || BELT_DOT.white}`} />
+                    {beltRank} belt
+                    {stripes > 0 && (
+                      <span className="inline-flex items-center gap-0.5 ml-0.5">
+                        {Array.from({ length: stripes }).map((_, i) => (
+                          <span key={i} className="inline-block h-2 w-[2px] rounded-sm bg-white/70" />
+                        ))}
+                      </span>
+                    )}
+                  </span>
+                </div>
                 <div className="h-8 w-8 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-xs font-bold">{initials}</div>
               </button>
               {showMenu && (
