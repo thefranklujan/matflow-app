@@ -10,18 +10,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const viewAsStudent = c.get("view_as_student")?.value === "1";
   return (
     <AuthProvider>
-      {viewAsStudent && <ViewAsStudentBanner />}
       {/* Desktop layout */}
-      <div className="hidden md:flex h-screen overflow-hidden">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto bg-[#111] p-6">{children}</main>
+      <div className="hidden md:flex md:flex-col h-screen overflow-hidden">
+        {viewAsStudent && <ViewAsStudentBanner />}
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <Header />
+            <main className="flex-1 overflow-y-auto bg-[#111] p-6">{children}</main>
+          </div>
         </div>
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden">
+      <div className="md:hidden flex flex-col h-screen overflow-hidden">
+        {viewAsStudent && <ViewAsStudentBanner />}
         <MobileLayout>
           <div className="bg-[#111] p-4">{children}</div>
         </MobileLayout>
