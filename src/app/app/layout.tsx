@@ -2,15 +2,10 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { AuthProvider } from "@/lib/auth-context";
-import ViewAsStudentBanner from "@/components/layout/ViewAsStudentBanner";
-import { cookies } from "next/headers";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const c = await cookies();
-  const viewAsStudent = c.get("view_as_student")?.value === "1";
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      {viewAsStudent && <ViewAsStudentBanner />}
       {/* Desktop layout */}
       <div className="hidden md:flex h-screen overflow-hidden">
         <Sidebar />

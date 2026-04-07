@@ -3,24 +3,42 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Search, Inbox, Building2, Calendar, Video, Megaphone, ShoppingBag } from "lucide-react";
 
 export default async function StudentDashboardPage() {
   const session = await getSession();
-  if (!session?.studentId) redirect("/sign-in");
+  if (!session) redirect("/sign-in");
+
+  const cookieStore = await cookies();
+  const viewAsStudent = cookieStore.get("view_as_student")?.value === "1";
+
+  // Allow admin into the student dashboard via view-as-student mode.
+  // Synthesize a single membership for the admin's current gym so the page renders.
+  const studentId = session.studentId;
+  if (!studentId && !viewAsStudent) redirect("/sign-in");
 
   const [memberships, requests, suggestedGyms] = await Promise.all([
-    prisma.member.findMany({
-      where: { studentId: session.studentId },
-      include: { gym: { select: { id: true, name: true, slug: true, city: true, state: true, logo: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.joinRequest.findMany({
-      where: { studentId: session.studentId },
-      include: { gym: { select: { name: true, slug: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
+    studentId
+      ? prisma.member.findMany({
+          where: { studentId },
+          include: { gym: { select: { id: true, name: true, slug: true, city: true, state: true, logo: true } } },
+          orderBy: { createdAt: "desc" },
+        })
+      : viewAsStudent && session.gymId
+      ? prisma.member.findMany({
+          where: { id: session.memberId },
+          include: { gym: { select: { id: true, name: true, slug: true, city: true, state: true, logo: true } } },
+        })
+      : Promise.resolve([]),
+    studentId
+      ? prisma.joinRequest.findMany({
+          where: { studentId },
+          include: { gym: { select: { name: true, slug: true } } },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
     prisma.gym.findMany({
       take: 4,
       where: { subscriptionStatus: { not: "cancelled" } },

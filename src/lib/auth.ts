@@ -4,7 +4,6 @@
  * Swap to Clerk imports when going to production.
  */
 import { getSession } from "@/lib/local-auth";
-import { cookies } from "next/headers";
 
 export interface AuthContext {
   userId: string;
@@ -21,21 +20,10 @@ export async function getAuthContext(): Promise<AuthContext> {
     throw new Error("Unauthorized");
   }
 
-  // "View as student" mode: admin temporarily downgrades to member view
-  let orgRole = session.role === "admin" ? "org:admin" : "org:member";
-  try {
-    const c = await cookies();
-    if (orgRole === "org:admin" && c.get("view_as_student")?.value === "1") {
-      orgRole = "org:member";
-    }
-  } catch {
-    // cookies() can throw outside request scope
-  }
-
   return {
     userId: session.userId,
     orgId: session.gymId, // in local auth, gymId serves as orgId
-    orgRole,
+    orgRole: session.role === "admin" ? "org:admin" : "org:member",
     gymId: session.gymId,
     memberId: session.memberId,
   };

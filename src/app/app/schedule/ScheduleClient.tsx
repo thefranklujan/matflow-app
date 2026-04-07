@@ -16,6 +16,15 @@ interface ScheduleItem {
   locationSlug: string;
 }
 
+interface EventItem {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  endDate: string | null;
+  eventType: string;
+}
+
 interface Commitment {
   id?: string;
   classDate: string;
@@ -54,10 +63,12 @@ function dateKey(d: Date) {
 export default function ScheduleClient({
   schedule: initialSchedule,
   initialCommitments,
+  events = [],
   isAdmin,
 }: {
   schedule: ScheduleItem[];
   initialCommitments: Commitment[];
+  events?: EventItem[];
   isAdmin: boolean;
 }) {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
@@ -137,20 +148,37 @@ export default function ScheduleClient({
       .filter((e) => e.dayOfWeek === date.getDay())
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   }
-  function isCommitted(date: Date, classType: string) {
+  function eventsForDate(date: Date) {
+    return events.filter((ev) => {
+      const start = new Date(ev.date);
+      const end = ev.endDate ? new Date(ev.endDate) : start;
+      const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      return target >= startDay && target <= endDay;
+    });
+  }
+  // Scope commitments by class start time so two same-type classes on the same day
+  // (e.g. 7am Gi and 6pm Gi) are tracked independently.
+  function commitKey(classItem: ScheduleItem) {
+    return `${classItem.classType}@${classItem.startTime}`;
+  }
+  function isCommitted(date: Date, classItem: ScheduleItem) {
     const k = dateKey(date);
-    return commitments.some((c) => c.classDate.slice(0, 10) === k && c.classType === classType);
+    const ck = commitKey(classItem);
+    return commitments.some((c) => c.classDate.slice(0, 10) === k && c.classType === ck);
   }
 
   async function toggleCommit(date: Date, classItem: ScheduleItem) {
     const k = dateKey(date);
-    const rowKey = `${k}-${classItem.classType}`;
+    const ck = commitKey(classItem);
+    const rowKey = `${k}-${ck}`;
     if (busy === rowKey) return;
     setBusy(rowKey);
-    const committed = isCommitted(date, classItem.classType);
+    const committed = isCommitted(date, classItem);
     const body = JSON.stringify({
       classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(),
-      classType: classItem.classType,
+      classType: ck,
       locationSlug: classItem.locationSlug,
     });
     try {
@@ -162,12 +190,12 @@ export default function ScheduleClient({
       if (res.ok) {
         if (committed) {
           setCommitments((prev) =>
-            prev.filter((c) => !(c.classDate.slice(0, 10) === k && c.classType === classItem.classType))
+            prev.filter((c) => !(c.classDate.slice(0, 10) === k && c.classType === ck))
           );
         } else {
           setCommitments((prev) => [
             ...prev,
-            { classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(), classType: classItem.classType, locationSlug: classItem.locationSlug },
+            { classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(), classType: ck, locationSlug: classItem.locationSlug },
           ]);
         }
       }
@@ -178,11 +206,16 @@ export default function ScheduleClient({
 
   const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const selectedClasses = classesForDate(selectedDate);
-  const legendTypes = Array.from(new Set(schedule.map((e) => e.classType))).map((ct) => ({
-    classType: ct,
-    ...colorFor(ct),
-    display: classLabel(ct),
-  }));
+  const selectedEvents = eventsForDate(selectedDate);
+  // Dedupe by the resolved color label so case/whitespace variants ("Gi" vs "gi") collapse
+  const legendMap = new Map<string, { classType: string; bar: string; display: string }>();
+  for (const e of schedule) {
+    const c = colorFor(e.classType);
+    if (!legendMap.has(c.label)) {
+      legendMap.set(c.label, { classType: e.classType, bar: c.bar, display: c.label });
+    }
+  }
+  const legendTypes = Array.from(legendMap.values());
 
   return (
     <div>
@@ -281,25 +314,29 @@ export default function ScheduleClient({
             {calendarCells.map((date, i) => {
               if (!date) return <div key={i} />;
               const dayClasses = classesForDate(date);
+              const dayEvents = eventsForDate(date);
               const isToday = isSameDay(date, today);
               const isSelected = isSameDay(date, selectedDate);
               const uniqueColors = Array.from(new Set(dayClasses.map((c) => colorFor(c.classType).bar))).slice(0, 4);
-              const hasCommitment = dayClasses.some((c) => isCommitted(date, c.classType));
+              const hasCommitment = dayClasses.some((c) => isCommitted(date, c));
               return (
                 <button
                   key={i}
                   onClick={() => setSelectedDate(date)}
-                  className={`aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition border ${
+                  className={`relative aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition border ${
                     isSelected
                       ? "bg-brand-accent/20 border-brand-accent text-white"
                       : isToday
                       ? "bg-white/5 border-white/30 text-white"
-                      : dayClasses.length > 0
+                      : dayClasses.length > 0 || dayEvents.length > 0
                       ? "border-white/5 text-white hover:bg-white/5"
                       : "border-transparent text-gray-500 hover:bg-white/5"
                   }`}
                 >
                   <span className={isToday ? "font-bold" : ""}>{date.getDate()}</span>
+                  {dayEvents.length > 0 && (
+                    <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  )}
                   {uniqueColors.length > 0 && (
                     <span className="mt-1 flex items-center gap-0.5">
                       {uniqueColors.map((bar, idx) => (
@@ -322,13 +359,25 @@ export default function ScheduleClient({
           <p className="text-white text-lg font-bold mb-4">
             {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
           </p>
-          {selectedClasses.length === 0 ? (
+          {selectedEvents.length > 0 && (
+            <div className="mb-4 space-y-2">
+              <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Events</h3>
+              {selectedEvents.map((ev) => (
+                <div key={ev.id} className="rounded-lg p-3 bg-amber-500/10 border-l-4 border-amber-400">
+                  <p className="text-white text-sm font-semibold">{ev.title}</p>
+                  <p className="text-amber-300 text-xs uppercase tracking-wider mt-0.5">{ev.eventType}</p>
+                  {ev.description && <p className="text-gray-400 text-xs mt-1">{ev.description}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+          {selectedClasses.length === 0 && selectedEvents.length === 0 ? (
             <p className="text-gray-500 text-sm">No classes scheduled.</p>
-          ) : (
+          ) : selectedClasses.length === 0 ? null : (
             <div className="space-y-3">
               {selectedClasses.map((c) => {
                 const color = colorFor(c.classType);
-                const committed = isCommitted(selectedDate, c.classType);
+                const committed = isCommitted(selectedDate, c);
                 return (
                   <div key={c.id} className={`rounded-lg p-3 ${color.bg} border-l-4`} style={{ borderLeftColor: "currentColor" }}>
                     <div className="flex items-start justify-between gap-3">
@@ -350,7 +399,7 @@ export default function ScheduleClient({
                       ) : (
                         <button
                           onClick={() => toggleCommit(selectedDate, c)}
-                          disabled={busy === `${dateKey(selectedDate)}-${c.classType}`}
+                          disabled={busy === `${dateKey(selectedDate)}-${commitKey(c)}`}
                           className={`shrink-0 h-7 w-7 rounded-md flex items-center justify-center border transition ${
                             committed
                               ? "bg-green-500 border-green-500 text-white"

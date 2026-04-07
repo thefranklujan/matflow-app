@@ -1,14 +1,25 @@
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import StudentShell from "./StudentShell";
+import ViewAsStudentBanner from "@/components/layout/ViewAsStudentBanner";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
   if (!session) redirect("/sign-in");
 
-  // If they're a regular gym member (not a student account), send them to /app
-  if (session.userType !== "student") redirect("/app");
+  const c = await cookies();
+  const viewAsStudent = c.get("view_as_student")?.value === "1";
 
-  return <StudentShell name={session.name}>{children}</StudentShell>;
+  // Allow admins into /student via "view as student" mode.
+  // Otherwise, only true student accounts may enter.
+  if (session.userType !== "student" && !viewAsStudent) redirect("/app");
+
+  return (
+    <>
+      {viewAsStudent && <ViewAsStudentBanner />}
+      <StudentShell name={session.name}>{children}</StudentShell>
+    </>
+  );
 }

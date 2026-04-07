@@ -3,7 +3,7 @@
 export default function ViewAsStudentBanner() {
   async function exit() {
     await fetch("/api/admin/view-as-student", { method: "DELETE" });
-    window.location.href = "/app";
+    window.location.href = "/app/settings";
   }
   return (
     <div className="bg-yellow-500 text-black px-6 py-2 flex items-center justify-between text-sm font-medium">
