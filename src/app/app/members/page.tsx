@@ -7,6 +7,7 @@ import { BELT_RANKS } from "@/lib/constants";
 // TODO: Locations will come from the Gym model
 const LOCATIONS: { value: string; label: string }[] = [];
 import MemberActions from "./MemberActions";
+import MiniBelt from "@/components/members/MiniBelt";
 
 export const dynamic = "force-dynamic";
 
@@ -52,13 +53,7 @@ export default async function AdminMembersPage() {
                   <td className="px-4 py-3 text-sm text-gray-400">{member.email}</td>
                   <td className="px-4 py-3 text-sm text-gray-300">
                     {beltLabel(member.beltRank)}
-                    {member.stripes > 0 && (
-                      <span className="inline-flex gap-0.5 ml-1.5 align-middle">
-                        {Array.from({ length: member.stripes }).map((_, i) => (
-                          <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
-                        ))}
-                      </span>
-                    )}
+                    <MiniBelt beltRank={member.beltRank} stripes={member.stripes} />
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-400">{locationLabel(member.locationSlug)}</td>
                   <td className="px-4 py-3">

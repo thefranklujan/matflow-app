@@ -7,6 +7,7 @@ import { BELT_RANKS } from "@/lib/constants";
 const LOCATIONS: { value: string; label: string }[] = [];
 import Link from "next/link";
 import BeltPromotionForm from "./BeltPromotionForm";
+import MiniBelt from "@/components/members/MiniBelt";
 
 export const dynamic = "force-dynamic";
 
@@ -71,13 +72,7 @@ export default async function AdminMemberDetailPage({
                 <dt className="text-xs text-gray-400 uppercase">Current Belt</dt>
                 <dd className="text-white font-medium">
                   {beltLabel}
-                  {member.stripes > 0 && (
-                    <span className="inline-flex gap-0.5 ml-1.5 align-middle">
-                      {Array.from({ length: member.stripes }).map((_, i) => (
-                        <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
-                      ))}
-                    </span>
-                  )}
+                  <MiniBelt beltRank={member.beltRank} stripes={member.stripes} />
                 </dd>
               </div>
               <div>
@@ -127,13 +122,7 @@ export default async function AdminMemberDetailPage({
                     <div key={bp.id} className="flex items-center justify-between bg-brand-gray/30 rounded px-3 py-2">
                       <div>
                         <span className="text-white text-sm font-medium">{label}</span>
-                        {bp.stripes > 0 && (
-                          <span className="inline-flex gap-0.5 ml-1.5 align-middle">
-                            {Array.from({ length: bp.stripes }).map((_, i) => (
-                              <span key={i} className="inline-block w-1 h-3.5 rounded-sm bg-black border border-gray-600" />
-                            ))}
-                          </span>
-                        )}
+                        <MiniBelt beltRank={bp.beltRank} stripes={bp.stripes} />
                         {bp.note && <p className="text-gray-400 text-xs mt-0.5">{bp.note}</p>}
                       </div>
                       <span className="text-gray-500 text-xs">
