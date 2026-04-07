@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import DeleteGymButton from "./DeleteGymButton";
 
 export default async function GymsListPage() {
   const gyms = await prisma.gym.findMany({
@@ -67,6 +68,7 @@ export default async function GymsListPage() {
                     >
                       View &rarr;
                     </Link>
+                    <DeleteGymButton gymId={gym.id} gymName={gym.name} />
                   </td>
                 </tr>
               );
