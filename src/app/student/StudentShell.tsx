@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy } from "lucide-react";
+import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ShareMatFlow from "@/components/student/ShareMatFlow";
 import QuickLogFAB from "@/components/student/QuickLogFAB";
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/student", label: "Home", icon: Home },
   { href: "/student/schedule", label: "Training Schedule", icon: CalendarDays },
   { href: "/student/training", label: "Training Log", icon: ClipboardList },
+  { href: "/student/clock", label: "BJJ Clock", icon: Timer },
   { href: "/student/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/student/community", label: "Community", icon: Users },
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
@@ -26,6 +27,7 @@ const MOBILE_PRIMARY = [
   { href: "/student/training", label: "Log", icon: ClipboardList },
 ];
 const MOBILE_MORE = [
+  { href: "/student/clock", label: "BJJ Clock", icon: Timer },
   { href: "/student/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/student/community", label: "Community", icon: Users },
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
