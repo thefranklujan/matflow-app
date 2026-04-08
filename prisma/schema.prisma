@@ -171,7 +171,7 @@ model Student {
   beltRank            String            @default("white")
   stripes             Int               @default(0)
   trainingSince       DateTime?
-  shareSchedule       Boolean           @default(false)
+  shareSchedule       Boolean           @default(true)
   showFriendsSchedule Boolean           @default(true)
   avatarUrl           String?
   createdAt           DateTime          @default(now())

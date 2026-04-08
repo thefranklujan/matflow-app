@@ -15,21 +15,46 @@ export default async function StudentSchedulePage() {
     select: { homeGym: true, shareSchedule: true, showFriendsSchedule: true },
   });
 
-  // Friends = students in the same GymGroups as me
-  const myGroups = await prisma.gymGroupMember.findMany({
-    where: { studentId, status: "active" },
-    select: { groupId: true },
-  });
+  // Friends = students in any of:
+  //  (a) the same GymGroups as me, or
+  //  (b) active Members at the same gyms as me
+  const [myGroups, myMemberships] = await Promise.all([
+    prisma.gymGroupMember.findMany({
+      where: { studentId, status: "active" },
+      select: { groupId: true },
+    }),
+    prisma.member.findMany({
+      where: { studentId, active: true, approved: true },
+      select: { gymId: true },
+    }),
+  ]);
   const groupIds = myGroups.map((g) => g.groupId);
+  const gymIds = Array.from(new Set(myMemberships.map((m) => m.gymId)));
 
-  const friendIds = groupIds.length
-    ? (
-        await prisma.gymGroupMember.findMany({
-          where: { groupId: { in: groupIds }, status: "active", NOT: { studentId } },
-          select: { studentId: true },
-        })
-      ).map((m) => m.studentId)
-    : [];
+  const [groupFriendIds, gymFriendIds] = await Promise.all([
+    groupIds.length
+      ? prisma.gymGroupMember
+          .findMany({
+            where: { groupId: { in: groupIds }, status: "active", NOT: { studentId } },
+            select: { studentId: true },
+          })
+          .then((r) => r.map((m) => m.studentId))
+      : Promise.resolve([] as string[]),
+    gymIds.length
+      ? prisma.member
+          .findMany({
+            where: {
+              gymId: { in: gymIds },
+              active: true,
+              approved: true,
+              studentId: { not: null, notIn: [studentId] },
+            },
+            select: { studentId: true },
+          })
+          .then((r) => r.map((m) => m.studentId).filter((id): id is string => !!id))
+      : Promise.resolve([] as string[]),
+  ]);
+  const friendIds = Array.from(new Set([...groupFriendIds, ...gymFriendIds]));
 
   const myGroupsData = groupIds.length
     ? await prisma.gymGroup.findMany({
