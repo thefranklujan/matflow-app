@@ -120,21 +120,19 @@ export default function StudentShell({
         <div className="flex flex-1 flex-col overflow-hidden">
           <header className="flex h-14 items-center justify-end border-b border-white/10 bg-[#0a0a0a] px-6">
             <div className="relative" ref={menuRef}>
-              <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
-                <div className="flex flex-col items-end leading-tight hidden sm:flex">
-                  <span className="text-sm text-gray-300">{name}</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 capitalize">
-                    <span className={`h-2 w-2 rounded-full ${BELT_DOT[beltRank] || BELT_DOT.white}`} />
-                    {beltRank} belt
-                    {stripes > 0 && (
-                      <span className="inline-flex items-center gap-0.5 ml-0.5">
-                        {Array.from({ length: stripes }).map((_, i) => (
-                          <span key={i} className="inline-block h-2 w-[2px] rounded-sm bg-white/70" />
-                        ))}
-                      </span>
-                    )}
-                  </span>
-                </div>
+              <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
+                <span className="text-sm text-gray-200 font-medium hidden sm:inline">{name}</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 capitalize">
+                  <span className={`h-2.5 w-2.5 rounded-full ${BELT_DOT[beltRank] || BELT_DOT.white}`} />
+                  {beltRank} belt
+                  {stripes > 0 && (
+                    <span className="inline-flex items-center gap-0.5 ml-0.5">
+                      {Array.from({ length: stripes }).map((_, i) => (
+                        <span key={i} className="inline-block h-2.5 w-[2.5px] rounded-sm bg-white/80" />
+                      ))}
+                    </span>
+                  )}
+                </span>
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarUrl} alt={name} className="h-8 w-8 rounded-full object-cover" />
