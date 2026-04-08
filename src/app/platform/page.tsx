@@ -38,7 +38,16 @@ export default async function PlatformDashboard() {
 
   const [nominationCount, totalStudents, hotNominations, totalGroupMembers, topGroups, totalGroupPosts] = await Promise.all([
     prisma.gymNomination.count(),
-    prisma.student.count(),
+    prisma.student.count({
+      where: {
+        NOT: {
+          OR: [
+            { email: { endsWith: "@matflow-sample.com" } },
+            { email: { endsWith: "@example.com" } },
+          ],
+        },
+      },
+    }),
     prisma.gymNomination.groupBy({
       by: ["gymName"],
       _count: { gymName: true },

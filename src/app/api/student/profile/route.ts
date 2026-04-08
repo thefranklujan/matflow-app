@@ -8,26 +8,66 @@ export async function GET() {
   const session = await getSession();
   if (!session?.studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const student = await prisma.student.findUnique({
-    where: { id: session.studentId },
-    select: {
-      firstName: true,
-      lastName: true,
-      email: true,
-      phone: true,
-      homeGym: true,
-      beltRank: true,
-      stripes: true,
-      trainingSince: true,
-    },
-  });
+  const [student, nominations, activeGyms] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id: session.studentId },
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        homeGym: true,
+        beltRank: true,
+        stripes: true,
+        trainingSince: true,
+      },
+    }),
+    prisma.gymNomination.findMany({
+      where: { studentId: session.studentId },
+      select: { gymName: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.gym.findMany({
+      where: {
+        id: { notIn: ["platform-owner-gym"] },
+        subscriptionStatus: { not: "cancelled" },
+      },
+      select: { name: true },
+      orderBy: { name: "asc" },
+      take: 200,
+    }),
+  ]);
+
+  // Build a deduped list: most recent nominated gym first, then active gyms
+  const seen = new Set<string>();
+  const gymOptions: string[] = [];
+  for (const n of nominations) {
+    const key = n.gymName.trim();
+    if (!seen.has(key.toLowerCase())) {
+      seen.add(key.toLowerCase());
+      gymOptions.push(key);
+    }
+  }
+  for (const g of activeGyms) {
+    const key = g.name.trim();
+    if (!seen.has(key.toLowerCase())) {
+      seen.add(key.toLowerCase());
+      gymOptions.push(key);
+    }
+  }
+
+  // Default to most recent nomination if homeGym is empty
+  const defaultedHomeGym = student?.homeGym || nominations[0]?.gymName || null;
+
   return NextResponse.json({
     profile: student
       ? {
           ...student,
+          homeGym: defaultedHomeGym,
           trainingSince: student.trainingSince ? student.trainingSince.toISOString().slice(0, 10) : null,
         }
       : null,
+    gymOptions,
   });
 }
 

@@ -23,12 +23,15 @@ const BELTS = [
 
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
+  const [gymOptions, setGymOptions] = useState<string[]>([]);
+  const [otherGym, setOtherGym] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetch("/api/student/profile").then((r) => r.json()).then((d) => {
       if (d.profile) setProfile(d.profile);
+      if (d.gymOptions) setGymOptions(d.gymOptions);
     });
   }, []);
 
@@ -99,13 +102,45 @@ export default function StudentProfilePage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Home Gym</label>
-              <input
-                type="text"
-                value={profile.homeGym || ""}
-                onChange={(e) => setProfile({ ...profile, homeGym: e.target.value })}
-                placeholder="Iron Lion Academy"
-                className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-white"
-              />
+              {gymOptions.length > 0 && !otherGym ? (
+                <select
+                  value={profile.homeGym && gymOptions.includes(profile.homeGym) ? profile.homeGym : ""}
+                  onChange={(e) => {
+                    if (e.target.value === "__other") {
+                      setOtherGym(true);
+                      setProfile({ ...profile, homeGym: "" });
+                    } else {
+                      setProfile({ ...profile, homeGym: e.target.value });
+                    }
+                  }}
+                  className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-white"
+                >
+                  <option value="">Choose your gym</option>
+                  {gymOptions.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                  <option value="__other">Other (type below)</option>
+                </select>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={profile.homeGym || ""}
+                    onChange={(e) => setProfile({ ...profile, homeGym: e.target.value })}
+                    placeholder="Iron Lion Academy"
+                    className="flex-1 px-4 py-2 bg-black border border-white/10 rounded-lg text-white"
+                  />
+                  {gymOptions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => { setOtherGym(false); setProfile({ ...profile, homeGym: gymOptions[0] }); }}
+                      className="text-xs text-gray-400 hover:text-white"
+                    >
+                      Pick from list
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
