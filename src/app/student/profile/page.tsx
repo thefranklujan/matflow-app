@@ -58,14 +58,18 @@ export default function StudentProfilePage() {
     setMessage("Uploading...");
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/student/avatar", { method: "POST", body: fd });
-    if (!res.ok) {
-      setMessage("Upload failed");
-      return;
+    try {
+      const res = await fetch("/api/student/avatar", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage(data?.error || `Upload failed (${res.status})`);
+        return;
+      }
+      setProfile({ ...profile, avatarUrl: data.url });
+      setMessage("Photo updated");
+    } catch (err) {
+      setMessage(`Upload failed: ${err instanceof Error ? err.message : String(err)}`);
     }
-    const data = await res.json();
-    setProfile({ ...profile, avatarUrl: data.url });
-    setMessage("Photo updated");
   }
 
   return (

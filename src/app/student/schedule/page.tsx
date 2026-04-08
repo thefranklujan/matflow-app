@@ -15,9 +15,11 @@ export default async function StudentSchedulePage() {
     select: { homeGym: true, shareSchedule: true, showFriendsSchedule: true },
   });
 
-  // Friends = students in any of:
-  //  (a) the same GymGroups as me, or
-  //  (b) active Members at the same gyms as me
+  // Friends = students connected in any of these ways:
+  //  (a) same GymGroup (community)
+  //  (b) active Member at the same Gym
+  //  (c) same Student.homeGym text (for the common case where neither
+  //      student has a Member record yet because their gym isn't activated)
   const [myGroups, myMemberships] = await Promise.all([
     prisma.gymGroupMember.findMany({
       where: { studentId, status: "active" },
@@ -31,7 +33,9 @@ export default async function StudentSchedulePage() {
   const groupIds = myGroups.map((g) => g.groupId);
   const gymIds = Array.from(new Set(myMemberships.map((m) => m.gymId)));
 
-  const [groupFriendIds, gymFriendIds] = await Promise.all([
+  const myHomeGymNormalized = me?.homeGym?.trim().toLowerCase() || null;
+
+  const [groupFriendIds, gymFriendIds, homeGymFriendIds] = await Promise.all([
     groupIds.length
       ? prisma.gymGroupMember
           .findMany({
@@ -53,8 +57,19 @@ export default async function StudentSchedulePage() {
           })
           .then((r) => r.map((m) => m.studentId).filter((id): id is string => !!id))
       : Promise.resolve([] as string[]),
+    myHomeGymNormalized
+      ? prisma.student
+          .findMany({
+            where: {
+              id: { not: studentId },
+              homeGym: { equals: me?.homeGym || undefined, mode: "insensitive" },
+            },
+            select: { id: true },
+          })
+          .then((r) => r.map((s) => s.id))
+      : Promise.resolve([] as string[]),
   ]);
-  const friendIds = Array.from(new Set([...groupFriendIds, ...gymFriendIds]));
+  const friendIds = Array.from(new Set([...groupFriendIds, ...gymFriendIds, ...homeGymFriendIds]));
 
   const myGroupsData = groupIds.length
     ? await prisma.gymGroup.findMany({

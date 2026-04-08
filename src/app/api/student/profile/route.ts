@@ -65,6 +65,16 @@ export async function GET() {
   // Default to most recent nomination if homeGym is empty
   const defaultedHomeGym = student?.homeGym || myNominations[0]?.gymName || null;
 
+  // If we defaulted from a nomination, persist it now so the displayed
+  // value matches what's actually stored. Previously this was display-only
+  // and users assumed it was saved when they loaded the form.
+  if (student && !student.homeGym && defaultedHomeGym) {
+    await prisma.student.update({
+      where: { id: session.studentId },
+      data: { homeGym: defaultedHomeGym },
+    });
+  }
+
   return NextResponse.json({
     profile: student
       ? {
