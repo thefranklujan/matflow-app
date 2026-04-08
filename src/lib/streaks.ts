@@ -27,7 +27,7 @@ export function computeStreaks(dates: string[]): { current: number; longest: num
   const yesterday = new Date(today.getTime() - 86400000);
   const set = new Set(days);
   let current = 0;
-  let cursor = set.has(dateKey(today)) ? new Date(today) : set.has(dateKey(yesterday)) ? new Date(yesterday) : null;
+  const cursor = set.has(dateKey(today)) ? new Date(today) : set.has(dateKey(yesterday)) ? new Date(yesterday) : null;
   while (cursor && set.has(dateKey(cursor))) {
     current++;
     cursor.setUTCDate(cursor.getUTCDate() - 1);
