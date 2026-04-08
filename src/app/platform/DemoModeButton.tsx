@@ -8,7 +8,7 @@ export default function DemoModeButton() {
 
   async function enterDemo() {
     setBusy(true);
-    const res = await fetch("/api/platform/impersonate/platform-admin-gym", { method: "POST" });
+    const res = await fetch("/api/platform/demo-mode/enter", { method: "POST" });
     if (res.ok) {
       window.location.href = "/app";
     } else {
