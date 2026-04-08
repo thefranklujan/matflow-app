@@ -122,11 +122,11 @@ export default function StudentShell({
             <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
                 <span className="text-sm text-gray-200 font-medium hidden sm:inline">{name}</span>
-                <span className="hidden sm:inline-flex items-stretch h-5 w-24 rounded-sm overflow-hidden border border-black/40 shadow-inner" title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}>
+                <span className="hidden sm:inline-flex items-stretch h-6 w-28 rounded-sm overflow-hidden border border-white/80 shadow-inner" title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}>
                   <span className={`flex-1 ${BELT_BAR[beltRank] || BELT_BAR.white}`} />
-                  <span className="w-9 bg-black flex items-center justify-center gap-[3px] px-1">
+                  <span className="w-11 bg-black flex items-center justify-center gap-[3px] px-1">
                     {Array.from({ length: stripes }).map((_, i) => (
-                      <span key={i} className="inline-block h-3 w-[3px] rounded-[1px] bg-white" />
+                      <span key={i} className="inline-block h-4 w-[3px] rounded-[1px] bg-white" />
                     ))}
                   </span>
                 </span>
