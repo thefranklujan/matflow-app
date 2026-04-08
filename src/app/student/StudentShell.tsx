@@ -122,10 +122,13 @@ export default function StudentShell({
             <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
                 <span className="text-sm text-gray-200 font-medium hidden sm:inline">{name}</span>
-                <span className={`hidden sm:inline-flex items-center justify-end gap-1 h-3 w-16 rounded-sm ${BELT_BAR[beltRank] || BELT_BAR.white} pr-1`} title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}>
-                  {Array.from({ length: stripes }).map((_, i) => (
-                    <span key={i} className="inline-block h-2 w-[2px] rounded-sm bg-white/90" />
-                  ))}
+                <span className="hidden sm:inline-flex items-stretch h-5 w-24 rounded-sm overflow-hidden border border-black/40 shadow-inner" title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}>
+                  <span className={`flex-1 ${BELT_BAR[beltRank] || BELT_BAR.white}`} />
+                  <span className="w-9 bg-black flex items-center justify-center gap-[3px] px-1">
+                    {Array.from({ length: stripes }).map((_, i) => (
+                      <span key={i} className="inline-block h-3 w-[3px] rounded-[1px] bg-white" />
+                    ))}
+                  </span>
                 </span>
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
