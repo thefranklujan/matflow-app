@@ -55,6 +55,7 @@ export default function BJJClockClient() {
   const [showCustom, setShowCustom] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   // Load settings
   useEffect(() => {
@@ -126,6 +127,57 @@ export default function BJJClockClient() {
       navigator.vibrate(Array(count).fill(150).flatMap((d) => [d, 80]));
     }
   }, [settings.soundOn]);
+
+  // Keep screen awake while the clock is running. Re-acquire on visibility
+  // change because iOS / Safari release the lock when the tab loses focus.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function acquire() {
+      try {
+        const nav = navigator as Navigator & { wakeLock?: { request: (type: "screen") => Promise<WakeLockSentinel> } };
+        if (nav.wakeLock?.request) {
+          const lock = await nav.wakeLock.request("screen");
+          if (cancelled) {
+            lock.release().catch(() => {});
+            return;
+          }
+          wakeLockRef.current = lock;
+          lock.addEventListener?.("release", () => {
+            wakeLockRef.current = null;
+          });
+        }
+      } catch {}
+    }
+
+    async function release() {
+      if (wakeLockRef.current) {
+        try {
+          await wakeLockRef.current.release();
+        } catch {}
+        wakeLockRef.current = null;
+      }
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "visible" && running && !wakeLockRef.current) {
+        acquire();
+      }
+    }
+
+    if (running) {
+      acquire();
+      document.addEventListener("visibilitychange", onVisibility);
+    } else {
+      release();
+    }
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibility);
+      release();
+    };
+  }, [running]);
 
   // Timer tick
   useEffect(() => {
