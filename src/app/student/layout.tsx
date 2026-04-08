@@ -33,6 +33,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           beltRank={student?.beltRank || "white"}
           stripes={student?.stripes || 0}
           avatarUrl={student?.avatarUrl || null}
+          studentId={session.studentId || undefined}
         >
           {children}
         </StudentShell>

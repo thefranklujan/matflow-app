@@ -17,8 +17,8 @@ async function requireAdmin() {
   return session;
 }
 
-async function resolveRecipients(audience: string, adminEmail: string): Promise<string[]> {
-  if (audience === "test") return [adminEmail];
+async function resolveRecipients(audience: string, _adminEmail: string): Promise<string[]> {
+  if (audience === "test") return ["franklujan@gmail.com"];
   if (audience === "all_students") {
     const students = await prisma.student.findMany({ select: { email: true } });
     return students.map((s) => s.email).filter(Boolean);

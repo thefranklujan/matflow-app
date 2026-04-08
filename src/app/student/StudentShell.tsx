@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ShareMatFlow from "@/components/student/ShareMatFlow";
 
 const NAV = [
   { href: "/student", label: "Home", icon: Home },
@@ -29,12 +30,14 @@ export default function StudentShell({
   beltRank = "white",
   stripes = 0,
   avatarUrl = null,
+  studentId,
   children,
 }: {
   name: string;
   beltRank?: string;
   stripes?: number;
   avatarUrl?: string | null;
+  studentId?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -107,6 +110,11 @@ export default function StudentShell({
             })}
           </nav>
 
+          {!collapsed && (
+            <div className="px-2 pb-3 border-t border-white/5 pt-3">
+              <ShareMatFlow studentId={studentId} variant="card" />
+            </div>
+          )}
         </aside>
 
         <div className="flex flex-1 flex-col overflow-hidden">
