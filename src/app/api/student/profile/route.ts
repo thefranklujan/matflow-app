@@ -8,7 +8,7 @@ export async function GET() {
   const session = await getSession();
   if (!session?.studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [student, nominations, activeGyms] = await Promise.all([
+  const [student, myNominations, allGroups, activeGyms] = await Promise.all([
     prisma.student.findUnique({
       where: { id: session.studentId },
       select: {
@@ -27,6 +27,11 @@ export async function GET() {
       select: { gymName: true },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.gymGroup.findMany({
+      select: { name: true, memberCount: true },
+      orderBy: [{ memberCount: "desc" }, { name: "asc" }],
+      take: 200,
+    }),
     prisma.gym.findMany({
       where: {
         id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
@@ -38,17 +43,17 @@ export async function GET() {
     }),
   ]);
 
-  // Build a deduped list: most recent nominated gym first, then active gyms
+  // Build a deduped list: every active gym + every nominated gym group
   const seen = new Set<string>();
   const gymOptions: string[] = [];
-  for (const n of nominations) {
-    const key = n.gymName.trim();
+  for (const g of activeGyms) {
+    const key = g.name.trim();
     if (!seen.has(key.toLowerCase())) {
       seen.add(key.toLowerCase());
       gymOptions.push(key);
     }
   }
-  for (const g of activeGyms) {
+  for (const g of allGroups) {
     const key = g.name.trim();
     if (!seen.has(key.toLowerCase())) {
       seen.add(key.toLowerCase());
@@ -57,7 +62,7 @@ export async function GET() {
   }
 
   // Default to most recent nomination if homeGym is empty
-  const defaultedHomeGym = student?.homeGym || nominations[0]?.gymName || null;
+  const defaultedHomeGym = student?.homeGym || myNominations[0]?.gymName || null;
 
   return NextResponse.json({
     profile: student
