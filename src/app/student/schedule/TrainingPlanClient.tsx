@@ -175,11 +175,16 @@ export default function TrainingPlanClient({
   }
 
   const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  // Compare as YYYY-MM-DD strings to avoid timezone shifts.
+  // new Date("2026-04-08") parses as UTC midnight which becomes the previous
+  // day in local time for negative-offset timezones, so the filter would
+  // wrongly exclude today's plans.
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const upcomingMine = Object.values(plans)
-    .filter((p) => new Date(p.date) >= new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+    .filter((p) => p.date >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date));
   const upcomingFriends = friendPlans
-    .filter((p) => new Date(p.date) >= new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+    .filter((p) => p.date >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 12);
 
