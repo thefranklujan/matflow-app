@@ -19,15 +19,32 @@ export default async function PlatformDashboard() {
     trialEnding,
   ] = await Promise.all([
     prisma.gym.findMany({
+      where: { id: { notIn: ["platform-owner-gym", "platform-admin-gym"] } },
       include: { _count: { select: { members: true } } },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.member.count({ where: { active: true } }),
-    prisma.member.count({ where: { createdAt: { gte: startOfMonth } } }),
-    prisma.attendance.count(),
-    prisma.attendance.count({ where: { classDate: { gte: sevenDaysAgo } } }),
+    prisma.member.count({
+      where: {
+        active: true,
+        gymId: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
+      },
+    }),
+    prisma.member.count({
+      where: {
+        createdAt: { gte: startOfMonth },
+        gymId: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
+      },
+    }),
+    prisma.attendance.count({ where: { gymId: { notIn: ["platform-owner-gym", "platform-admin-gym"] } } }),
+    prisma.attendance.count({
+      where: {
+        classDate: { gte: sevenDaysAgo },
+        gymId: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
+      },
+    }),
     prisma.gym.findMany({
       where: {
+        id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
         subscriptionStatus: "trialing",
         trialEndsAt: { lte: sevenDaysFromNow, gte: now },
       },
@@ -110,13 +127,13 @@ export default async function PlatformDashboard() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {topGroups.map((g) => (
-              <div key={g.id} className="bg-cyan-500/5 border border-cyan-500/15 rounded-lg p-3">
+              <Link key={g.id} href={`/platform/groups/${g.id}`} className="bg-cyan-500/5 border border-cyan-500/15 rounded-lg p-3 hover:border-cyan-500/40 transition block">
                 <p className="text-white font-semibold">{g.name}</p>
                 {(g.city || g.state) && (
                   <p className="text-gray-500 text-xs mt-0.5">{g.city}{g.city && g.state ? ", " : ""}{g.state}</p>
                 )}
                 <p className="text-cyan-400 text-xs mt-1 font-semibold">{g.memberCount} active member{g.memberCount === 1 ? "" : "s"}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
