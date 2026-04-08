@@ -4,7 +4,8 @@ import { getSession, createSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Search, Inbox, Building2, Calendar, Video, Megaphone, ShoppingBag } from "lucide-react";
+import { Search, Inbox, Building2, Calendar, Video, Megaphone, ShoppingBag, Flame, CalendarDays, TrendingUp, Clock } from "lucide-react";
+import { computeStreaks } from "@/lib/streaks";
 
 export default async function StudentDashboardPage() {
   const session = await getSession();
@@ -111,6 +112,22 @@ export default async function StudentDashboardPage() {
   const totalRolls = (trainingAgg._sum.rollsWon || 0) + (trainingAgg._sum.rollsLost || 0);
   const winRate = totalRolls > 0 ? Math.round(((trainingAgg._sum.rollsWon || 0) / totalRolls) * 100) : 0;
 
+  // Metrics: this week, this month, streak
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const allSessionDates = await prisma.trainingSession.findMany({
+    where: { studentId },
+    orderBy: { date: "desc" },
+    select: { date: true },
+  });
+  const sessionsThisWeek = allSessionDates.filter((s) => s.date >= startOfWeek).length;
+  const sessionsThisMonth = allSessionDates.filter((s) => s.date >= startOfMonth).length;
+  const streaks = computeStreaks(allSessionDates.map((s) => s.date.toISOString()));
+
   // Pull a snapshot of content from each approved gym
   const gymIds = memberships.map((m) => m.gymId);
   const todayDow = new Date().getDay();
@@ -147,6 +164,55 @@ export default async function StudentDashboardPage() {
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Welcome, {session.name.split(" ")[0]}</h1>
       <p className="text-gray-500 mb-8">Your training, your gyms, your community.</p>
+
+      {/* Quick Metrics */}
+      <section className="mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
+                <CalendarDays className="h-4 w-4 text-[#dc2626]" />
+              </div>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">This Week</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{sessionsThisWeek}</p>
+            <p className="text-gray-500 text-xs mt-0.5">session{sessionsThisWeek === 1 ? "" : "s"}</p>
+          </div>
+
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-[#dc2626]" />
+              </div>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">This Month</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{sessionsThisMonth}</p>
+            <p className="text-gray-500 text-xs mt-0.5">session{sessionsThisMonth === 1 ? "" : "s"}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-500/15 to-[#dc2626]/5 border border-orange-500/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                <Flame className="h-4 w-4 text-orange-400" />
+              </div>
+              <p className="text-[10px] uppercase tracking-wider text-orange-300 font-semibold">Streak</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{streaks.current}</p>
+            <p className="text-gray-400 text-xs mt-0.5">day{streaks.current === 1 ? "" : "s"} · best {streaks.longest}</p>
+          </div>
+
+          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
+                <Clock className="h-4 w-4 text-[#dc2626]" />
+              </div>
+              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Total Hours</p>
+            </div>
+            <p className="text-3xl font-bold text-white">{totalHours}</p>
+            <p className="text-gray-500 text-xs mt-0.5">all time</p>
+          </div>
+        </div>
+      </section>
 
       {/* My Gyms */}
       <section className="mb-10">
