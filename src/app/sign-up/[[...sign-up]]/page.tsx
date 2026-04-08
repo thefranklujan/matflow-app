@@ -141,7 +141,8 @@ function SignUpForm() {
     <div className="min-h-screen flex items-center justify-center bg-brand-black px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">MatFlow</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
           <p className="text-gray-400">
             {joinSlug
               ? "Join your gym"

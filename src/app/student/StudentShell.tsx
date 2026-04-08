@@ -77,11 +77,12 @@ export default function StudentShell({
       <div className="hidden md:flex h-screen overflow-hidden bg-[#080808]">
         <aside className={cn("flex h-screen flex-col border-r border-white/10 bg-[#0a0a0a] transition-all duration-200", collapsed ? "w-[60px]" : "w-[240px]")}>
           <div className="flex items-center justify-between px-3 py-4 border-b border-white/5">
-            {!collapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-semibold text-white truncate leading-tight">MatFlow</span>
-                <span className="text-[10px] text-[#dc2626] font-medium tracking-wider uppercase leading-tight">Student</span>
-              </div>
+            {!collapsed ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/logo.svg" alt="MatFlow" className="h-9 w-auto" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/logo-icon.svg" alt="MatFlow" className="h-7 w-7" />
             )}
             <button onClick={toggle} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-white/5 hover:text-gray-300 transition">
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -156,7 +157,8 @@ export default function StudentShell({
       {/* Mobile */}
       <div className="md:hidden flex h-screen flex-col bg-[#080808]">
         <header className="flex h-12 items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-4 shrink-0">
-          <span className="text-sm font-semibold text-white">MatFlow <span className="text-[#dc2626] text-xs">Student</span></span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="MatFlow" className="h-7 w-auto" />
           <button onClick={signOut} className="h-7 w-7 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-[10px] font-bold">{initials}</button>
         </header>
         <main className="flex-1 overflow-y-auto bg-[#111] p-4 pb-20">{children}</main>

@@ -43,7 +43,8 @@ export default function StudentSignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#080808] px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">MatFlow</h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
           <p className="text-gray-400">Student Companion App</p>
           <p className="text-gray-600 text-xs mt-2 uppercase tracking-wider">Create your student account</p>
         </div>
