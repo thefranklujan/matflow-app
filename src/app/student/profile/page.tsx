@@ -11,6 +11,7 @@ interface StudentProfile {
   beltRank: string;
   stripes: number;
   trainingSince: string | null;
+  avatarUrl?: string | null;
 }
 
 const BELTS = [
@@ -51,10 +52,47 @@ export default function StudentProfilePage() {
 
   if (!profile) return <p className="text-gray-500">Loading...</p>;
 
+  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+    setMessage("Uploading...");
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/student/avatar", { method: "POST", body: fd });
+    if (!res.ok) {
+      setMessage("Upload failed");
+      return;
+    }
+    const data = await res.json();
+    setProfile({ ...profile, avatarUrl: data.url });
+    setMessage("Photo updated");
+  }
+
   return (
     <div className="max-w-lg">
       <h1 className="text-3xl font-bold text-white mb-2">Profile</h1>
       <p className="text-gray-500 mb-8">Manage your personal info.</p>
+
+      <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-4 flex items-center gap-4">
+        {profile.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={profile.avatarUrl} alt="Avatar" className="h-20 w-20 rounded-full object-cover border border-white/10" />
+        ) : (
+          <div className="h-20 w-20 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center text-xl font-bold border border-white/10">
+            {profile.firstName[0]}{profile.lastName[0]}
+          </div>
+        )}
+        <div className="flex-1">
+          <p className="text-white font-semibold text-sm">Profile Photo</p>
+          <p className="text-gray-500 text-xs mb-2">PNG, JPG, or WebP. Max 5MB.</p>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={uploadAvatar}
+            className="block text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#dc2626] file:text-white hover:file:bg-[#b91c1c]"
+          />
+        </div>
+      </div>
 
       <form onSubmit={save} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 space-y-4">
         <div className="grid grid-cols-2 gap-3">

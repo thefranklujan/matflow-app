@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Clock, Swords } from "lucide-react";
+import { Plus, Trash2, Clock, Swords, Flame } from "lucide-react";
 
 interface Session {
   id: string;
@@ -24,7 +24,13 @@ const SESSION_TYPES = [
   { value: "private", label: "Private Lesson" },
 ];
 
-export default function TrainingLogClient({ initialSessions }: { initialSessions: Session[] }) {
+export default function TrainingLogClient({
+  initialSessions,
+  streaks = { current: 0, longest: 0, thisMonth: 0 },
+}: {
+  initialSessions: Session[];
+  streaks?: { current: number; longest: number; thisMonth: number };
+}) {
   const [sessions, setSessions] = useState<Session[]>(initialSessions);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -97,6 +103,26 @@ export default function TrainingLogClient({ initialSessions }: { initialSessions
           {showForm ? "Cancel" : "Log Session"}
         </button>
       </div>
+
+      {/* Streak banner */}
+      {streaks.current > 0 && (
+        <div className="bg-gradient-to-r from-orange-500/20 to-[#dc2626]/10 border border-orange-500/30 rounded-xl p-4 mb-4 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <Flame className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-orange-300 text-xs uppercase tracking-wider font-semibold">Active Streak</p>
+            <p className="text-white text-2xl font-bold leading-tight">
+              {streaks.current} day{streaks.current === 1 ? "" : "s"}
+            </p>
+            <p className="text-gray-400 text-xs mt-0.5">
+              Longest streak: <span className="text-white font-semibold">{streaks.longest} days</span>
+              {" . "}
+              {streaks.thisMonth} session{streaks.thisMonth === 1 ? "" : "s"} this month
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">

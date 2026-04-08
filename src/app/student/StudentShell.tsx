@@ -28,11 +28,13 @@ export default function StudentShell({
   name,
   beltRank = "white",
   stripes = 0,
+  avatarUrl = null,
   children,
 }: {
   name: string;
   beltRank?: string;
   stripes?: number;
+  avatarUrl?: string | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -125,7 +127,12 @@ export default function StudentShell({
                     )}
                   </span>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt={name} className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+                )}
               </button>
               {showMenu && (
                 <div className="absolute right-0 top-full mt-1 w-48 bg-[#141414] border border-white/10 rounded-lg shadow-xl z-50 py-1">

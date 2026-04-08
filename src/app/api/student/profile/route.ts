@@ -20,6 +20,7 @@ export async function GET() {
         beltRank: true,
         stripes: true,
         trainingSince: true,
+        avatarUrl: true,
       },
     }),
     prisma.gymNomination.findMany({

@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Trash2, Users, Shield, Flag, EyeOff, Check, X, Clock } from "lucide-react";
+import { Send, Trash2, Users, Shield, Flag, EyeOff, Check, X, Clock, Heart, MessageCircle, Trophy } from "lucide-react";
+
+interface CommentItem {
+  id: string;
+  body: string;
+  createdAt: string;
+  authorName: string;
+  authorAvatar: string | null;
+  authorBelt: string;
+  isMine: boolean;
+}
 
 interface PostItem {
   id: string;
@@ -9,21 +19,34 @@ interface PostItem {
   createdAt: string;
   authorId: string;
   authorName: string;
+  authorAvatar: string | null;
   authorBelt: string;
   authorJoinedAt: string;
   authorSessionCount: number;
   isMine: boolean;
   reportCount: number;
   hidden: boolean;
+  likeCount: number;
+  likedByMe: boolean;
+  comments: CommentItem[];
 }
 
 interface MemberItem {
   studentId: string;
   name: string;
+  avatarUrl: string | null;
   joinedAt: string;
   role: string;
   belt: string;
   sessionCount: number;
+}
+
+interface LeaderboardEntry {
+  studentId: string;
+  name: string;
+  avatarUrl: string | null;
+  belt: string;
+  sessions: number;
 }
 
 interface GroupSummary {
@@ -46,6 +69,18 @@ function initials(name: string) {
   return name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
 }
 
+function Avatar({ name, url, className = "h-8 w-8 text-xs" }: { name: string; url: string | null; className?: string }) {
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={url} alt={name} className={`${className} rounded-full object-cover shrink-0`} />;
+  }
+  return (
+    <div className={`${className} rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center font-bold shrink-0`}>
+      {initials(name)}
+    </div>
+  );
+}
+
 const BELT_DOT: Record<string, string> = {
   white: "bg-white",
   blue: "bg-blue-500",
@@ -60,6 +95,7 @@ export default function CommunityClient({
   posts: initialPosts,
   members,
   pending,
+  leaderboard = [],
   isMod,
   myStatus,
 }: {
@@ -68,6 +104,7 @@ export default function CommunityClient({
   posts: PostItem[];
   members: MemberItem[];
   pending: MemberItem[];
+  leaderboard?: LeaderboardEntry[];
   isMod: boolean;
   myStatus: string;
 }) {
@@ -76,6 +113,8 @@ export default function CommunityClient({
   const [activeMembers, setActiveMembers] = useState<MemberItem[]>(members);
   const [body, setBody] = useState("");
   const [posting, setPosting] = useState(false);
+  const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const selected = groups.find((g) => g.id === selectedGroupId);
 
   async function submitPost(e: React.FormEvent) {
@@ -126,6 +165,64 @@ export default function CommunityClient({
     } else {
       setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, hidden: action === "hide" } : p));
     }
+  }
+
+  async function toggleLike(postId: string) {
+    // Optimistic
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, likedByMe: !p.likedByMe, likeCount: p.likedByMe ? p.likeCount - 1 : p.likeCount + 1 }
+          : p
+      )
+    );
+    const res = await fetch("/api/student/community/like", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId }),
+    });
+    if (!res.ok) {
+      // Revert
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, likedByMe: !p.likedByMe, likeCount: p.likedByMe ? p.likeCount - 1 : p.likeCount + 1 }
+            : p
+        )
+      );
+    }
+  }
+
+  function toggleComments(postId: string) {
+    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+  }
+
+  async function submitComment(postId: string) {
+    const draft = commentDrafts[postId]?.trim();
+    if (!draft) return;
+    const res = await fetch("/api/student/community/comment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId, body: draft }),
+    });
+    if (!res.ok) return;
+    const c = await res.json();
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, comments: [...p.comments, c] } : p
+      )
+    );
+    setCommentDrafts((prev) => ({ ...prev, [postId]: "" }));
+  }
+
+  async function deleteComment(postId: string, commentId: string) {
+    const res = await fetch(`/api/student/community/comment?id=${commentId}`, { method: "DELETE" });
+    if (!res.ok) return;
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, comments: p.comments.filter((c) => c.id !== commentId) } : p
+      )
+    );
   }
 
   async function reportPost(postId: string) {
@@ -356,9 +453,7 @@ export default function CommunityClient({
                             </div>
                           )}
                           <div className="flex items-start gap-3">
-                            <div className="h-9 w-9 rounded-full bg-white/5 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                              {initials(p.authorName)}
-                            </div>
+                            <Avatar name={p.authorName} url={p.authorAvatar} className="h-9 w-9 text-xs" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-white font-semibold text-sm">{p.authorName}</p>
@@ -374,7 +469,23 @@ export default function CommunityClient({
                                 )}
                               </div>
                               <p className="text-gray-300 text-sm mt-2 whitespace-pre-wrap">{p.body}</p>
-                              <div className="flex items-center gap-3 mt-2 text-xs">
+                              <div className="flex items-center gap-4 mt-3 text-xs">
+                                <button
+                                  onClick={() => toggleLike(p.id)}
+                                  className={`inline-flex items-center gap-1 transition ${
+                                    p.likedByMe ? "text-[#dc2626]" : "text-gray-500 hover:text-[#dc2626]"
+                                  }`}
+                                >
+                                  <Heart className="h-3.5 w-3.5" fill={p.likedByMe ? "currentColor" : "none"} />
+                                  <span className="font-semibold">{p.likeCount}</span>
+                                </button>
+                                <button
+                                  onClick={() => toggleComments(p.id)}
+                                  className="inline-flex items-center gap-1 text-gray-500 hover:text-white transition"
+                                >
+                                  <MessageCircle className="h-3.5 w-3.5" />
+                                  <span className="font-semibold">{p.comments.length}</span>
+                                </button>
                                 <span className="text-gray-700">{new Date(p.createdAt).toLocaleDateString()}</span>
                                 {!p.isMine && (
                                   <button onClick={() => reportPost(p.id)} className="text-gray-600 hover:text-red-400 inline-flex items-center gap-1">
@@ -403,11 +514,86 @@ export default function CommunityClient({
                                   </button>
                                 )}
                               </div>
+
+                              {(openComments[p.id] || p.comments.length > 0) && (
+                                <div className="mt-3 pt-3 border-t border-white/5 space-y-2">
+                                  {p.comments.map((c) => (
+                                    <div key={c.id} className="flex items-start gap-2">
+                                      <Avatar name={c.authorName} url={c.authorAvatar} className="h-6 w-6 text-[10px]" />
+                                      <div className="flex-1 min-w-0 bg-white/5 rounded-lg px-2.5 py-1.5">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-white text-xs font-semibold">{c.authorName}</span>
+                                          <span className={`h-1.5 w-1.5 rounded-full ${BELT_DOT[c.authorBelt] || BELT_DOT.white}`} />
+                                          <span className="text-gray-600 text-[10px]">{new Date(c.createdAt).toLocaleDateString()}</span>
+                                          {c.isMine && (
+                                            <button onClick={() => deleteComment(p.id, c.id)} className="text-gray-600 hover:text-red-400 ml-auto">
+                                              <Trash2 className="h-3 w-3" />
+                                            </button>
+                                          )}
+                                        </div>
+                                        <p className="text-gray-300 text-xs mt-0.5 whitespace-pre-wrap">{c.body}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      value={commentDrafts[p.id] || ""}
+                                      onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                          e.preventDefault();
+                                          submitComment(p.id);
+                                        }
+                                      }}
+                                      placeholder="Write a comment..."
+                                      maxLength={500}
+                                      className="flex-1 bg-black border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-[#dc2626]"
+                                    />
+                                    <button
+                                      onClick={() => submitComment(p.id)}
+                                      disabled={!commentDrafts[p.id]?.trim()}
+                                      className="bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
+                                    >
+                                      Send
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
                       ))
                     )}
+                  </div>
+                )}
+
+                {/* Leaderboard (this month) */}
+                {myStatus === "active" && leaderboard.length > 0 && (
+                  <div className="bg-[#0a0a0a] border border-yellow-500/20 rounded-xl p-5 mb-4">
+                    <h3 className="text-xs text-yellow-400 uppercase tracking-wider font-semibold mb-3 flex items-center gap-2">
+                      <Trophy className="h-3.5 w-3.5" /> Leaderboard . This Month
+                    </h3>
+                    <div className="space-y-2">
+                      {leaderboard.map((entry, i) => (
+                        <div key={entry.studentId} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
+                          <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                            i === 0 ? "bg-yellow-400 text-black"
+                            : i === 1 ? "bg-gray-300 text-black"
+                            : i === 2 ? "bg-amber-700 text-white"
+                            : "bg-white/10 text-gray-400"
+                          }`}>
+                            {i + 1}
+                          </div>
+                          <Avatar name={entry.name} url={entry.avatarUrl} className="h-7 w-7 text-[10px]" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-semibold truncate">{entry.name}</p>
+                            <p className="text-gray-500 text-[10px] capitalize">{entry.belt} belt</p>
+                          </div>
+                          <span className="text-yellow-400 text-xs font-bold">{entry.sessions}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -420,9 +606,7 @@ export default function CommunityClient({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {activeMembers.map((m) => (
                         <div key={m.studentId} className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
-                          <div className="h-8 w-8 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center text-xs font-bold shrink-0">
-                            {initials(m.name)}
-                          </div>
+                          <Avatar name={m.name} url={m.avatarUrl} className="h-8 w-8 text-xs" />
                           <div className="flex-1 min-w-0">
                             <p className="text-white text-xs font-semibold flex items-center gap-1.5 truncate">
                               {m.name}

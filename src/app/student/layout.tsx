@@ -16,7 +16,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const student = session.studentId
     ? await prisma.student.findUnique({
         where: { id: session.studentId },
-        select: { beltRank: true, stripes: true },
+        select: { beltRank: true, stripes: true, avatarUrl: true },
       })
     : null;
 
@@ -32,6 +32,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           name={session.name}
           beltRank={student?.beltRank || "white"}
           stripes={student?.stripes || 0}
+          avatarUrl={student?.avatarUrl || null}
         >
           {children}
         </StudentShell>

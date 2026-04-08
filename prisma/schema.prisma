@@ -173,6 +173,7 @@ model Student {
   trainingSince       DateTime?
   shareSchedule       Boolean           @default(false)
   showFriendsSchedule Boolean           @default(true)
+  avatarUrl           String?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   joinRequests    JoinRequest[]
@@ -183,6 +184,8 @@ model Student {
   groupPosts      GroupPost[]
   postReports     PostReport[]
   trainingPlan    StudentTrainingPlan[]
+  postLikes       PostLike[]
+  postComments    PostComment[]
 }
 
 model StudentTrainingPlan {
@@ -226,20 +229,46 @@ model GymGroupMember {
 }
 
 model GroupPost {
-  id          String       @id @default(cuid())
+  id          String        @id @default(cuid())
   groupId     String
   studentId   String
   body        String
-  hidden      Boolean      @default(false)
+  hidden      Boolean       @default(false)
   hiddenAt    DateTime?
   hiddenBy    String?
-  reportCount Int          @default(0)
-  createdAt   DateTime     @default(now())
-  group       GymGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reportCount Int           @default(0)
+  createdAt   DateTime      @default(now())
+  group       GymGroup      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   reports     PostReport[]
+  likes       PostLike[]
+  comments    PostComment[]
 
   @@index([groupId])
+}
+
+model PostLike {
+  id        String    @id @default(cuid())
+  postId    String
+  studentId String
+  createdAt DateTime  @default(now())
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, studentId])
+  @@index([postId])
+}
+
+model PostComment {
+  id        String    @id @default(cuid())
+  postId    String
+  studentId String
+  body      String
+  createdAt DateTime  @default(now())
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
 }
 
 model PostReport {
