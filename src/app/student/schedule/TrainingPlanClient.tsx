@@ -164,6 +164,23 @@ export default function TrainingPlanClient({
     setSaving(false);
   }
 
+  async function deletePlanByDate(dateStr: string) {
+    await fetch(`/api/student/training-plan?date=${dateStr}`, { method: "DELETE" });
+    setPlans((prev) => {
+      const next = { ...prev };
+      delete next[dateStr];
+      return next;
+    });
+    if (selKey === dateStr) {
+      setSelectedDate(null);
+    }
+  }
+
+  function editPlanByDate(dateStr: string) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    setSelectedDate(new Date(y, (m || 1) - 1, d || 1));
+  }
+
   async function toggleVisibility(field: "shareSchedule" | "showFriendsSchedule", value: boolean) {
     if (field === "shareSchedule") setShare(value);
     if (field === "showFriendsSchedule") setShow(value);
@@ -367,7 +384,13 @@ export default function TrainingPlanClient({
             ) : (
               <div className="space-y-2">
                 {upcomingMine.slice(0, 6).map((p) => (
-                  <PlanRowCard key={p.date} plan={p} mine />
+                  <PlanRowCard
+                    key={p.date}
+                    plan={p}
+                    mine
+                    onEdit={() => editPlanByDate(p.date)}
+                    onDelete={() => deletePlanByDate(p.date)}
+                  />
                 ))}
               </div>
             )}
@@ -415,18 +438,49 @@ function blockSummary(p: PlanRow) {
   return blocks.join(" · ") || "Training";
 }
 
-function PlanRowCard({ plan, mine }: { plan: PlanRow; mine?: boolean }) {
-  const d = new Date(plan.date);
+function PlanRowCard({
+  plan,
+  mine,
+  onEdit,
+  onDelete,
+}: {
+  plan: PlanRow;
+  mine?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) {
+  // Parse YYYY-MM-DD safely without timezone shift
+  const [y, m, dd] = plan.date.split("-").map(Number);
+  const d = new Date(y, (m || 1) - 1, dd || 1);
   return (
-    <div className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
-      <div className={`h-9 w-9 rounded flex flex-col items-center justify-center shrink-0 ${mine ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-blue-400/20 text-blue-400"}`}>
+    <div className="group flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2 transition">
+      <button
+        onClick={onEdit}
+        className={`h-9 w-9 rounded flex flex-col items-center justify-center shrink-0 ${mine ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-blue-400/20 text-blue-400"}`}
+      >
         <span className="text-[9px] font-bold uppercase leading-none">{d.toLocaleDateString("en-US", { month: "short" })}</span>
         <span className="text-sm font-bold leading-none">{d.getDate()}</span>
-      </div>
-      <div className="flex-1 min-w-0">
+      </button>
+      <button onClick={onEdit} className="flex-1 min-w-0 text-left">
         <p className="text-white text-sm font-medium truncate">{blockSummary(plan)}</p>
         {plan.gym && <p className="text-gray-500 text-xs truncate">{plan.gym}</p>}
-      </div>
+      </button>
+      {mine && onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`Delete training on ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}?`)) {
+              onDelete();
+            }
+          }}
+          className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#dc2626] transition p-1"
+          title="Delete"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
