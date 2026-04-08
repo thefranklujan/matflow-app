@@ -32,7 +32,7 @@ export default async function StudentDashboardPage() {
     redirect("/app");
   }
 
-  const [memberships, requests, suggestedGyms] = await Promise.all([
+  const [memberships, requests, activeGyms, nominatedGroups] = await Promise.all([
     prisma.member.findMany({
       where: { studentId },
       include: { gym: { select: { id: true, name: true, slug: true, city: true, state: true, logo: true } } },
@@ -51,7 +51,46 @@ export default async function StudentDashboardPage() {
       },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.gymGroup.findMany({
+      orderBy: { memberCount: "desc" },
+      take: 6,
+      select: { id: true, name: true, city: true, state: true, memberCount: true },
+    }),
   ]);
+
+  // Build the unified Suggested Gyms list: active gyms first, then nominated groups
+  // (deduped by name) so students see every gym available on the platform.
+  const activeNames = new Set(activeGyms.map((g) => g.name.toLowerCase().trim()));
+  type SuggestedCard = {
+    key: string;
+    name: string;
+    city: string | null;
+    state: string | null;
+    href: string;
+    isActive: boolean;
+    memberCount?: number;
+  };
+  const suggestedGyms: SuggestedCard[] = [
+    ...activeGyms.map((g) => ({
+      key: `gym-${g.id}`,
+      name: g.name,
+      city: g.city,
+      state: g.state,
+      href: `/student/gyms/${g.slug}`,
+      isActive: true,
+    })),
+    ...nominatedGroups
+      .filter((n) => !activeNames.has(n.name.toLowerCase().trim()))
+      .map((n) => ({
+        key: `nom-${n.id}`,
+        name: n.name,
+        city: n.city,
+        state: n.state,
+        href: `/student/nominate`,
+        isActive: false,
+        memberCount: n.memberCount,
+      })),
+  ].slice(0, 8);
 
   const pendingCount = requests.filter((r) => r.status === "pending").length;
 
@@ -306,20 +345,40 @@ export default async function StudentDashboardPage() {
       )}
 
       {/* Suggested Gyms */}
-      {memberships.length === 0 && (
+      {memberships.length === 0 && suggestedGyms.length > 0 && (
         <section>
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Suggested Gyms</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {suggestedGyms.map((gym) => (
-              <Link key={gym.id} href={`/student/gyms/${gym.slug}`} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 hover:border-[#dc2626] transition">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-lg bg-[#dc2626]/10 flex items-center justify-center text-[#dc2626] text-sm font-bold">
-                    {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+              <Link
+                key={gym.key}
+                href={gym.href}
+                className={`bg-[#0a0a0a] border rounded-xl p-5 transition ${
+                  gym.isActive ? "border-white/10 hover:border-[#dc2626]" : "border-yellow-500/20 hover:border-yellow-500/50"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+                      gym.isActive ? "bg-[#dc2626]/10 text-[#dc2626]" : "bg-yellow-500/10 text-yellow-400"
+                    }`}>
+                      {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold truncate">{gym.name}</p>
+                      {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
+                      {!gym.isActive && (
+                        <p className="text-yellow-400/80 text-[10px] mt-0.5">
+                          {gym.memberCount ?? 0} student{(gym.memberCount ?? 0) === 1 ? "" : "s"} nominating
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white font-semibold">{gym.name}</p>
-                    {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
-                  </div>
+                  {!gym.isActive && (
+                    <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
+                      Not Active
+                    </span>
+                  )}
                 </div>
               </Link>
             ))}
