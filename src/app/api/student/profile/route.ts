@@ -29,7 +29,7 @@ export async function GET() {
     }),
     prisma.gym.findMany({
       where: {
-        id: { notIn: ["platform-owner-gym"] },
+        id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
         subscriptionStatus: { not: "cancelled" },
       },
       select: { name: true },

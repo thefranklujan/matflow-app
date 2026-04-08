@@ -45,7 +45,10 @@ export default async function StudentDashboardPage() {
     }),
     prisma.gym.findMany({
       take: 4,
-      where: { subscriptionStatus: { not: "cancelled" } },
+      where: {
+        id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
+        subscriptionStatus: { not: "cancelled" },
+      },
       orderBy: { createdAt: "desc" },
     }),
   ]);
