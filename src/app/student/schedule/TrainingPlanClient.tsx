@@ -193,17 +193,30 @@ export default function TrainingPlanClient({
 
   const monthLabel = cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   // Compare as YYYY-MM-DD strings to avoid timezone shifts.
-  // new Date("2026-04-08") parses as UTC midnight which becomes the previous
-  // day in local time for negative-offset timezones, so the filter would
-  // wrongly exclude today's plans.
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const upcomingMine = Object.values(plans)
-    .filter((p) => p.date >= todayKey)
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const upcomingFriends = friendPlans
-    .filter((p) => p.date >= todayKey)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, 12);
+
+  // Build a unified timeline keyed by date. Each entry holds my plan (if any)
+  // and any friend plans on that date. Days I'm training AND friend-only days
+  // both show up, sorted ascending.
+  const unifiedDays = useMemo(() => {
+    const byDate = new Map<string, { date: string; mine?: PlanRow; friends: FriendPlanRow[] }>();
+    for (const p of Object.values(plans)) {
+      if (p.date < todayKey) continue;
+      byDate.set(p.date, { date: p.date, mine: p, friends: [] });
+    }
+    if (show) {
+      for (const fp of friendPlans) {
+        if (fp.date < todayKey) continue;
+        const existing = byDate.get(fp.date);
+        if (existing) {
+          existing.friends.push(fp);
+        } else {
+          byDate.set(fp.date, { date: fp.date, friends: [fp] });
+        }
+      }
+    }
+    return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+  }, [plans, friendPlans, show, todayKey]);
 
   return (
     <div>
@@ -375,40 +388,24 @@ export default function TrainingPlanClient({
           </div>
         </div>
 
-        {/* Side panel */}
-        <div className="space-y-4">
-          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">Your Plan ({upcomingMine.length})</h2>
-            {upcomingMine.length === 0 ? (
-              <p className="text-gray-600 text-sm">No training planned yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {upcomingMine.slice(0, 6).map((p) => (
-                  <PlanRowCard
-                    key={p.date}
-                    plan={p}
-                    mine
-                    onEdit={() => editPlanByDate(p.date)}
-                    onDelete={() => deletePlanByDate(p.date)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {show && (
-            <div className="bg-[#0a0a0a] border border-blue-500/20 rounded-xl p-5">
-              <h2 className="text-xs text-blue-400 uppercase tracking-wider font-semibold mb-3">Friends Training ({upcomingFriends.length})</h2>
-              {upcomingFriends.length === 0 ? (
-                <p className="text-gray-600 text-sm">No friends have shared their schedule yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {upcomingFriends.map((p, i) => (
-                    <FriendRowCard key={`${p.friendName}-${p.date}-${i}`} plan={p} />
-                  ))}
-                </div>
-              )}
+        {/* Side panel: one card per day, mine + friends combined */}
+        <div className="space-y-3">
+          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Upcoming ({unifiedDays.length})</h2>
+          {unifiedDays.length === 0 ? (
+            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
+              <p className="text-gray-600 text-sm">No training planned yet. Tap a day on the calendar to start.</p>
             </div>
+          ) : (
+            unifiedDays.slice(0, 12).map((day) => (
+              <DayCard
+                key={day.date}
+                date={day.date}
+                mine={day.mine}
+                friends={day.friends}
+                onEdit={() => editPlanByDate(day.date)}
+                onDelete={day.mine ? () => deletePlanByDate(day.date) : undefined}
+              />
+            ))
           )}
         </div>
       </div>
@@ -438,65 +435,90 @@ function blockSummary(p: PlanRow) {
   return blocks.join(" · ") || "Training";
 }
 
-function PlanRowCard({
-  plan,
+function DayCard({
+  date,
   mine,
+  friends,
   onEdit,
   onDelete,
 }: {
-  plan: PlanRow;
-  mine?: boolean;
-  onEdit?: () => void;
+  date: string;
+  mine?: PlanRow;
+  friends: FriendPlanRow[];
+  onEdit: () => void;
   onDelete?: () => void;
 }) {
-  // Parse YYYY-MM-DD safely without timezone shift
-  const [y, m, dd] = plan.date.split("-").map(Number);
+  const [y, m, dd] = date.split("-").map(Number);
   const d = new Date(y, (m || 1) - 1, dd || 1);
+  const isToday = new Date().toDateString() === d.toDateString();
+  const hasMine = !!mine;
+
   return (
-    <div className="group flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2 transition">
-      <button
-        onClick={onEdit}
-        className={`h-9 w-9 rounded flex flex-col items-center justify-center shrink-0 ${mine ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-blue-400/20 text-blue-400"}`}
-      >
-        <span className="text-[9px] font-bold uppercase leading-none">{d.toLocaleDateString("en-US", { month: "short" })}</span>
-        <span className="text-sm font-bold leading-none">{d.getDate()}</span>
+    <div
+      className={`group bg-[#0a0a0a] border rounded-xl overflow-hidden transition ${
+        hasMine ? "border-[#dc2626]/30 hover:border-[#dc2626]/60" : "border-blue-500/20 hover:border-blue-500/40"
+      }`}
+    >
+      <button onClick={onEdit} className="w-full text-left p-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className={`h-12 w-12 rounded-lg flex flex-col items-center justify-center shrink-0 ${
+            hasMine ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-blue-400/20 text-blue-400"
+          }`}>
+            <span className="text-[10px] font-bold uppercase leading-none">{d.toLocaleDateString("en-US", { month: "short" })}</span>
+            <span className="text-lg font-bold leading-none mt-0.5">{d.getDate()}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-sm">
+              {isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long" })}
+            </p>
+            {hasMine ? (
+              <p className="text-gray-400 text-xs truncate">
+                {blockSummary(mine)}{mine.gym ? ` · ${mine.gym}` : ""}
+              </p>
+            ) : (
+              <p className="text-blue-400/80 text-xs">Friends only</p>
+            )}
+          </div>
+          {hasMine && onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm(`Delete training on ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}?`)) {
+                  onDelete();
+                }
+              }}
+              className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#dc2626] transition p-1 shrink-0"
+              title="Delete"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </button>
-      <button onClick={onEdit} className="flex-1 min-w-0 text-left">
-        <p className="text-white text-sm font-medium truncate">{blockSummary(plan)}</p>
-        {plan.gym && <p className="text-gray-500 text-xs truncate">{plan.gym}</p>}
-      </button>
-      {mine && onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm(`Delete training on ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}?`)) {
-              onDelete();
-            }
-          }}
-          className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#dc2626] transition p-1"
-          title="Delete"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
+
+      {friends.length > 0 && (
+        <div className="border-t border-white/5 bg-white/[0.02] px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wider text-blue-400 font-semibold mb-2">
+            {friends.length} friend{friends.length === 1 ? "" : "s"} training
+          </p>
+          <div className="space-y-1.5">
+            {friends.map((f, i) => (
+              <div key={`${f.friendName}-${i}`} className="flex items-center gap-2 text-xs">
+                <div className="h-5 w-5 rounded-full bg-blue-400/20 text-blue-400 flex items-center justify-center text-[9px] font-bold shrink-0">
+                  {f.friendName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                </div>
+                <span className="text-white font-medium">{f.friendName}</span>
+                <span className="text-gray-500 truncate">
+                  {blockSummary(f)}{f.gym ? ` · ${f.gym}` : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-function FriendRowCard({ plan }: { plan: FriendPlanRow }) {
-  const d = new Date(plan.date);
-  return (
-    <div className="flex items-center gap-3 bg-white/5 rounded-lg px-3 py-2">
-      <div className="h-9 w-9 rounded bg-blue-400/20 text-blue-400 flex flex-col items-center justify-center shrink-0">
-        <span className="text-[9px] font-bold uppercase leading-none">{d.toLocaleDateString("en-US", { month: "short" })}</span>
-        <span className="text-sm font-bold leading-none">{d.getDate()}</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-white text-sm font-medium truncate">{plan.friendName}</p>
-        <p className="text-gray-500 text-xs truncate">{blockSummary(plan)}{plan.gym ? ` · ${plan.gym}` : ""}</p>
-      </div>
-    </div>
-  );
-}
