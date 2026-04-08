@@ -9,10 +9,17 @@ export default async function NominatePage() {
   const session = await getSession();
   if (!session?.studentId) redirect("/sign-in");
 
-  const mine = await prisma.gymNomination.findMany({
-    where: { studentId: session.studentId },
-    orderBy: { createdAt: "desc" },
-  });
+  const [mine, existingGroups] = await Promise.all([
+    prisma.gymNomination.findMany({
+      where: { studentId: session.studentId },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.gymGroup.findMany({
+      orderBy: [{ memberCount: "desc" }, { name: "asc" }],
+      take: 100,
+      select: { id: true, name: true, city: true, state: true, memberCount: true },
+    }),
+  ]);
 
   return (
     <div>
@@ -22,7 +29,7 @@ export default async function NominatePage() {
         the same gym nominate, we&apos;ll activate it free for the owner.
       </p>
 
-      <NominateForm />
+      <NominateForm existingGroups={existingGroups} />
 
       {mine.length > 0 && (
         <div className="mt-10">
