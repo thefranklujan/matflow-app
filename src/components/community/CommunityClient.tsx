@@ -134,12 +134,16 @@ export default function CommunityClient({
         createdAt: created.createdAt,
         authorId: "you",
         authorName: "You",
+        authorAvatar: null,
         authorBelt: "white",
         authorJoinedAt: new Date().toISOString(),
         authorSessionCount: 0,
         isMine: true,
         reportCount: 0,
         hidden: false,
+        likeCount: 0,
+        likedByMe: false,
+        comments: [],
       }, ...prev]);
       setBody("");
     }

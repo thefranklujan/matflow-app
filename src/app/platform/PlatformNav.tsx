@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, Users, Megaphone, Flame } from "lucide-react";
+import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail } from "lucide-react";
 
 const tabs = [
   { href: "/platform", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/gyms", label: "Gyms", icon: Building2 },
   { href: "/platform/students", label: "Students", icon: Users },
   { href: "/platform/nominations", label: "Nominations", icon: Flame },
+  { href: "/platform/campaigns", label: "Campaigns", icon: Mail },
   { href: "/platform/broadcast", label: "Broadcast", icon: Megaphone },
 ];
 

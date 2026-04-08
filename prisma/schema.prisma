@@ -505,3 +505,18 @@ model WaiverSignature {
   member                Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
   template              WaiverTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 }
+
+model EmailCampaign {
+  id        String    @id @default(cuid())
+  subject   String
+  html      String
+  audience  String    @default("all_students")
+  status    String    @default("draft")
+  sentCount Int       @default(0)
+  sentAt    DateTime?
+  createdBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([createdAt])
+}
