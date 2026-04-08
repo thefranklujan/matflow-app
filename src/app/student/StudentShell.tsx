@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays } from "lucide-react";
+import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ShareMatFlow from "@/components/student/ShareMatFlow";
 
@@ -15,6 +15,20 @@ const NAV = [
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
   { href: "/student/nominate", label: "Nominate Gym", icon: Megaphone },
   { href: "/student/requests", label: "My Requests", icon: Inbox },
+];
+
+// Mobile bottom tab bar: only 4 primary items. Everything else goes into "More".
+const MOBILE_PRIMARY = [
+  { href: "/student", label: "Home", icon: Home },
+  { href: "/student/schedule", label: "Schedule", icon: CalendarDays },
+  { href: "/student/training", label: "Log", icon: ClipboardList },
+];
+const MOBILE_MORE = [
+  { href: "/student/community", label: "Community", icon: Users },
+  { href: "/student/gyms", label: "Find Gyms", icon: Search },
+  { href: "/student/nominate", label: "Nominate Gym", icon: Megaphone },
+  { href: "/student/requests", label: "My Requests", icon: Inbox },
+  { href: "/student/profile", label: "Profile", icon: User },
 ];
 
 const BELT_BAR: Record<string, string> = {
@@ -43,6 +57,7 @@ export default function StudentShell({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,7 +179,7 @@ export default function StudentShell({
         <main className="flex-1 overflow-y-auto bg-[#111] p-4 pb-20">{children}</main>
         <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]">
           <div className="flex h-16 items-stretch">
-            {NAV.map((item) => {
+            {MOBILE_PRIMARY.map((item) => {
               const Icon = item.icon;
               const isActive = item.href === "/student" ? pathname === "/student" : pathname.startsWith(item.href);
               return (
@@ -181,8 +196,67 @@ export default function StudentShell({
                 </Link>
               );
             })}
+            <button
+              onClick={() => setMoreOpen(true)}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                MOBILE_MORE.some((i) => pathname.startsWith(i.href)) ? "text-[#dc2626]" : "text-gray-500"
+              )}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+              More
+            </button>
           </div>
         </nav>
+
+        {moreOpen && (
+          <div
+            className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-end"
+            onClick={() => setMoreOpen(false)}
+          >
+            <div
+              className="w-full bg-[#0a0a0a] border-t border-white/10 rounded-t-2xl p-5 pb-[calc(env(safe-area-inset-bottom)+20px)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-white font-bold text-lg">More</h3>
+                <button
+                  onClick={() => setMoreOpen(false)}
+                  className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-1">
+                {MOBILE_MORE.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMoreOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-3 rounded-lg transition",
+                        isActive ? "bg-[#dc2626]/10 text-[#dc2626]" : "text-gray-300 hover:bg-white/5"
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  );
+                })}
+                <button
+                  onClick={() => { setMoreOpen(false); signOut(); }}
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-400 hover:bg-white/5 mt-2 border-t border-white/5 pt-4"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium">Sign Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
