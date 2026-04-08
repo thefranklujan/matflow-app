@@ -17,12 +17,12 @@ const NAV = [
   { href: "/student/requests", label: "My Requests", icon: Inbox },
 ];
 
-const BELT_DOT: Record<string, string> = {
+const BELT_BAR: Record<string, string> = {
   white: "bg-white",
   blue: "bg-blue-500",
   purple: "bg-purple-500",
   brown: "bg-amber-700",
-  black: "bg-black border border-white/40",
+  black: "bg-neutral-900 border border-white/30",
 };
 
 export default function StudentShell({
@@ -122,16 +122,10 @@ export default function StudentShell({
             <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5 transition">
                 <span className="text-sm text-gray-200 font-medium hidden sm:inline">{name}</span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-gray-400 capitalize">
-                  <span className={`h-2.5 w-2.5 rounded-full ${BELT_DOT[beltRank] || BELT_DOT.white}`} />
-                  {beltRank} belt
-                  {stripes > 0 && (
-                    <span className="inline-flex items-center gap-0.5 ml-0.5">
-                      {Array.from({ length: stripes }).map((_, i) => (
-                        <span key={i} className="inline-block h-2.5 w-[2.5px] rounded-sm bg-white/80" />
-                      ))}
-                    </span>
-                  )}
+                <span className={`hidden sm:inline-flex items-center justify-end gap-1 h-3 w-16 rounded-sm ${BELT_BAR[beltRank] || BELT_BAR.white} pr-1`} title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}>
+                  {Array.from({ length: stripes }).map((_, i) => (
+                    <span key={i} className="inline-block h-2 w-[2px] rounded-sm bg-white/90" />
+                  ))}
                 </span>
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
