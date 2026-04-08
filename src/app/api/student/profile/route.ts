@@ -21,6 +21,7 @@ export async function GET() {
         stripes: true,
         trainingSince: true,
         avatarUrl: true,
+        weeklyGoal: true,
       },
     }),
     prisma.gymNomination.findMany({
@@ -91,7 +92,28 @@ export async function PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session?.studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { firstName, lastName, phone, homeGym, beltRank, stripes, trainingSince } = await req.json();
+  const body = await req.json();
+  const { firstName, lastName, phone, homeGym, beltRank, stripes, trainingSince, weeklyGoal } = body;
+
+  // Allow partial updates: if a weekly-goal-only PATCH comes in, don't clobber the rest.
+  if (
+    typeof weeklyGoal === "number" &&
+    firstName === undefined &&
+    lastName === undefined &&
+    phone === undefined &&
+    homeGym === undefined &&
+    beltRank === undefined &&
+    stripes === undefined &&
+    trainingSince === undefined
+  ) {
+    const clamped = Math.max(1, Math.min(7, Math.round(weeklyGoal)));
+    await prisma.student.update({
+      where: { id: session.studentId },
+      data: { weeklyGoal: clamped },
+    });
+    return NextResponse.json({ success: true, weeklyGoal: clamped });
+  }
+
   await prisma.student.update({
     where: { id: session.studentId },
     data: {
@@ -102,6 +124,9 @@ export async function PATCH(req: NextRequest) {
       beltRank: beltRank || "white",
       stripes: typeof stripes === "number" ? stripes : 0,
       trainingSince: trainingSince ? new Date(trainingSince) : null,
+      ...(typeof weeklyGoal === "number"
+        ? { weeklyGoal: Math.max(1, Math.min(7, Math.round(weeklyGoal))) }
+        : {}),
     },
   });
   return NextResponse.json({ success: true });

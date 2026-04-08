@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import TrainingLogClient from "./TrainingLogClient";
 import { computeStreaks } from "@/lib/streaks";
+import TrainingHeatmap from "@/components/student/TrainingHeatmap";
 
 export default async function TrainingLogPage() {
   const session = await getSession();
@@ -18,8 +19,12 @@ export default async function TrainingLogPage() {
 
   const streaks = computeStreaks(sessions.map((s) => s.date.toISOString()));
 
+  const sessionDates = sessions.map((s) => s.date.toISOString());
+
   return (
-    <TrainingLogClient
+    <>
+      <TrainingHeatmap sessionDates={sessionDates} />
+      <TrainingLogClient
       streaks={streaks}
       initialSessions={sessions.map((s) => ({
         id: s.id,
@@ -33,5 +38,6 @@ export default async function TrainingLogPage() {
         rollsLost: s.rollsLost,
       }))}
     />
+    </>
   );
 }

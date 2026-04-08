@@ -6,12 +6,22 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Search, Inbox, Building2, Calendar, Video, Megaphone, ShoppingBag, Flame, CalendarDays, TrendingUp, Clock } from "lucide-react";
 import { computeStreaks } from "@/lib/streaks";
+import WeeklyGoalRing from "@/components/student/WeeklyGoalRing";
+import WhosTrainingToday from "@/components/student/WhosTrainingToday";
+import AutoLogTodayButton from "@/components/student/AutoLogTodayButton";
 
 export default async function StudentDashboardPage() {
   const session = await getSession();
   if (!session?.studentId) redirect("/sign-in");
 
   const studentId = session.studentId;
+
+  const studentRecord = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { weeklyGoal: true, homeGym: true },
+  });
+  const weeklyGoal = studentRecord?.weeklyGoal ?? 4;
+  const myHomeGym = studentRecord?.homeGym || null;
 
   // If a real student has at least one approved membership, switch them straight
   // into that gym's member portal. they should never see this find-a-gym landing.
@@ -128,6 +138,54 @@ export default async function StudentDashboardPage() {
   const sessionsThisMonth = allSessionDates.filter((s) => s.date >= startOfMonth).length;
   const streaks = computeStreaks(allSessionDates.map((s) => s.date.toISOString()));
 
+  // Today: my planned training (if any) and friends training today
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
+
+  const [myTodayPlan, loggedToday, friendsToday] = await Promise.all([
+    prisma.studentTrainingPlan.findFirst({
+      where: { studentId, date: { gte: todayStart, lt: todayEnd } },
+    }),
+    prisma.trainingSession.count({
+      where: { studentId, date: { gte: todayStart, lt: todayEnd } },
+    }),
+    myHomeGym
+      ? prisma.studentTrainingPlan.findMany({
+          where: {
+            date: { gte: todayStart, lt: todayEnd },
+            NOT: { studentId },
+            student: {
+              shareSchedule: true,
+              homeGym: { equals: myHomeGym, mode: "insensitive" },
+            },
+          },
+          include: {
+            student: { select: { firstName: true, lastName: true, avatarUrl: true } },
+          },
+          take: 20,
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const blockLabel = (p: { morning: boolean; noon: boolean; afternoon: boolean }) => {
+    const b: string[] = [];
+    if (p.morning) b.push("Morning");
+    if (p.noon) b.push("Noon");
+    if (p.afternoon) b.push("Afternoon");
+    return b.join(" + ") || "Training";
+  };
+
+  const friendsTodayList = friendsToday.map((f) => ({
+    name: f.student ? `${f.student.firstName} ${f.student.lastName}`.trim() : "Friend",
+    avatarUrl: f.student?.avatarUrl || null,
+    block: blockLabel(f),
+    gym: f.gym,
+  }));
+
+  const showAutoLog = !!myTodayPlan && loggedToday === 0;
+
   // Pull a snapshot of content from each approved gym
   const gymIds = memberships.map((m) => m.gymId);
   const todayDow = new Date().getDay();
@@ -163,11 +221,22 @@ export default async function StudentDashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Welcome, {session.name.split(" ")[0]}</h1>
-      <p className="text-gray-500 mb-8">Your training, your gyms, your community.</p>
+      <p className="text-gray-500 mb-6">Your training, your gyms, your community.</p>
+
+      {showAutoLog && myTodayPlan && (
+        <div className="mb-6">
+          <AutoLogTodayButton
+            plannedGym={myTodayPlan.gym}
+            plannedBlock={blockLabel(myTodayPlan)}
+          />
+        </div>
+      )}
+
+      <WhosTrainingToday friends={friendsTodayList} />
 
       {/* Quick Metrics */}
       <section className="mb-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
@@ -211,6 +280,8 @@ export default async function StudentDashboardPage() {
             <p className="text-3xl font-bold text-white">{totalHours}</p>
             <p className="text-gray-500 text-xs mt-0.5">all time</p>
           </div>
+
+          <WeeklyGoalRing current={sessionsThisWeek} goal={weeklyGoal} />
         </div>
       </section>
 

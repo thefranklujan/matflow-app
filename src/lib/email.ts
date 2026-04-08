@@ -204,6 +204,60 @@ export function notifyAdminOfNewStudent(student: { firstName: string; lastName: 
   send("franklujan@gmail.com", `New MatFlow Student: ${student.firstName} ${student.lastName}`, html).catch(() => {});
 }
 
+export function sendWeeklyRecap(
+  email: string,
+  name: string,
+  data: {
+    sessionsThisWeek: number;
+    hoursThisWeek: number;
+    currentStreak: number;
+    leaderboardRank: number;
+    topPartner?: string | null;
+  }
+) {
+  const { sessionsThisWeek, hoursThisWeek, currentStreak, leaderboardRank, topPartner } = data;
+
+  let message = "";
+  if (sessionsThisWeek === 0) {
+    message = "Zero sessions this week. The mats are open. Get back on them.";
+  } else if (sessionsThisWeek <= 2) {
+    message = `${sessionsThisWeek} session${sessionsThisWeek === 1 ? "" : "s"} on the books. Add one more next week and watch what happens.`;
+  } else if (sessionsThisWeek <= 4) {
+    message = `${sessionsThisWeek} sessions this week. That is the rhythm of someone who is getting better every month.`;
+  } else {
+    message = `${sessionsThisWeek} sessions this week. Elite work. Recover hard, then go again.`;
+  }
+
+  const stat = (label: string, value: string) => `
+    <td style="background:#000000;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 12px;text-align:center;">
+      <div style="font-size:24px;font-weight:900;color:#ffffff;line-height:1;">${value}</div>
+      <div style="font-size:10px;color:#737373;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-top:6px;">${label}</div>
+    </td>`;
+
+  const html = wrap({
+    eyebrow: "Weekly Recap",
+    headline: "Your week on the mats.",
+    body: `<p style="margin:0 0 18px 0;">Hey ${name},</p>
+           <p style="margin:0 0 22px 0;">Here is the week behind you.</p>
+           <table cellpadding="0" cellspacing="6" style="width:100%;border-collapse:separate;">
+             <tr>
+               ${stat("Sessions", String(sessionsThisWeek))}
+               ${stat("Hours", String(hoursThisWeek))}
+             </tr>
+             <tr>
+               ${stat("Streak", `${currentStreak}d`)}
+               ${stat("Rank", `#${leaderboardRank}`)}
+             </tr>
+           </table>
+           ${topPartner ? `<p style="margin:18px 0 0 0;font-size:13px;color:#a3a3a3;">Most rolled with: <strong style="color:#ffffff;">${topPartner}</strong></p>` : ""}
+           <p style="margin:22px 0 0 0;color:#ffffff;font-weight:600;">${message}</p>`,
+    ctaText: "Open MatFlow",
+    ctaHref: "https://app.mymatflow.com/student",
+    footnote: "Recaps land every Sunday night. Stay sharp.",
+  });
+  send(email, "Your week on the mats", html).catch(() => {});
+}
+
 export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
   const html = wrap({
     eyebrow: "Update",

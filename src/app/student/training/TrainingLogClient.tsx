@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2, Clock, Swords, Flame } from "lucide-react";
+import MilestoneModal from "@/components/student/MilestoneModal";
 
 interface Session {
   id: string;
@@ -44,6 +45,7 @@ export default function TrainingLogClient({
   const [notes, setNotes] = useState("");
   const [rollsWon, setRollsWon] = useState(0);
   const [rollsLost, setRollsLost] = useState(0);
+  const [milestone, setMilestone] = useState<{ count: number; label: string } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,6 +74,9 @@ export default function TrainingLogClient({
       setNotes("");
       setRollsWon(0);
       setRollsLost(0);
+      if (created.milestone) {
+        setMilestone(created.milestone);
+      }
     }
     setSaving(false);
   }
@@ -93,6 +98,7 @@ export default function TrainingLogClient({
 
   return (
     <div>
+      <MilestoneModal open={!!milestone} milestone={milestone} onClose={() => setMilestone(null)} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Training Log</h1>
         <button

@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ShareMatFlow from "@/components/student/ShareMatFlow";
+import QuickLogFAB from "@/components/student/QuickLogFAB";
 
 const NAV = [
   { href: "/student", label: "Home", icon: Home },
@@ -47,6 +48,7 @@ export default function StudentShell({
   stripes = 0,
   avatarUrl = null,
   studentId,
+  homeGym = null,
   children,
 }: {
   name: string;
@@ -54,6 +56,7 @@ export default function StudentShell({
   stripes?: number;
   avatarUrl?: string | null;
   studentId?: string;
+  homeGym?: string | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -260,6 +263,8 @@ export default function StudentShell({
           </div>
         )}
       </div>
+
+      <QuickLogFAB defaultGym={homeGym} />
     </>
   );
 }

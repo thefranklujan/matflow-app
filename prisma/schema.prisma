@@ -174,6 +174,7 @@ model Student {
   shareSchedule       Boolean           @default(true)
   showFriendsSchedule Boolean           @default(true)
   avatarUrl           String?
+  weeklyGoal          Int               @default(4)
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   joinRequests    JoinRequest[]

@@ -39,7 +39,22 @@ export async function POST(req: NextRequest) {
       rollsLost: typeof rollsLost === "number" ? rollsLost : 0,
     },
   });
-  return NextResponse.json(entry, { status: 201 });
+
+  const total = await prisma.trainingSession.count({ where: { studentId } });
+  const MILESTONES: Record<number, string> = {
+    1: "First Session!",
+    10: "10 Sessions",
+    25: "25 Sessions",
+    50: "Half Century",
+    100: "Century Club",
+    250: "250 Sessions",
+    500: "500 Sessions",
+  };
+  const milestone = MILESTONES[total]
+    ? { count: total, label: MILESTONES[total] }
+    : null;
+
+  return NextResponse.json({ ...entry, milestone }, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest) {
