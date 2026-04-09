@@ -156,7 +156,16 @@ export default function TrainingLogClient({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Date</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm" />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                onClick={(e) => {
+                  try { (e.target as HTMLInputElement).showPicker(); } catch {}
+                }}
+                required
+                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm cursor-pointer [color-scheme:dark]"
+              />
             </div>
             <div>
               <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Duration (min)</label>
