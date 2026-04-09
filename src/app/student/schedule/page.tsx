@@ -102,10 +102,23 @@ export default async function StudentSchedulePage() {
       : Promise.resolve([]),
   ]);
 
+  // Which dates the student has already logged a session for (so we can show
+  // a green check on the DayCard instead of the "mark complete" button).
+  const loggedSessions = await prisma.trainingSession.findMany({
+    where: { studentId },
+    select: { date: true },
+    orderBy: { date: "desc" },
+    take: 500,
+  });
+  const completedDates = Array.from(
+    new Set(loggedSessions.map((s) => s.date.toISOString().slice(0, 10)))
+  );
+
   return (
     <TrainingPlanClient
       shareSchedule={!!me?.shareSchedule}
       showFriendsSchedule={!!me?.showFriendsSchedule}
+      completedDates={completedDates}
       myGyms={[
         ...(me?.homeGym ? [{ id: "__home", name: me.homeGym }] : []),
         ...myGroupsData.map((g) => ({ id: g.id, name: g.name })),

@@ -62,7 +62,21 @@ export async function DELETE(req: NextRequest) {
   if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  await prisma.trainingSession.deleteMany({ where: { id, studentId } });
+  const date = searchParams.get("date");
+  if (!id && !date) return NextResponse.json({ error: "Missing id or date" }, { status: 400 });
+
+  if (id) {
+    await prisma.trainingSession.deleteMany({ where: { id, studentId } });
+  } else if (date) {
+    // Delete all sessions for the given YYYY-MM-DD in the student's local day.
+    const [y, m, d] = date.split("-").map(Number);
+    const start = new Date(y, (m || 1) - 1, d || 1);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    await prisma.trainingSession.deleteMany({
+      where: { studentId, date: { gte: start, lt: end } },
+    });
+  }
   return NextResponse.json({ success: true });
 }

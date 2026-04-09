@@ -33,15 +33,18 @@ export default function TrainingPlanClient({
   myGyms,
   initialPlans,
   friendPlans,
+  completedDates: initCompleted = [],
 }: {
   shareSchedule: boolean;
   showFriendsSchedule: boolean;
   myGyms: GymOption[];
   initialPlans: PlanRow[];
   friendPlans: FriendPlanRow[];
+  completedDates?: string[];
 }) {
   const [share, setShare] = useState(initShare);
   const [show, setShow] = useState(initShow);
+  const [completed, setCompleted] = useState<Set<string>>(() => new Set(initCompleted));
   const [plans, setPlans] = useState<Record<string, PlanRow>>(() => {
     const m: Record<string, PlanRow> = {};
     for (const p of initialPlans) m[p.date] = p;
@@ -180,6 +183,60 @@ export default function TrainingPlanClient({
     const [y, m, d] = dateStr.split("-").map(Number);
     setSelectedDate(new Date(y, (m || 1) - 1, d || 1));
   }
+
+  async function markComplete(dateStr: string) {
+    const plan = plans[dateStr];
+    if (!plan) return;
+    // Optimistic
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.add(dateStr);
+      return next;
+    });
+    try {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const isoDate = new Date(y, (m || 1) - 1, d || 1).toISOString();
+      const res = await fetch("/api/student/training", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: isoDate,
+          duration: 60,
+          sessionType: "class",
+          gym: plan.gym || null,
+          notes: "Marked complete from schedule",
+        }),
+      });
+      if (!res.ok) {
+        // Revert
+        setCompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(dateStr);
+          return next;
+        });
+      }
+    } catch {
+      setCompleted((prev) => {
+        const next = new Set(prev);
+        next.delete(dateStr);
+        return next;
+      });
+    }
+  }
+
+  async function unmarkComplete(dateStr: string) {
+    // Optimistic unmark. Delete the session(s) for this date via DELETE.
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.delete(dateStr);
+      return next;
+    });
+    try {
+      await fetch(`/api/student/training?date=${dateStr}`, { method: "DELETE" });
+    } catch {}
+  }
+
+  const todayKeyForCheck = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   async function toggleVisibility(field: "shareSchedule" | "showFriendsSchedule", value: boolean) {
     if (field === "shareSchedule") setShare(value);
@@ -402,8 +459,12 @@ export default function TrainingPlanClient({
                 date={day.date}
                 mine={day.mine}
                 friends={day.friends}
+                isCompleted={completed.has(day.date)}
+                canMarkComplete={!!day.mine && day.date <= todayKeyForCheck}
                 onEdit={() => editPlanByDate(day.date)}
                 onDelete={day.mine ? () => deletePlanByDate(day.date) : undefined}
+                onMarkComplete={() => markComplete(day.date)}
+                onUnmarkComplete={() => unmarkComplete(day.date)}
               />
             ))
           )}
@@ -439,14 +500,22 @@ function DayCard({
   date,
   mine,
   friends,
+  isCompleted = false,
+  canMarkComplete = false,
   onEdit,
   onDelete,
+  onMarkComplete,
+  onUnmarkComplete,
 }: {
   date: string;
   mine?: PlanRow;
   friends: FriendPlanRow[];
+  isCompleted?: boolean;
+  canMarkComplete?: boolean;
   onEdit: () => void;
   onDelete?: () => void;
+  onMarkComplete?: () => void;
+  onUnmarkComplete?: () => void;
 }) {
   const [y, m, dd] = date.split("-").map(Number);
   const d = new Date(y, (m || 1) - 1, dd || 1);
@@ -456,7 +525,11 @@ function DayCard({
   return (
     <div
       className={`group bg-[#0a0a0a] border rounded-xl overflow-hidden transition ${
-        hasMine ? "border-[#dc2626]/30 hover:border-[#dc2626]/60" : "border-blue-500/20 hover:border-blue-500/40"
+        isCompleted
+          ? "border-green-500/50 hover:border-green-500/70"
+          : hasMine
+          ? "border-[#dc2626]/30 hover:border-[#dc2626]/60"
+          : "border-blue-500/20 hover:border-blue-500/40"
       }`}
     >
       <button onClick={onEdit} className="w-full text-left p-4">
@@ -468,18 +541,49 @@ function DayCard({
             <span className="text-lg font-bold leading-none mt-0.5">{d.getDate()}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm">
+            <p className="text-white font-semibold text-sm flex items-center gap-2">
               {isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long" })}
+              {isCompleted && (
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-green-400 font-bold">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Completed
+                </span>
+              )}
             </p>
             {hasMine ? (
-              <p className="text-gray-400 text-xs truncate">
+              <p className={`text-xs truncate ${isCompleted ? "text-gray-500 line-through" : "text-gray-400"}`}>
                 {blockSummary(mine)}{mine.gym ? ` · ${mine.gym}` : ""}
               </p>
             ) : (
               <p className="text-blue-400/80 text-xs">Friends only</p>
             )}
           </div>
-          {hasMine && onDelete && (
+
+          {/* Completion toggle */}
+          {hasMine && canMarkComplete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isCompleted) {
+                  if (confirm("Unmark this session as complete? It will remove the logged session.")) {
+                    onUnmarkComplete?.();
+                  }
+                } else {
+                  onMarkComplete?.();
+                }
+              }}
+              className={`shrink-0 h-9 w-9 rounded-full flex items-center justify-center transition border ${
+                isCompleted
+                  ? "bg-green-500 border-green-500 text-white"
+                  : "bg-transparent border-white/20 text-gray-500 hover:border-green-500/60 hover:text-green-400"
+              }`}
+              title={isCompleted ? "Mark as not done" : "Mark as complete"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          )}
+
+          {hasMine && onDelete && !isCompleted && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
