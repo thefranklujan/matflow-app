@@ -166,6 +166,11 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
             <button onClick={sendNow} disabled={saving} className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50">
               Send Now
             </button>
+            {campaign.status === "sent" && (
+              <Link href={`/platform/campaigns/${campaign.id}/report`} className="bg-white/5 hover:bg-white/10 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+                View Report
+              </Link>
+            )}
             {message && <span className="text-sm text-gray-400">{message}</span>}
           </div>
         </div>

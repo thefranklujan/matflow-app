@@ -528,18 +528,33 @@ model ActivityLog {
 }
 
 model EmailCampaign {
-  id        String    @id @default(cuid())
+  id        String          @id @default(cuid())
   subject   String
   html      String
-  audience  String    @default("all_students")
-  status    String    @default("draft")
-  sentCount Int       @default(0)
+  audience  String          @default("all_students")
+  status    String          @default("draft")
+  sentCount Int             @default(0)
   sentAt    DateTime?
   createdBy String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  events    CampaignEvent[]
 
   @@index([createdAt])
+}
+
+model CampaignEvent {
+  id         String        @id @default(cuid())
+  campaignId String
+  email      String
+  event      String
+  metadata   String?
+  createdAt  DateTime      @default(now())
+  campaign   EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([event])
+  @@index([campaignId, email, event])
 }
 
 model GymDatabase {

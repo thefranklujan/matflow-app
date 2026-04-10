@@ -10,6 +10,7 @@ const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsy
   .map((e) => e.trim().toLowerCase());
 
 const FROM = "MatFlow <noreply@mymatflow.com>";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.mymatflow.com";
 
 async function requireAdmin() {
   const session = await getSession();
@@ -49,6 +50,26 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
   return [];
 }
 
+function injectTracking(html: string, campaignId: string, email: string): string {
+  const encodedEmail = encodeURIComponent(email);
+
+  // Add tracking pixel before </body>
+  const pixel = `<img src="${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}" width="1" height="1" style="display:none;" alt="" />`;
+  let tracked = html.replace(/<\/body>/i, `${pixel}</body>`);
+
+  // Wrap <a href="..."> links with click tracker (skip mailto: and #)
+  tracked = tracked.replace(
+    /(<a\s[^>]*href=")([^"#][^"]*?)("[^>]*>)/gi,
+    (match, before, url, after) => {
+      if (url.startsWith("mailto:") || url.startsWith("#") || url.includes("/api/track/")) return match;
+      const trackUrl = `${BASE_URL}/api/track/click?cid=${campaignId}&e=${encodedEmail}&url=${encodeURIComponent(url)}`;
+      return `${before}${trackUrl}${after}`;
+    }
+  );
+
+  return tracked;
+}
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -69,14 +90,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let sent = 0;
   const errors: string[] = [];
 
-  // Send individually (Resend rate limits via retries handled by SDK). Cap at 500 per call for safety.
+  // Log sent events and send with tracking
   const capped = recipients.slice(0, 500);
   for (const to of capped) {
     try {
-      await resend.emails.send({ from: FROM, to, subject: campaign.subject, html: campaign.html });
+      const trackedHtml = injectTracking(campaign.html, id, to);
+      await resend.emails.send({ from: FROM, to, subject: campaign.subject, html: trackedHtml });
       sent++;
+
+      // Log sent event
+      await prisma.campaignEvent.create({
+        data: { campaignId: id, email: to, event: "sent" },
+      }).catch(() => {});
     } catch (err) {
       errors.push(`${to}: ${String(err).slice(0, 100)}`);
+
+      // Log bounce/failure
+      await prisma.campaignEvent.create({
+        data: { campaignId: id, email: to, event: "failed", metadata: String(err).slice(0, 200) },
+      }).catch(() => {});
     }
   }
 
