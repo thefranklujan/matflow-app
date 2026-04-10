@@ -100,6 +100,9 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
           )}
           <div className="text-gray-500 text-sm mt-1 flex items-center gap-3">
             <span className="capitalize">{campaign.audience.replace(/_/g, " ")}</span>
+            {recipientCount !== null && (
+              <span className="text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
+            )}
             <span>·</span>
             <span className={campaign.status === "sent" ? "text-green-400" : ""}>{campaign.status}</span>
             {campaign.sentCount > 0 && <><span>·</span><span>{campaign.sentCount} sent</span></>}
