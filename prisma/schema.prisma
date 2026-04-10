@@ -145,6 +145,7 @@ model Member {
   approved            Boolean              @default(true)
   active              Boolean              @default(true)
   isAmbassador        Boolean              @default(false)
+  checkinCode         String?
   locationSlug        String?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt

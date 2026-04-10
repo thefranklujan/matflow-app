@@ -25,8 +25,6 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "waivers", label: "Waivers", icon: "FileText", roles: ["admin"], section: "main" },
   { slug: "events", label: "Events", icon: "CalendarDays", roles: ["admin"], section: "main" },
   { slug: "competitions", label: "Competitions", icon: "Trophy", roles: ["admin"], section: "main" },
-  { slug: "database", label: "Database", icon: "Database", roles: ["admin"], section: "main" },
-  { slug: "approve-gyms", label: "Approve Gyms", icon: "ShieldCheck", roles: ["admin"], section: "main" },
   // Member-only
   { slug: "training", label: "Training Log", icon: "ClipboardList", roles: ["member"], section: "main" },
   { slug: "community", label: "Community", icon: "Users", roles: ["member"], section: "main" },

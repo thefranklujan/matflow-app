@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail, Activity } from "lucide-react";
+import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail, Activity, Database, ShieldCheck } from "lucide-react";
 
 const tabs = [
   { href: "/platform", label: "Dashboard", icon: LayoutDashboard },
@@ -12,6 +12,8 @@ const tabs = [
   { href: "/platform/nominations", label: "Nominations", icon: Flame },
   { href: "/platform/campaigns", label: "Campaigns", icon: Mail },
   { href: "/platform/broadcast", label: "Broadcast", icon: Megaphone },
+  { href: "/platform/database", label: "Database", icon: Database },
+  { href: "/platform/approve-gyms", label: "Approve Gyms", icon: ShieldCheck },
 ];
 
 export default function PlatformNav() {
