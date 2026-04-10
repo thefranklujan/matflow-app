@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, Send, Eye, MousePointerClick, AlertTriangle,
-  TrendingUp, ExternalLink,
+  TrendingUp, ExternalLink, X,
 } from "lucide-react";
 
 interface ReportData {
@@ -30,6 +30,12 @@ interface ReportData {
   clicksByUrl: [string, number][];
   timeline: [string, { opens: number; clicks: number }][];
   recentActivity: { email: string; event: string; metadata: string | null; time: string }[];
+  emailLists: {
+    sent: string[];
+    opened: string[];
+    clicked: string[];
+    bounced: string[];
+  };
 }
 
 const EVENT_COLORS: Record<string, { bg: string; text: string; icon: typeof Send }> = {
@@ -55,6 +61,7 @@ export default function ReportClient() {
   const id = params.id as string;
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeList, setActiveList] = useState<"sent" | "opened" | "clicked" | "bounced" | null>(null);
 
   useEffect(() => {
     fetch(`/api/platform/campaigns/${id}/report`)
@@ -100,38 +107,43 @@ export default function ReportClient() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: "32px" }}>
-        <KPI
-          label="Sent"
-          value={metrics.sent}
-          icon={Send}
-          color="text-blue-400"
-          bgColor="bg-blue-500/10"
-        />
-        <KPI
-          label="Opened"
-          value={metrics.opened}
-          sub={`${metrics.openRate}% open rate`}
-          icon={Eye}
-          color="text-emerald-400"
-          bgColor="bg-emerald-500/10"
-        />
-        <KPI
-          label="Clicked"
-          value={metrics.clicked}
-          sub={`${metrics.clickRate}% click rate`}
-          icon={MousePointerClick}
-          color="text-purple-400"
-          bgColor="bg-purple-500/10"
-        />
-        <KPI
-          label="Bounced"
-          value={metrics.failed}
-          sub={metrics.sent > 0 ? `${Math.round((metrics.failed / metrics.sent) * 100)}% bounce rate` : undefined}
-          icon={AlertTriangle}
-          color={metrics.failed > 0 ? "text-red-400" : "text-gray-600"}
-          bgColor={metrics.failed > 0 ? "bg-red-500/10" : "bg-white/5"}
-        />
+        <KPI label="Sent" value={metrics.sent} icon={Send} color="text-blue-400" bgColor="bg-blue-500/10"
+          active={activeList === "sent"} onClick={() => setActiveList(activeList === "sent" ? null : "sent")} />
+        <KPI label="Opened" value={metrics.opened} sub={`${metrics.openRate}% open rate`} icon={Eye} color="text-emerald-400" bgColor="bg-emerald-500/10"
+          active={activeList === "opened"} onClick={() => setActiveList(activeList === "opened" ? null : "opened")} />
+        <KPI label="Clicked" value={metrics.clicked} sub={`${metrics.clickRate}% click rate`} icon={MousePointerClick} color="text-purple-400" bgColor="bg-purple-500/10"
+          active={activeList === "clicked"} onClick={() => setActiveList(activeList === "clicked" ? null : "clicked")} />
+        <KPI label="Bounced" value={metrics.failed} sub={metrics.sent > 0 ? `${Math.round((metrics.failed / metrics.sent) * 100)}% bounce rate` : undefined}
+          icon={AlertTriangle} color={metrics.failed > 0 ? "text-red-400" : "text-gray-600"} bgColor={metrics.failed > 0 ? "bg-red-500/10" : "bg-white/5"}
+          active={activeList === "bounced"} onClick={() => setActiveList(activeList === "bounced" ? null : "bounced")} />
       </div>
+
+      {/* Email list panel */}
+      {activeList && data.emailLists && (
+        <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden" style={{ marginBottom: "32px" }}>
+          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+            <h2 className="text-white font-semibold capitalize">{activeList} Emails</h2>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-500">{data.emailLists[activeList].length} emails</span>
+              <button onClick={() => setActiveList(null)} className="text-gray-500 hover:text-white transition">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto divide-y divide-white/5">
+            {data.emailLists[activeList].length === 0 ? (
+              <p className="px-6 py-8 text-gray-500 text-sm text-center">No emails in this category yet</p>
+            ) : (
+              data.emailLists[activeList].map((email) => (
+                <div key={email} className="px-6 py-2.5 flex items-center justify-between">
+                  <span className="text-sm text-gray-300">{email}</span>
+                  <a href={`mailto:${email}`} className="text-xs text-brand-accent hover:underline">Email</a>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Rates Bar */}
       <div className="grid grid-cols-3 gap-4" style={{ marginBottom: "32px" }}>
@@ -199,16 +211,22 @@ export default function ReportClient() {
   );
 }
 
-function KPI({ label, value, sub, icon: Icon, color, bgColor }: {
+function KPI({ label, value, sub, icon: Icon, color, bgColor, active, onClick }: {
   label: string;
   value: number;
   sub?: string;
   icon: typeof Send;
   color: string;
   bgColor: string;
+  active?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <div className={`${bgColor} border border-white/5 rounded-xl`} style={{ padding: "24px" }}>
+    <div
+      className={`${bgColor} border rounded-xl cursor-pointer transition hover:border-white/20 ${active ? "border-white/30 ring-1 ring-white/10" : "border-white/5"}`}
+      style={{ padding: "24px" }}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between" style={{ marginBottom: "12px" }}>
         <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">{label}</span>
         <Icon className={`h-4 w-4 ${color}`} />

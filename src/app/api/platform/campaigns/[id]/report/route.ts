@@ -78,5 +78,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     clicksByUrl: Object.entries(clicksByUrl).sort(([, a], [, b]) => b - a),
     timeline: Object.entries(timeline).sort(([a], [b]) => a.localeCompare(b)),
     recentActivity,
+    emailLists: {
+      sent: Array.from(sentEmails),
+      opened: Array.from(openedEmails),
+      clicked: Array.from(clickedEmails),
+      bounced: Array.from(failedEmails),
+    },
   });
 }
