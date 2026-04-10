@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import {
   Database, Search, Filter, ChevronDown, ChevronLeft, ChevronRight,
   Mail, Phone, MapPin, Star, Globe, X, Plus,
-  Edit2, Trash2, Eye, Layers, ChevronsDown, ChevronsUp,
+  Edit2, Trash2, Eye, Layers, ChevronsDown, ChevronsUp, Map,
 } from "lucide-react";
 
 interface GymRecord {
@@ -203,6 +203,19 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
               <div>
                 <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Notes</label>
                 <p className="text-sm text-gray-300" style={{ marginTop: "4px" }}>{record.notes}</p>
+              </div>
+            )}
+
+            {record.googlePlaceId && (
+              <div>
+                <a
+                  href={`https://www.google.com/maps/place/?q=place_id:${record.googlePlaceId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-brand-accent hover:underline"
+                >
+                  <Map className="h-3.5 w-3.5" /> View on Google
+                </a>
               </div>
             )}
 
@@ -494,12 +507,26 @@ export default function DatabaseClient() {
           </select>
         </td>
         <td style={{ padding: "14px 16px" }} className="text-right">
-          <button
-            onClick={(e) => { e.stopPropagation(); setSelected(rec); }}
-            className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
+          <div className="flex items-center justify-end gap-1">
+            {rec.googlePlaceId && (
+              <a
+                href={`https://www.google.com/maps/place/?q=place_id:${rec.googlePlaceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
+                title="View on Google Maps"
+              >
+                <Map className="h-4 w-4" />
+              </a>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); setSelected(rec); }}
+              className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+          </div>
         </td>
       </tr>
     );

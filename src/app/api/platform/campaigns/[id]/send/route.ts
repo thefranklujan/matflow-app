@@ -24,7 +24,6 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
     return students.map((s) => s.email).filter(Boolean);
   }
   if (audience === "all_admins") {
-    // Admin = oldest active member of each gym
     const gyms = await prisma.gym.findMany({ select: { id: true } });
     const emails: string[] = [];
     for (const g of gyms) {
@@ -36,6 +35,13 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
       if (first?.email) emails.push(first.email);
     }
     return emails;
+  }
+  if (audience === "database_leads") {
+    const leads = await prisma.gymDatabase.findMany({
+      where: { email: { not: null } },
+      select: { email: true },
+    });
+    return leads.map((l) => l.email).filter((e): e is string => !!e);
   }
   return [];
 }

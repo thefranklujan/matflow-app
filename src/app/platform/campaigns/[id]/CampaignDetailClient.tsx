@@ -114,6 +114,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
               >
                 <option value="all_students">All Students</option>
                 <option value="all_admins">All Gym Admins</option>
+                <option value="database_leads">Database Leads</option>
                 <option value="test">Test (just me)</option>
               </select>
             </div>
