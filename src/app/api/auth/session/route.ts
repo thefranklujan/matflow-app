@@ -19,14 +19,15 @@ export async function GET() {
   }
 
   let gym = null;
-  let billing: { subscriptionStatus: string; trialEndsAt: string | null; stripePriceId: string | null } | null = null;
+  let billing: { approved: boolean; subscriptionStatus: string; trialEndsAt: string | null; stripePriceId: string | null } | null = null;
   if (session.gymId) {
     const g = await prisma.gym.findUnique({
       where: { id: session.gymId },
-      select: { name: true, logo: true, subscriptionStatus: true, trialEndsAt: true, stripePriceId: true },
+      select: { name: true, logo: true, approved: true, subscriptionStatus: true, trialEndsAt: true, stripePriceId: true },
     });
     if (g) gym = { name: g.name, logo: g.logo };
     if (g) billing = {
+      approved: g.approved,
       subscriptionStatus: g.subscriptionStatus,
       trialEndsAt: g.trialEndsAt?.toISOString() || null,
       stripePriceId: g.stripePriceId || null,

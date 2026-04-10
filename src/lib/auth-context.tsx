@@ -18,6 +18,7 @@ interface GymInfo {
 }
 
 interface BillingInfo {
+  approved: boolean;
   subscriptionStatus: string;
   trialEndsAt: string | null;
   stripePriceId: string | null;
@@ -32,6 +33,7 @@ interface AuthContextValue {
   isMember: boolean;
   isPlatformAdmin: boolean;
   isTrialExpired: boolean;
+  isPendingApproval: boolean;
   isLockedOut: boolean;
   role: "admin" | "member" | null;
   signOut: () => Promise<void>;
@@ -47,6 +49,7 @@ const AuthContext = createContext<AuthContextValue>({
   isMember: false,
   isPlatformAdmin: false,
   isTrialExpired: false,
+  isPendingApproval: false,
   isLockedOut: false,
   role: null,
   signOut: async () => {},
@@ -94,7 +97,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     && !!billing.trialEndsAt
     && new Date(billing.trialEndsAt) < new Date();
 
-  const isLockedOut = isTrialExpired
+  const isPendingApproval = billing ? !billing.approved : false;
+
+  const isLockedOut = isPendingApproval
+    || isTrialExpired
     || billing?.subscriptionStatus === "canceled"
     || billing?.subscriptionStatus === "past_due";
 
@@ -109,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isMember: user?.role === "member",
         isPlatformAdmin,
         isTrialExpired,
+        isPendingApproval,
         isLockedOut: !!isLockedOut,
         role: user?.role || null,
         signOut,

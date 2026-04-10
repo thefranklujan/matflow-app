@@ -11,14 +11,14 @@ import {
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
   FileSignature, UserCircle, Settings, CreditCard, ChevronLeft,
-  ChevronRight, LayoutDashboard, Home, UserPlus, Database,
+  ChevronRight, LayoutDashboard, Home, UserPlus, Database, ShieldCheck,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity, BarChart3, Target, Users, Calendar, CheckSquare, Video,
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
-  FileSignature, UserCircle, Settings, CreditCard, LayoutDashboard, Home, UserPlus, Database,
+  FileSignature, UserCircle, Settings, CreditCard, LayoutDashboard, Home, UserPlus, Database, ShieldCheck,
 };
 
 export function Sidebar() {
