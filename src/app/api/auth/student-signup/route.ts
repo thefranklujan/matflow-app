@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { registerStudent, createSession } from "@/lib/local-auth";
 import { sendWelcomeEmail, notifyAdminOfNewStudent } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     sendWelcomeEmail(email, `${firstName} ${lastName}`, "MatFlow");
     notifyAdminOfNewStudent({ firstName, lastName, email, phone });
+    logActivity({ gymId: "platform-admin-gym", action: "student_signup", actorId: student.id, actorName: `${firstName} ${lastName}` });
 
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error) {

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { registerMember, createSession } from "@/lib/local-auth";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
 
     const gym = await prisma.gym.findUnique({ where: { slug: gymSlug }, select: { name: true } });
     sendWelcomeEmail(email, `${firstName} ${lastName}`, gym?.name || "your gym");
+    logActivity({ gymId: result.member.gymId, action: "member_added", targetId: result.member.id, targetName: `${firstName} ${lastName}` });
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
