@@ -27,11 +27,20 @@ export async function POST(request: NextRequest) {
         const gymId = session.metadata?.gymId;
         if (!gymId) break;
 
+        // Retrieve the subscription to get the price ID
+        let stripePriceId: string | null = null;
+        if (session.subscription) {
+          const sub = await getStripe().subscriptions.retrieve(session.subscription as string);
+          stripePriceId = sub.items.data[0]?.price.id || null;
+        }
+
         await prisma.gym.update({
           where: { id: gymId },
           data: {
             stripeCustomerId: session.customer as string,
             subscriptionStatus: "active",
+            stripePriceId,
+            trialEndsAt: null,
           },
         });
         break;

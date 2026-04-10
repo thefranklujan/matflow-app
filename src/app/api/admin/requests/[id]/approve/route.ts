@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestApprovedToStudent } from "@/lib/email";
+import { checkMemberLimit } from "@/lib/billing";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -16,6 +18,14 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     });
     if (!request) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (request.status !== "pending") return NextResponse.json({ error: "Already decided" }, { status: 400 });
+
+    const { allowed, current, limit } = await checkMemberLimit(gymId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: `Member limit reached (${current}/${limit}). Upgrade to Pro for unlimited members.` },
+        { status: 403 }
+      );
+    }
 
     // Create a Member record linked to the Student
     await prisma.$transaction(async (tx) => {
@@ -46,6 +56,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       `${request.student.firstName} ${request.student.lastName}`,
       request.gym.name
     );
+    logActivity({ gymId, action: "join_approved", actorName: "Admin", targetId: request.student.id, targetName: `${request.student.firstName} ${request.student.lastName}` });
 
     return NextResponse.json({ success: true });
   } catch (error) {

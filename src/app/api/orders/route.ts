@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getAuthContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function GET() {
   try {
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
     sendOrderConfirmation(customerEmail, customerName, order.id, subtotal, gym?.name || "Your Gym");
+    logActivity({ gymId, action: "order_placed", actorName: customerName, targetId: order.id, meta: { total: subtotal, itemCount: items.length } });
 
     return NextResponse.json(order, { status: 201 });
   } catch {

@@ -40,6 +40,7 @@ model Gym {
   videos             Video[]
   waiverSignatures   WaiverSignature[]
   waiverTemplates    WaiverTemplate[]
+  activityLogs       ActivityLog[]
 }
 
 model Category {
@@ -505,6 +506,23 @@ model WaiverSignature {
   gym                   Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
   member                Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
   template              WaiverTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  gymId      String
+  action     String
+  actorId    String?
+  actorName  String?
+  targetId   String?
+  targetName String?
+  meta       String?
+  createdAt  DateTime @default(now())
+  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, createdAt])
+  @@index([gymId, action])
+  @@index([createdAt])
 }
 
 model EmailCampaign {

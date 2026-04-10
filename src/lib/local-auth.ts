@@ -88,9 +88,8 @@ export async function registerGymOwner(data: {
         name: data.gymName,
         slug: data.gymSlug,
         timezone: data.timezone || "America/Chicago",
-        // Free forever for gyms under 15 members. They upgrade only when they grow.
-        subscriptionStatus: "free",
-        trialEndsAt: null,
+        subscriptionStatus: "trialing",
+        trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       },
     });
 

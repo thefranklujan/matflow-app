@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBeltPromotion } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(
   req: NextRequest,
@@ -44,6 +45,7 @@ export async function POST(
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
     sendBeltPromotion(existing.email, `${existing.firstName} ${existing.lastName}`, beltRank, stripes, gym?.name || "Your Gym");
+    logActivity({ gymId, action: "belt_promotion", actorName: "Admin", targetId: id, targetName: `${existing.firstName} ${existing.lastName}`, meta: { beltRank, stripes } });
 
     return NextResponse.json(beltProgress, { status: 201 });
   } catch {

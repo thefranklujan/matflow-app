@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail } from "lucide-react";
+import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail, Activity } from "lucide-react";
 
 const tabs = [
   { href: "/platform", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/platform/activity", label: "Activity", icon: Activity },
   { href: "/platform/gyms", label: "Gyms", icon: Building2 },
   { href: "/platform/students", label: "Students", icon: Users },
   { href: "/platform/nominations", label: "Nominations", icon: Flame },

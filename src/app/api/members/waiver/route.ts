@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activity-log";
 
 // GET: Get active waiver template + member's signature status
 export async function GET() {
@@ -65,6 +66,8 @@ export async function POST(request: NextRequest) {
         waiverContentSnapshot: template.content,
       },
     });
+
+    logActivity({ gymId, action: "waiver_signed", actorId: memberId, actorName: signedName, targetId: templateId, targetName: template.title });
 
     return NextResponse.json({ success: true, signedAt: signature.signedAt }, { status: 201 });
   } catch {

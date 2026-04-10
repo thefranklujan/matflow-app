@@ -8,6 +8,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   // Admin-only
+  { slug: "activity", label: "Activity", icon: "Activity", roles: ["admin"], section: "main" },
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"], section: "main" },
   { slug: "leads", label: "Leads", icon: "Target", roles: ["admin"], section: "main" },
   { slug: "requests", label: "Join Requests", icon: "UserPlus", roles: ["admin"], section: "main" },

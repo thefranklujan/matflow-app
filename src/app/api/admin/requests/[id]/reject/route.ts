@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestRejectedToStudent } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,6 +28,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       `${request.student.firstName} ${request.student.lastName}`,
       request.gym.name
     );
+    logActivity({ gymId, action: "join_rejected", actorName: "Admin", targetId: request.student.id, targetName: `${request.student.firstName} ${request.student.lastName}` });
 
     return NextResponse.json({ success: true });
   } catch (error) {

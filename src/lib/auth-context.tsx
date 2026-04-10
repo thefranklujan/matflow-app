@@ -17,13 +17,22 @@ interface GymInfo {
   logo: string | null;
 }
 
+interface BillingInfo {
+  subscriptionStatus: string;
+  trialEndsAt: string | null;
+  stripePriceId: string | null;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   gym: GymInfo | null;
+  billing: BillingInfo | null;
   isLoading: boolean;
   isAdmin: boolean;
   isMember: boolean;
   isPlatformAdmin: boolean;
+  isTrialExpired: boolean;
+  isLockedOut: boolean;
   role: "admin" | "member" | null;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -32,10 +41,13 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   gym: null,
+  billing: null,
   isLoading: true,
   isAdmin: false,
   isMember: false,
   isPlatformAdmin: false,
+  isTrialExpired: false,
+  isLockedOut: false,
   role: null,
   signOut: async () => {},
   refresh: async () => {},
@@ -44,6 +56,7 @@ const AuthContext = createContext<AuthContextValue>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [gym, setGym] = useState<GymInfo | null>(null);
+  const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.user) {
           setUser(data.user);
           if (data.gym) setGym(data.gym);
+          if (data.billing) setBilling(data.billing);
           if (data.isPlatformAdmin) setIsPlatformAdmin(true);
         }
       }
@@ -76,15 +90,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/sign-in";
   }, []);
 
+  const isTrialExpired = billing?.subscriptionStatus === "trialing"
+    && !!billing.trialEndsAt
+    && new Date(billing.trialEndsAt) < new Date();
+
+  const isLockedOut = isTrialExpired
+    || billing?.subscriptionStatus === "canceled"
+    || billing?.subscriptionStatus === "past_due";
+
   return (
     <AuthContext.Provider
       value={{
         user,
         gym,
+        billing,
         isLoading,
         isAdmin: user?.role === "admin",
         isMember: user?.role === "member",
         isPlatformAdmin,
+        isTrialExpired,
+        isLockedOut: !!isLockedOut,
         role: user?.role || null,
         signOut,
         refresh: fetchSession,

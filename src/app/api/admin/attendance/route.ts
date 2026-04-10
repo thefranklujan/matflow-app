@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activity-log";
 
 export async function GET(req: NextRequest) {
   try {
@@ -62,6 +63,8 @@ export async function POST(req: NextRequest) {
       })),
       skipDuplicates: true,
     });
+
+    logActivity({ gymId, action: "check_in", actorName: "Admin", meta: { count: result.count, classType, classDate } });
 
     return NextResponse.json({ count: result.count }, { status: 201 });
   } catch {

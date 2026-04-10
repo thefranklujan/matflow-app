@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestSubmittedToAdmin } from "@/lib/email";
+import { logActivity } from "@/lib/activity-log";
 
 export async function GET() {
   const session = await getSession();
@@ -53,6 +54,8 @@ export async function POST(req: NextRequest) {
       request.gym.name
     );
   }
+
+  logActivity({ gymId, action: "join_request", actorId: session.studentId, actorName: `${request.student.firstName} ${request.student.lastName}`, targetName: request.gym.name });
 
   return NextResponse.json({ success: true, request }, { status: 201 });
 }

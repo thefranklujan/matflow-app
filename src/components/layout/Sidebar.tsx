@@ -7,7 +7,7 @@ import { NAV_ITEMS } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import {
-  BarChart3, Target, Users, Calendar, CheckSquare, Video,
+  Activity, BarChart3, Target, Users, Calendar, CheckSquare, Video,
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
   FileSignature, UserCircle, Settings, CreditCard, ChevronLeft,
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  BarChart3, Target, Users, Calendar, CheckSquare, Video,
+  Activity, BarChart3, Target, Users, Calendar, CheckSquare, Video,
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
   FileSignature, UserCircle, Settings, CreditCard, LayoutDashboard, Home, UserPlus,
