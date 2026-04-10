@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Database, Search, Filter, ChevronDown, ChevronLeft, ChevronRight,
   Mail, Phone, MapPin, Star, Globe, X, Plus,
-  Edit2, Trash2, Eye,
+  Edit2, Trash2, Eye, Layers,
 } from "lucide-react";
 
 interface GymRecord {
@@ -290,6 +290,9 @@ export default function DatabaseClient() {
   const [stateFilter, setStateFilter] = useState("all");
   const [selected, setSelected] = useState<GymRecord | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [groupBy, setGroupBy] = useState<"none" | "state">("none");
+  const [sortField, setSortField] = useState<"name" | "state" | "rating" | "email" | "phone">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const limit = 50;
 
   const fetchRecords = useCallback(async () => {
@@ -300,6 +303,7 @@ export default function DatabaseClient() {
     if (statusFilter !== "all") params.set("status", statusFilter);
     if (stateFilter !== "all") params.set("state", stateFilter);
     if (search) params.set("search", search);
+    if (groupBy === "state") params.set("groupBy", "state");
 
     try {
       const res = await fetch(`/api/admin/database?${params}`);
@@ -312,7 +316,7 @@ export default function DatabaseClient() {
       console.error("Failed to fetch database:", err);
     }
     setLoading(false);
-  }, [page, statusFilter, stateFilter, search]);
+  }, [page, statusFilter, stateFilter, search, groupBy]);
 
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
 
@@ -355,6 +359,130 @@ export default function DatabaseClient() {
     acc[r.status] = (acc[r.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  function toggleSort(field: typeof sortField) {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  }
+
+  const sortedRecords = useMemo(() => {
+    const sorted = [...records];
+    sorted.sort((a, b) => {
+      let aVal: string | number = "";
+      let bVal: string | number = "";
+      if (sortField === "name") { aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); }
+      else if (sortField === "state") { aVal = (a.state || "").toLowerCase(); bVal = (b.state || "").toLowerCase(); }
+      else if (sortField === "rating") { aVal = a.rating || 0; bVal = b.rating || 0; }
+      else if (sortField === "email") { aVal = (a.email || "zzz").toLowerCase(); bVal = (b.email || "zzz").toLowerCase(); }
+      else if (sortField === "phone") { aVal = (a.phone || "zzz"); bVal = (b.phone || "zzz"); }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [records, sortField, sortDir]);
+
+  const groupedByState = useMemo(() => {
+    if (groupBy !== "state") return null;
+    const groups: Record<string, GymRecord[]> = {};
+    for (const rec of sortedRecords) {
+      const key = rec.state || "Unknown";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(rec);
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [sortedRecords, groupBy]);
+
+  function SortHeader({ label, field, className }: { label: string; field: typeof sortField; className?: string }) {
+    const active = sortField === field;
+    return (
+      <th
+        className={`text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none hover:text-white transition ${active ? "text-brand-accent" : "text-gray-500"} ${className || ""}`}
+        style={{ padding: "12px 16px" }}
+        onClick={() => toggleSort(field)}
+      >
+        {label} {active && (sortDir === "asc" ? "\u2191" : "\u2193")}
+      </th>
+    );
+  }
+
+  function GymRow({ rec }: { rec: GymRecord }) {
+    const sc = STATUS_COLORS[rec.status] || STATUS_COLORS.new;
+    return (
+      <tr
+        key={rec.id}
+        className="border-b border-white/5 hover:bg-white/[0.03] transition cursor-pointer"
+        onClick={() => setSelected(rec)}
+      >
+        <td style={{ padding: "14px 16px" }}>
+          <div className="text-sm font-medium text-white">{rec.name}</div>
+          {rec.website && (
+            <div className="text-xs text-gray-500 truncate max-w-[200px]">{rec.website}</div>
+          )}
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          <div className="text-sm text-gray-300">{rec.ownerName || "\u2014"}</div>
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          {rec.email ? (
+            <div className="text-sm text-gray-300 truncate max-w-[200px]">{rec.email}</div>
+          ) : (
+            <span className="text-sm text-gray-600">{"\u2014"}</span>
+          )}
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          {rec.phone ? (
+            <div className="text-sm text-gray-300">{rec.phone}</div>
+          ) : (
+            <span className="text-sm text-gray-600">{"\u2014"}</span>
+          )}
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          <div className="text-sm text-gray-300">
+            {rec.city && rec.state ? `${rec.city}, ${rec.state}` : rec.state || rec.city || "\u2014"}
+          </div>
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          {rec.rating ? (
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+              <span className="text-sm text-gray-300">{rec.rating}</span>
+              {rec.reviewCount != null && (
+                <span className="text-xs text-gray-600">({rec.reviewCount})</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-sm text-gray-600">{"\u2014"}</span>
+          )}
+        </td>
+        <td style={{ padding: "14px 16px" }}>
+          <select
+            value={rec.status}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => updateRecord(rec.id, { status: e.target.value })}
+            className={`text-xs font-medium px-2 py-1 rounded border-0 cursor-pointer focus:outline-none capitalize ${sc.bg} ${sc.text}`}
+            style={{ background: "transparent" }}
+          >
+            {STATUSES.map((s) => (
+              <option key={s} value={s} className="bg-[#1a1a1a] text-gray-300">{s}</option>
+            ))}
+          </select>
+        </td>
+        <td style={{ padding: "14px 16px" }} className="text-right">
+          <button
+            onClick={(e) => { e.stopPropagation(); setSelected(rec); }}
+            className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </td>
+      </tr>
+    );
+  }
 
   return (
     <div>
@@ -422,9 +550,21 @@ export default function DatabaseClient() {
           ))}
         </DropdownMenu>
 
-        {(statusFilter !== "all" || stateFilter !== "all" || search) && (
+        <button
+          onClick={() => { setGroupBy(groupBy === "state" ? "none" : "state"); setPage(1); }}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
+            groupBy === "state"
+              ? "bg-brand-accent/15 text-brand-accent border border-brand-accent/30"
+              : "bg-[#1a1a1a] text-gray-400 border border-white/10 hover:text-white hover:border-white/20"
+          }`}
+        >
+          <Layers className="h-3.5 w-3.5" />
+          {groupBy === "state" ? "Grouped by State" : "Group by State"}
+        </button>
+
+        {(statusFilter !== "all" || stateFilter !== "all" || search || groupBy !== "none") && (
           <button
-            onClick={() => { setStatusFilter("all"); setStateFilter("all"); setSearch(""); setSearchInput(""); setPage(1); }}
+            onClick={() => { setStatusFilter("all"); setStateFilter("all"); setSearch(""); setSearchInput(""); setGroupBy("none"); setPage(1); }}
             className="flex items-center gap-1 px-2 py-2 text-xs text-gray-500 hover:text-white transition"
           >
             <X className="h-3 w-3" /> Reset
@@ -441,92 +581,63 @@ export default function DatabaseClient() {
             ? "No gyms match your filters."
             : "No gyms in the database yet. Add manually or import from a scrape."}
         </div>
+      ) : groupedByState ? (
+        /* Grouped by State view */
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          {groupedByState.map(([state, gyms]) => (
+            <div key={state}>
+              <div className="flex items-center gap-3" style={{ marginBottom: "8px" }}>
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{state}</h3>
+                <span className="text-[10px] text-gray-600 bg-white/5 px-1.5 py-0.5 rounded-full">{gyms.length}</span>
+                <div className="flex-1 h-px bg-white/5" />
+              </div>
+              <div className="border border-white/10 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10 bg-[#0a0a0a]">
+                        <SortHeader label="Gym" field="name" />
+                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
+                        <SortHeader label="Email" field="email" />
+                        <SortHeader label="Phone" field="phone" />
+                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>City</th>
+                        <SortHeader label="Rating" field="rating" />
+                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
+                        <th style={{ padding: "12px 16px" }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {gyms.map((rec) => (
+                        <GymRow key={rec.id} rec={rec} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        /* Flat table view */
         <div className="border border-white/10 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10 bg-[#0a0a0a]">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Gym</th>
+                  <SortHeader label="Gym" field="name" />
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Contact</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Location</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Rating</th>
+                  <SortHeader label="Email" field="email" />
+                  <SortHeader label="Phone" field="phone" />
+                  <SortHeader label="Location" field="state" />
+                  <SortHeader label="Rating" field="rating" />
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
-                  <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}></th>
+                  <th style={{ padding: "12px 16px" }}></th>
                 </tr>
               </thead>
               <tbody>
-                {records.map((rec) => {
-                  const sc = STATUS_COLORS[rec.status] || STATUS_COLORS.new;
-                  return (
-                    <tr
-                      key={rec.id}
-                      className="border-b border-white/5 hover:bg-white/[0.03] transition cursor-pointer"
-                      onClick={() => setSelected(rec)}
-                    >
-                      <td style={{ padding: "14px 16px" }}>
-                        <div className="text-sm font-medium text-white">{rec.name}</div>
-                        {rec.website && (
-                          <div className="text-xs text-gray-500 truncate max-w-[200px]">{rec.website}</div>
-                        )}
-                      </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        <div className="text-sm text-gray-300">{rec.ownerName || "\u2014"}</div>
-                      </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        {rec.email && (
-                          <div className="text-sm text-gray-300 truncate max-w-[200px]">{rec.email}</div>
-                        )}
-                        {rec.phone && (
-                          <div className="text-xs text-gray-500">{rec.phone}</div>
-                        )}
-                        {!rec.email && !rec.phone && (
-                          <span className="text-sm text-gray-600">{"\u2014"}</span>
-                        )}
-                      </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        <div className="text-sm text-gray-300">
-                          {rec.city && rec.state ? `${rec.city}, ${rec.state}` : rec.state || rec.city || "\u2014"}
-                        </div>
-                      </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        {rec.rating ? (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                            <span className="text-sm text-gray-300">{rec.rating}</span>
-                            {rec.reviewCount != null && (
-                              <span className="text-xs text-gray-600">({rec.reviewCount})</span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-600">{"\u2014"}</span>
-                        )}
-                      </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        <select
-                          value={rec.status}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => updateRecord(rec.id, { status: e.target.value })}
-                          className={`text-xs font-medium px-2 py-1 rounded border-0 cursor-pointer focus:outline-none capitalize ${sc.bg} ${sc.text}`}
-                          style={{ background: "transparent" }}
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s} className="bg-[#1a1a1a] text-gray-300">{s}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td style={{ padding: "14px 16px" }} className="text-right">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelected(rec); }}
-                          className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {sortedRecords.map((rec) => (
+                  <GymRow key={rec.id} rec={rec} />
+                ))}
               </tbody>
             </table>
           </div>

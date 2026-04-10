@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const state = searchParams.get("state");
     const search = searchParams.get("search");
+    const groupBy = searchParams.get("groupBy");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const skip = (page - 1) * limit;
@@ -25,6 +26,15 @@ export async function GET(request: NextRequest) {
         { email: { contains: search, mode: "insensitive" } },
         { city: { contains: search, mode: "insensitive" } },
       ];
+    }
+
+    if (groupBy === "state") {
+      const records = await prisma.gymDatabase.findMany({
+        where,
+        orderBy: [{ state: "asc" }, { city: "asc" }, { name: "asc" }],
+      });
+      const total = records.length;
+      return NextResponse.json({ records, total, page: 1, limit: total, grouped: true });
     }
 
     const [records, total] = await Promise.all([
