@@ -95,7 +95,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   for (const to of capped) {
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
-      await resend.emails.send({ from: FROM, to, subject: campaign.subject, html: trackedHtml });
+      await resend.emails.send({ from: FROM, replyTo: "franklujan@gmail.com", to, subject: campaign.subject, html: trackedHtml });
       sent++;
 
       // Log sent event
