@@ -36,9 +36,12 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
     }
     return emails;
   }
-  if (audience === "database_leads") {
+  if (audience.startsWith("database_leads")) {
+    const stateMatch = audience.match(/^database_leads_(.+)$/);
+    const where: Record<string, unknown> = { email: { not: null } };
+    if (stateMatch) where.state = stateMatch[1];
     const leads = await prisma.gymDatabase.findMany({
-      where: { email: { not: null } },
+      where,
       select: { email: true },
     });
     return leads.map((l) => l.email).filter((e): e is string => !!e);

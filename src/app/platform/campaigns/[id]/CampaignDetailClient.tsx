@@ -114,7 +114,24 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
               >
                 <option value="all_students">All Students</option>
                 <option value="all_admins">All Gym Admins</option>
-                <option value="database_leads">Database Leads</option>
+                <optgroup label="Database Leads">
+                  <option value="database_leads">All Database Leads</option>
+                  <option value="database_leads_TX">Texas Leads</option>
+                  <option value="database_leads_CA">California Leads</option>
+                  <option value="database_leads_FL">Florida Leads</option>
+                  <option value="database_leads_NY">New York Leads</option>
+                  <option value="database_leads_NJ">New Jersey Leads</option>
+                  <option value="database_leads_PA">Pennsylvania Leads</option>
+                  <option value="database_leads_CO">Colorado Leads</option>
+                  <option value="database_leads_OR">Oregon Leads</option>
+                  <option value="database_leads_WA">Washington Leads</option>
+                  <option value="database_leads_GA">Georgia Leads</option>
+                  <option value="database_leads_NC">North Carolina Leads</option>
+                  <option value="database_leads_OH">Ohio Leads</option>
+                  <option value="database_leads_IL">Illinois Leads</option>
+                  <option value="database_leads_AZ">Arizona Leads</option>
+                  <option value="database_leads_MA">Massachusetts Leads</option>
+                </optgroup>
                 <option value="test">Test (just me)</option>
               </select>
             </div>
