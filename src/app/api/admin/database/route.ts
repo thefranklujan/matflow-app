@@ -12,6 +12,16 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get("state");
     const search = searchParams.get("search");
     const groupBy = searchParams.get("groupBy");
+    const mapPins = searchParams.get("mapPins");
+
+    if (mapPins === "true") {
+      const pins = await prisma.gymDatabase.findMany({
+        where: { lat: { not: null }, lng: { not: null } },
+        select: { id: true, name: true, lat: true, lng: true, city: true, state: true, status: true, rating: true, email: true, phone: true },
+      });
+      return NextResponse.json({ pins });
+    }
+
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const skip = (page - 1) * limit;

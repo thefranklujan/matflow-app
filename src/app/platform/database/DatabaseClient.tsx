@@ -545,12 +545,20 @@ export default function DatabaseClient() {
             </span>
           )}
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-accent text-black rounded-lg text-sm font-medium hover:opacity-90 transition"
-        >
-          <Plus className="h-4 w-4" /> Add Gym
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="/platform/database/map"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-white/10 text-gray-300 rounded-lg text-sm font-medium hover:text-white hover:border-white/20 transition"
+          >
+            <Map className="h-4 w-4" /> View on Map
+          </a>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-brand-accent text-black rounded-lg text-sm font-medium hover:opacity-90 transition"
+          >
+            <Plus className="h-4 w-4" /> Add Gym
+          </button>
+        </div>
       </div>
 
       {/* Search + Filters */}
