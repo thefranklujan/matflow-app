@@ -124,8 +124,9 @@ export default function ReportClient() {
           bgColor="bg-purple-500/10"
         />
         <KPI
-          label="Failed"
+          label="Bounced"
           value={metrics.failed}
+          sub={metrics.sent > 0 ? `${Math.round((metrics.failed / metrics.sent) * 100)}% bounce rate` : undefined}
           icon={AlertTriangle}
           color={metrics.failed > 0 ? "text-red-400" : "text-gray-600"}
           bgColor={metrics.failed > 0 ? "bg-red-500/10" : "bg-white/5"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const STARTER_HTML = `<!-- Paste HTML Claude generates for you, or write your own -->
@@ -17,6 +17,14 @@ export default function NewCampaignPage() {
   const [saving, setSaving] = useState(false);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [recipientCount, setRecipientCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/platform/campaigns/audience-count?audience=${audience}`)
+      .then(r => r.json())
+      .then(d => setRecipientCount(d.count ?? null))
+      .catch(() => setRecipientCount(null));
+  }, [audience]);
 
   async function save() {
     setSaving(true);
@@ -115,7 +123,12 @@ export default function NewCampaignPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Audience</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Audience</label>
+              {recipientCount !== null && (
+                <span className="text-xs text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
+              )}
+            </div>
             <select
               value={audience}
               onChange={(e) => setAudience(e.target.value)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -22,6 +22,14 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [recipientCount, setRecipientCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/platform/campaigns/audience-count?audience=${campaign.audience}`)
+      .then(r => r.json())
+      .then(d => setRecipientCount(d.count ?? null))
+      .catch(() => setRecipientCount(null));
+  }, [campaign.audience]);
 
   async function save() {
     setSaving(true);
@@ -106,7 +114,12 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
         <div className="space-y-4">
           {editing && (
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Audience</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Audience</label>
+                {recipientCount !== null && (
+                  <span className="text-xs text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
+                )}
+              </div>
               <select
                 value={campaign.audience}
                 onChange={(e) => setCampaign({ ...campaign, audience: e.target.value })}
