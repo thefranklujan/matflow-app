@@ -88,11 +88,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   let sent = 0;
+  let skipped = 0;
   const errors: string[] = [];
 
-  // Log sent events and send with tracking
+  // Skip already-sent emails (for resume after timeout)
+  const alreadySent = new Set(
+    (await prisma.campaignEvent.findMany({
+      where: { campaignId: id, event: "sent" },
+      select: { email: true },
+    })).map(e => e.email)
+  );
+
   const capped = recipients.slice(0, 1000);
   for (const to of capped) {
+    if (!testMode && alreadySent.has(to)) { skipped++; continue; }
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
       await resend.emails.send({ from: FROM, replyTo: "franklujan@gmail.com", to, subject: campaign.subject, html: trackedHtml });
@@ -123,5 +132,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
   }
 
-  return NextResponse.json({ success: true, sent, total: capped.length, errors: errors.slice(0, 5) });
+  return NextResponse.json({ success: true, sent, skipped, total: capped.length, errors: errors.slice(0, 5) });
 }
