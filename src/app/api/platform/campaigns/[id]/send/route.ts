@@ -91,7 +91,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const errors: string[] = [];
 
   // Log sent events and send with tracking
-  const capped = recipients.slice(0, 2000);
+  const capped = recipients.slice(0, 1000);
   for (const to of capped) {
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
