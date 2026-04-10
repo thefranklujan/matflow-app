@@ -28,11 +28,13 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (groupBy === "state") {
-      const records = await prisma.gymDatabase.findMany({
-        where,
-        orderBy: [{ state: "asc" }, { city: "asc" }, { name: "asc" }],
-      });
+    if (groupBy === "state" || groupBy === "rating" || groupBy === "status") {
+      const orderBy = groupBy === "state"
+        ? [{ state: "asc" as const }, { city: "asc" as const }, { name: "asc" as const }]
+        : groupBy === "rating"
+        ? [{ rating: "desc" as const }, { name: "asc" as const }]
+        : [{ status: "asc" as const }, { name: "asc" as const }];
+      const records = await prisma.gymDatabase.findMany({ where, orderBy });
       const total = records.length;
       return NextResponse.json({ records, total, page: 1, limit: total, grouped: true });
     }

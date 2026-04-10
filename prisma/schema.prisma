@@ -557,7 +557,7 @@ model GymDatabase {
   reviewCount   Int?
   categories    String?
   socialMedia   String?
-  status        String   @default("new")
+  status        String   @default("lead")
   notes         String?
   source        String   @default("google_maps")
   googlePlaceId String?  @unique

@@ -30,9 +30,10 @@ interface GymRecord {
   updatedAt: string;
 }
 
-const STATUSES = ["new", "contacted", "demo", "negotiating", "signed", "lost"];
+const STATUSES = ["lead", "contacted", "demo", "negotiating", "signed", "lost"];
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   new: { bg: "bg-blue-500/15", text: "text-blue-400" },
+  lead: { bg: "bg-blue-500/15", text: "text-blue-400" },
   contacted: { bg: "bg-yellow-500/15", text: "text-yellow-400" },
   demo: { bg: "bg-purple-500/15", text: "text-purple-400" },
   negotiating: { bg: "bg-orange-500/15", text: "text-orange-400" },
@@ -290,7 +291,7 @@ export default function DatabaseClient() {
   const [stateFilter, setStateFilter] = useState("all");
   const [selected, setSelected] = useState<GymRecord | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [groupBy, setGroupBy] = useState<"none" | "state">("none");
+  const [groupBy, setGroupBy] = useState<"none" | "state" | "rating" | "status">("none");
   const [expandedStates, setExpandedStates] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<"name" | "state" | "rating" | "email" | "phone">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -304,7 +305,7 @@ export default function DatabaseClient() {
     if (statusFilter !== "all") params.set("status", statusFilter);
     if (stateFilter !== "all") params.set("state", stateFilter);
     if (search) params.set("search", search);
-    if (groupBy === "state") params.set("groupBy", "state");
+    if (groupBy !== "none") params.set("groupBy", groupBy);
 
     try {
       const res = await fetch(`/api/admin/database?${params}`);
@@ -387,15 +388,34 @@ export default function DatabaseClient() {
     return sorted;
   }, [records, sortField, sortDir]);
 
-  const groupedByState = useMemo(() => {
-    if (groupBy !== "state") return null;
+  const groupedData = useMemo(() => {
+    if (groupBy === "none") return null;
     const groups: Record<string, GymRecord[]> = {};
     for (const rec of sortedRecords) {
-      const key = rec.state || "Unknown";
+      let key: string;
+      if (groupBy === "state") {
+        key = rec.state || "Unknown";
+      } else if (groupBy === "rating") {
+        const r = rec.rating;
+        if (!r) key = "No Rating";
+        else if (r >= 4.8) key = "4.8 - 5.0";
+        else if (r >= 4.5) key = "4.5 - 4.7";
+        else if (r >= 4.0) key = "4.0 - 4.4";
+        else key = "Below 4.0";
+      } else {
+        key = (rec.status === "new" ? "lead" : rec.status) || "Unknown";
+      }
       if (!groups[key]) groups[key] = [];
       groups[key].push(rec);
     }
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+    const entries = Object.entries(groups);
+    if (groupBy === "rating") {
+      const order = ["4.8 - 5.0", "4.5 - 4.7", "4.0 - 4.4", "Below 4.0", "No Rating"];
+      entries.sort(([a], [b]) => order.indexOf(a) - order.indexOf(b));
+    } else {
+      entries.sort(([a], [b]) => a.localeCompare(b));
+    }
+    return entries;
   }, [sortedRecords, groupBy]);
 
   function SortHeader({ label, field, className }: { label: string; field: typeof sortField; className?: string }) {
@@ -551,31 +571,22 @@ export default function DatabaseClient() {
           ))}
         </DropdownMenu>
 
-        <button
-          onClick={() => {
-            if (groupBy === "none") {
-              setGroupBy("state");
-              setExpandedStates(new Set());
-              setPage(1);
-            } else {
-              setGroupBy("none");
-              setPage(1);
-            }
-          }}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-            groupBy === "state"
-              ? "bg-brand-accent/15 text-brand-accent border border-brand-accent/30"
-              : "bg-[#1a1a1a] text-gray-400 border border-white/10 hover:text-white hover:border-white/20"
-          }`}
+        <DropdownMenu
+          label={groupBy === "none" ? "Group" : `By ${groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}`}
+          icon={Layers}
+          active={groupBy !== "none"}
         >
-          <Layers className="h-3.5 w-3.5" />
-          {groupBy === "state" ? "Grouped by State" : "Group by State"}
-        </button>
+          <MenuItem label="No Grouping" active={groupBy === "none"} onClick={() => { setGroupBy("none"); setPage(1); }} />
+          <div className="h-px bg-white/5 my-1" />
+          <MenuItem label="By State" active={groupBy === "state"} onClick={() => { setGroupBy("state"); setExpandedStates(new Set()); setPage(1); }} />
+          <MenuItem label="By Rating" active={groupBy === "rating"} onClick={() => { setGroupBy("rating"); setExpandedStates(new Set()); setPage(1); }} />
+          <MenuItem label="By Status" active={groupBy === "status"} onClick={() => { setGroupBy("status"); setExpandedStates(new Set()); setPage(1); }} />
+        </DropdownMenu>
 
-        {groupBy === "state" && groupedByState && (
+        {groupBy !== "none" && groupedData && (
           <>
             <button
-              onClick={() => setExpandedStates(new Set(groupedByState.map(([s]) => s)))}
+              onClick={() => setExpandedStates(new Set(groupedData.map(([s]) => s)))}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[#1a1a1a] text-gray-400 border border-white/10 hover:text-white hover:border-white/20 transition"
             >
               <ChevronsDown className="h-3.5 w-3.5" /> Expand All
@@ -608,7 +619,7 @@ export default function DatabaseClient() {
             ? "No gyms match your filters."
             : "No gyms in the database yet. Add manually or import from a scrape."}
         </div>
-      ) : groupedByState ? (
+      ) : groupedData ? (
         /* Grouped by State: parent/child rows in single table */
         <div className="border border-white/10 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -626,7 +637,7 @@ export default function DatabaseClient() {
                 </tr>
               </thead>
               <tbody>
-                {groupedByState.map(([state, gyms]) => {
+                {groupedData.map(([state, gyms]) => {
                   const isExpanded = expandedStates.has(state);
                   return (
                     <Fragment key={state}>
