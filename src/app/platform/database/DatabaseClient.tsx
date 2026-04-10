@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import {
   Database, Search, Filter, ChevronDown, ChevronLeft, ChevronRight,
   Mail, Phone, MapPin, Star, Globe, X, Plus,
-  Edit2, Trash2, Eye, Layers,
+  Edit2, Trash2, Eye, Layers, ChevronsDown, ChevronsUp,
 } from "lucide-react";
 
 interface GymRecord {
@@ -291,6 +291,7 @@ export default function DatabaseClient() {
   const [selected, setSelected] = useState<GymRecord | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [groupBy, setGroupBy] = useState<"none" | "state">("none");
+  const [expandedStates, setExpandedStates] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<"name" | "state" | "rating" | "email" | "phone">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const limit = 50;
@@ -551,7 +552,16 @@ export default function DatabaseClient() {
         </DropdownMenu>
 
         <button
-          onClick={() => { setGroupBy(groupBy === "state" ? "none" : "state"); setPage(1); }}
+          onClick={() => {
+            if (groupBy === "none") {
+              setGroupBy("state");
+              setExpandedStates(new Set());
+              setPage(1);
+            } else {
+              setGroupBy("none");
+              setPage(1);
+            }
+          }}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
             groupBy === "state"
               ? "bg-brand-accent/15 text-brand-accent border border-brand-accent/30"
@@ -561,6 +571,23 @@ export default function DatabaseClient() {
           <Layers className="h-3.5 w-3.5" />
           {groupBy === "state" ? "Grouped by State" : "Group by State"}
         </button>
+
+        {groupBy === "state" && groupedByState && (
+          <>
+            <button
+              onClick={() => setExpandedStates(new Set(groupedByState.map(([s]) => s)))}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[#1a1a1a] text-gray-400 border border-white/10 hover:text-white hover:border-white/20 transition"
+            >
+              <ChevronsDown className="h-3.5 w-3.5" /> Expand All
+            </button>
+            <button
+              onClick={() => setExpandedStates(new Set())}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-[#1a1a1a] text-gray-400 border border-white/10 hover:text-white hover:border-white/20 transition"
+            >
+              <ChevronsUp className="h-3.5 w-3.5" /> Collapse All
+            </button>
+          </>
+        )}
 
         {(statusFilter !== "all" || stateFilter !== "all" || search || groupBy !== "none") && (
           <button
@@ -582,40 +609,58 @@ export default function DatabaseClient() {
             : "No gyms in the database yet. Add manually or import from a scrape."}
         </div>
       ) : groupedByState ? (
-        /* Grouped by State view */
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {groupedByState.map(([state, gyms]) => (
-            <div key={state}>
-              <div className="flex items-center gap-3" style={{ marginBottom: "8px" }}>
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">{state}</h3>
-                <span className="text-[10px] text-gray-600 bg-white/5 px-1.5 py-0.5 rounded-full">{gyms.length}</span>
-                <div className="flex-1 h-px bg-white/5" />
-              </div>
-              <div className="border border-white/10 rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10 bg-[#0a0a0a]">
-                        <SortHeader label="Gym" field="name" />
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
-                        <SortHeader label="Email" field="email" />
-                        <SortHeader label="Phone" field="phone" />
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>City</th>
-                        <SortHeader label="Rating" field="rating" />
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
-                        <th style={{ padding: "12px 16px" }}></th>
+        /* Grouped by State: parent/child rows in single table */
+        <div className="border border-white/10 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10 bg-[#0a0a0a]">
+                  <SortHeader label="Gym" field="name" />
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
+                  <SortHeader label="Email" field="email" />
+                  <SortHeader label="Phone" field="phone" />
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>City</th>
+                  <SortHeader label="Rating" field="rating" />
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
+                  <th style={{ padding: "12px 16px" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {groupedByState.map(([state, gyms]) => {
+                  const isExpanded = expandedStates.has(state);
+                  return (
+                    <Fragment key={state}>
+                      {/* Parent row */}
+                      <tr
+                        className="border-b border-white/10 bg-[#0d0d0d] hover:bg-white/[0.04] cursor-pointer select-none"
+                        onClick={() => {
+                          setExpandedStates(prev => {
+                            const next = new Set(prev);
+                            if (next.has(state)) next.delete(state); else next.add(state);
+                            return next;
+                          });
+                        }}
+                      >
+                        <td colSpan={8} style={{ padding: "10px 16px" }}>
+                          <div className="flex items-center gap-3">
+                            <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isExpanded ? "" : "-rotate-90"}`} />
+                            <span className="text-sm font-semibold text-white uppercase tracking-wider">{state}</span>
+                            <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full font-medium">
+                              {gyms.length} gym{gyms.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {gyms.map((rec) => (
+                      {/* Child rows */}
+                      {isExpanded && gyms.map((rec) => (
                         <GymRow key={rec.id} rec={rec} />
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          ))}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         /* Flat table view */
