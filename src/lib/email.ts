@@ -6,13 +6,19 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM = "MatFlow <noreply@mymatflow.com>";
 
-async function send(to: string, subject: string, html: string) {
+async function send(to: string, subject: string, html: string, bccFrank = false) {
   if (!resend) {
     console.log(`[Email] Would send to ${to}: ${subject}`);
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject,
+      html,
+      ...(bccFrank ? { bcc: "franklujan@gmail.com" } : {}),
+    });
   } catch (err) {
     console.error("[Email] Failed:", err);
   }
@@ -277,7 +283,7 @@ export function sendGymApprovedEmail(email: string, ownerName: string, gymName: 
     ctaHref: "https://app.mymatflow.com/app",
     footnote: "You are a founding member. Your pricing is locked in for life.",
   });
-  send(email, `${gymName} is live on MatFlow`, html).catch(() => {});
+  send(email, `${gymName} is live on MatFlow`, html, true).catch(() => {});
 }
 
 export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
