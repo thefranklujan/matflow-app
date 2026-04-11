@@ -101,7 +101,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   let sent = 0;
-  let skipped = 0;
   const errors: string[] = [];
 
   // Skip already-sent emails (for resume after timeout)
@@ -112,9 +111,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })).map(e => e.email)
   );
 
-  const capped = recipients.slice(0, 1000);
+  const unsent = testMode ? recipients : recipients.filter(e => !alreadySent.has(e));
+  const skipped = recipients.length - unsent.length;
+  const capped = unsent.slice(0, 1000);
   for (const to of capped) {
-    if (!testMode && alreadySent.has(to)) { skipped++; continue; }
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
       await resend.emails.send({ from: FROM, replyTo: "franklujan@gmail.com", to, subject: campaign.subject, html: trackedHtml });
