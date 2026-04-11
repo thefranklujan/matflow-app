@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, MapPin } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const GymsMapView = dynamic(() => import("./GymsMapView"), { ssr: false });
 
 interface GymPin {
   id: string;
@@ -10,16 +13,10 @@ interface GymPin {
   city: string | null;
   state: string | null;
   status: string;
-  approved: boolean;
   members: number;
-  query: string;
+  lat?: number;
+  lng?: number;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  trialing: "#eab308",
-  active: "#10b981",
-  free: "#0ea5e9",
-};
 
 export default function GymsMapPage() {
   const [pins, setPins] = useState<GymPin[]>([]);
@@ -28,9 +25,33 @@ export default function GymsMapPage() {
   useEffect(() => {
     fetch("/api/platform/gyms/map")
       .then(r => r.json())
-      .then(d => { setPins(d.pins || []); setLoading(false); })
+      .then(async (d) => {
+        const gyms = d.pins || [];
+        // Geocode each gym using Nominatim (free, no API key)
+        const geocoded: GymPin[] = [];
+        for (const gym of gyms) {
+          try {
+            const q = encodeURIComponent(`${gym.name} ${gym.city || ""} ${gym.state || ""}`);
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=us`);
+            const results = await res.json();
+            if (results.length > 0) {
+              geocoded.push({ ...gym, lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) });
+            } else {
+              geocoded.push(gym);
+            }
+          } catch {
+            geocoded.push(gym);
+          }
+          // Nominatim rate limit: 1 req/sec
+          await new Promise(r => setTimeout(r, 1100));
+        }
+        setPins(geocoded);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
+
+  const mappedPins = pins.filter(p => p.lat && p.lng);
 
   return (
     <div>
@@ -42,54 +63,22 @@ export default function GymsMapPage() {
           <MapPin className="h-5 w-5 text-brand-accent" />
           <h1 className="text-xl font-bold text-white">Active Gyms Map</h1>
           {!loading && (
-            <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">{pins.length} gyms</span>
+            <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">{mappedPins.length} gyms</span>
           )}
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center" style={{ height: "calc(100vh - 200px)" }}>
-          <div className="text-gray-500 text-sm">Loading...</div>
+          <div className="text-gray-500 text-sm">Locating {pins.length > 0 ? `${pins.filter(p => p.lat).length}/${pins.length}` : ""} gyms...</div>
+        </div>
+      ) : mappedPins.length === 0 ? (
+        <div className="flex items-center justify-center" style={{ height: "calc(100vh - 200px)" }}>
+          <div className="text-gray-500 text-sm">No gyms could be located on the map.</div>
         </div>
       ) : (
         <div className="border border-white/10 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 200px)" }}>
-          <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
-            {/* Gym list with map links */}
-            <div className="flex-1 overflow-y-auto" style={{ padding: "16px" }}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {pins.map(pin => {
-                  const color = STATUS_COLORS[pin.status] || "#737373";
-                  return (
-                    <a
-                      key={pin.id}
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pin.query)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#111] border border-white/10 rounded-xl hover:border-white/20 transition block"
-                      style={{ padding: "16px" }}
-                    >
-                      <div className="flex items-center gap-3" style={{ marginBottom: "8px" }}>
-                        <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
-                        <div className="text-sm font-semibold text-white truncate">{pin.name}</div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">
-                          {pin.city}{pin.city && pin.state ? ", " : ""}{pin.state}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-600">{pin.members} members</span>
-                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded capitalize`} style={{ backgroundColor: `${color}20`, color }}>{pin.status}</span>
-                        </div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-              {pins.length === 0 && (
-                <div className="text-center text-gray-500 text-sm" style={{ paddingTop: "64px" }}>No active gyms yet.</div>
-              )}
-            </div>
-          </div>
+          <GymsMapView pins={mappedPins} />
         </div>
       )}
     </div>
