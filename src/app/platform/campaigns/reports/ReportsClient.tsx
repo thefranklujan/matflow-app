@@ -180,23 +180,23 @@ export default function ReportsClient() {
       <Link href="/platform/campaigns" className="inline-flex items-center gap-1 text-gray-500 hover:text-white text-sm mb-4"><ArrowLeft className="h-4 w-4" /> All Campaigns</Link>
       <h1 className="text-2xl font-bold text-white" style={{ marginBottom: "24px" }}>Campaign Reports</h1>
 
-      {/* KPIs */}
+      {/* KPIs - clickable to filter */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: "24px" }}>
-        <div className="bg-blue-500/10 border border-white/5 rounded-xl" style={{ padding: "20px" }}>
+        <div onClick={() => setStatusFilter(statusFilter === "all" ? "all" : "all")} className={`bg-blue-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "all" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
           <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Total Sent</span><Send className="h-4 w-4 text-blue-400" /></div>
           <div className="text-2xl font-bold text-blue-400">{stats.totalSent.toLocaleString()}</div>
         </div>
-        <div className="bg-emerald-500/10 border border-white/5 rounded-xl" style={{ padding: "20px" }}>
+        <div onClick={() => setStatusFilter(statusFilter === "opened" ? "all" : "opened")} className={`bg-emerald-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "opened" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
           <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Opened</span><Eye className="h-4 w-4 text-emerald-400" /></div>
           <div className="text-2xl font-bold text-emerald-400">{stats.totalOpened}</div>
           <div className="text-xs text-gray-500">{stats.openRate}% open rate</div>
         </div>
-        <div className="bg-purple-500/10 border border-white/5 rounded-xl" style={{ padding: "20px" }}>
+        <div onClick={() => setStatusFilter(statusFilter === "clicked" ? "all" : "clicked")} className={`bg-purple-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "clicked" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
           <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Clicked</span><MousePointerClick className="h-4 w-4 text-purple-400" /></div>
           <div className="text-2xl font-bold text-purple-400">{stats.totalClicked}</div>
           <div className="text-xs text-gray-500">{stats.clickRate}% click rate</div>
         </div>
-        <div className="bg-red-500/10 border border-white/5 rounded-xl" style={{ padding: "20px" }}>
+        <div onClick={() => setStatusFilter(statusFilter === "unsubscribed" ? "all" : "unsubscribed")} className={`bg-red-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "unsubscribed" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
           <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Unsubscribed</span><UserX className="h-4 w-4 text-red-400" /></div>
           <div className="text-2xl font-bold text-red-400">{stats.totalUnsubscribed}</div>
         </div>
