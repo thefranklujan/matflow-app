@@ -557,6 +557,14 @@ model CampaignEvent {
   @@index([campaignId, email, event])
 }
 
+model EmailUnsubscribe {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 model GymDatabase {
   id            String   @id @default(cuid())
   name          String

@@ -66,10 +66,15 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
 function injectTracking(html: string, campaignId: string, email: string): string {
   const encodedEmail = encodeURIComponent(email);
 
-  // Add tracking pixel - cache-bust with timestamp, no display:none (email clients strip it)
+  // Add tracking pixel
   const pixelUrl = `${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}&t=${Date.now()}`;
   const pixel = `<img src="${pixelUrl}" width="1" height="1" alt="" style="border:0;width:1px;height:1px;" />`;
-  let tracked = html.replace(/<\/body>/i, `${pixel}</body>`);
+
+  // Add unsubscribe link before </body>
+  const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodedEmail}`;
+  const unsubFooter = `<table width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:16px;"><tr><td align="center"><div style="font-size:11px;color:#525252;text-align:center;">You received this because your gym is listed on Google. <a href="${unsubUrl}" style="color:#525252;text-decoration:underline;">Unsubscribe</a></div></td></tr></table>`;
+
+  let tracked = html.replace(/<\/body>/i, `${unsubFooter}${pixel}</body>`);
 
   // Wrap <a href="..."> links with click tracker (skip mailto: and #)
   tracked = tracked.replace(
@@ -104,21 +109,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let sent = 0;
   const errors: string[] = [];
 
-  // Skip already-sent emails (for resume after timeout)
-  const alreadySent = new Set(
-    (await prisma.campaignEvent.findMany({
-      where: { campaignId: id, event: "sent" },
-      select: { email: true },
-    })).map(e => e.email)
-  );
+  // Skip already-sent and unsubscribed emails
+  const [alreadySentList, unsubList] = await Promise.all([
+    prisma.campaignEvent.findMany({ where: { campaignId: id, event: "sent" }, select: { email: true } }),
+    prisma.emailUnsubscribe.findMany({ select: { email: true } }),
+  ]);
+  const alreadySent = new Set(alreadySentList.map(e => e.email));
+  const unsubscribed = new Set(unsubList.map(e => e.email));
 
-  const unsent = testMode ? recipients : recipients.filter(e => !alreadySent.has(e));
+  const unsent = testMode ? recipients : recipients.filter(e => !alreadySent.has(e) && !unsubscribed.has(e));
   const skipped = recipients.length - unsent.length;
   const capped = unsent.slice(0, 1000);
   for (const to of capped) {
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
-      await resend.emails.send({ from: FROM, replyTo: "franklujan@gmail.com", to, subject: campaign.subject, html: trackedHtml });
+      const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodeURIComponent(to)}`;
+      await resend.emails.send({
+        from: FROM,
+        replyTo: "franklujan@gmail.com",
+        to,
+        subject: campaign.subject,
+        html: trackedHtml,
+        headers: {
+          "List-Unsubscribe": `<${unsubUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+      });
       sent++;
 
       // Log sent event
