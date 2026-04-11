@@ -196,6 +196,22 @@ export function sendJoinRequestApprovedToStudent(email: string, studentName: str
   send(email, `You are approved at ${gymName}`, html).catch(() => {});
 }
 
+export function notifyFrankNewGymPending({ gymName, ownerName, ownerEmail }: { gymName: string; ownerName: string; ownerEmail: string }) {
+  const html = wrap({
+    eyebrow: "New Gym Signup",
+    headline: "A gym is waiting for approval.",
+    body: `<table cellpadding="6" style="font-size:14px;color:#a3a3a3;">
+             <tr><td><strong style="color:#ffffff;">Gym</strong></td><td>${gymName}</td></tr>
+             <tr><td><strong style="color:#ffffff;">Owner</strong></td><td>${ownerName}</td></tr>
+             <tr><td><strong style="color:#ffffff;">Email</strong></td><td>${ownerEmail}</td></tr>
+             <tr><td><strong style="color:#ffffff;">When</strong></td><td>${new Date().toLocaleString()}</td></tr>
+           </table>`,
+    ctaText: "Review and Approve",
+    ctaHref: "https://app.mymatflow.com/platform/approve-gyms",
+  });
+  send("franklujan@gmail.com", `New Gym Pending: ${gymName}`, html).catch(() => {});
+}
+
 export function notifyAdminOfNewStudent(student: { firstName: string; lastName: string; email: string; phone?: string | null }) {
   const html = wrap({
     eyebrow: "Internal",

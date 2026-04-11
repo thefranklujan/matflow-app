@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerGymOwner, createSession } from "@/lib/local-auth";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, notifyFrankNewGymPending } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     sendWelcomeEmail(email, `${firstName} ${lastName}`, gymName);
+    notifyFrankNewGymPending({ gymName, ownerName: `${firstName} ${lastName}`, ownerEmail: email });
     logActivity({ gymId: result.gym.id, action: "gym_created", actorName: `${firstName} ${lastName}`, targetName: gymName });
 
     return NextResponse.json(
