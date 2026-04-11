@@ -14,79 +14,48 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get all events grouped by email
-  const events = await prisma.campaignEvent.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      campaign: { select: { subject: true, audience: true } },
-    },
-  });
+  // Aggregate per email using raw SQL for speed
+  const rows: { email: string; sent: number; opened: boolean; clicked: boolean; last_event: string; last_time: Date }[] = await prisma.$queryRaw`
+    SELECT
+      email,
+      COUNT(*) FILTER (WHERE event = 'sent') as sent,
+      bool_or(event = 'open') as opened,
+      bool_or(event = 'click') as clicked,
+      (array_agg(event ORDER BY "createdAt" DESC))[1] as last_event,
+      MAX("createdAt") as last_time
+    FROM "CampaignEvent"
+    GROUP BY email
+    ORDER BY email
+  `;
 
-  // Build per-email summary
-  const emailMap: Record<string, {
-    email: string;
-    sent: number;
-    opened: boolean;
-    clicked: boolean;
-    campaigns: string[];
-    lastEvent: string;
-    lastEventTime: Date;
-    state: string | null;
-    gymName: string | null;
-  }> = {};
-
-  for (const e of events) {
-    if (!emailMap[e.email]) {
-      emailMap[e.email] = {
-        email: e.email,
-        sent: 0,
-        opened: false,
-        clicked: false,
-        campaigns: [],
-        lastEvent: e.event,
-        lastEventTime: e.createdAt,
-        state: null,
-        gymName: null,
-      };
-    }
-    const rec = emailMap[e.email];
-    if (e.event === "sent") rec.sent++;
-    if (e.event === "open") rec.opened = true;
-    if (e.event === "click") rec.clicked = true;
-    const subj = e.campaign?.subject || "";
-    if (subj && !rec.campaigns.includes(subj)) rec.campaigns.push(subj);
-    if (e.createdAt > rec.lastEventTime) {
-      rec.lastEvent = e.event;
-      rec.lastEventTime = e.createdAt;
-    }
-  }
-
-  // Enrich with gym data
-  const emails = Object.keys(emailMap);
+  // Get gym info for these emails
+  const emails = rows.map(r => r.email);
   const gyms = await prisma.gymDatabase.findMany({
     where: { email: { in: emails } },
     select: { email: true, name: true, state: true },
   });
-
+  const gymMap: Record<string, { name: string; state: string | null }> = {};
   for (const g of gyms) {
-    if (g.email && emailMap[g.email]) {
-      emailMap[g.email].state = g.state;
-      emailMap[g.email].gymName = g.name;
-    }
+    if (g.email) gymMap[g.email] = { name: g.name, state: g.state };
   }
 
-  // Get unsubscribed list
+  // Get unsubscribed
   const unsubs = await prisma.emailUnsubscribe.findMany({ select: { email: true } });
   const unsubSet = new Set(unsubs.map(u => u.email));
 
-  const recipients = Object.values(emailMap).map(r => ({
-    ...r,
+  const recipients = rows.map(r => ({
+    email: r.email,
+    sent: Number(r.sent),
+    opened: r.opened,
+    clicked: r.clicked,
+    lastEvent: r.last_event,
+    lastEventTime: r.last_time,
+    gymName: gymMap[r.email]?.name || null,
+    state: gymMap[r.email]?.state || null,
     unsubscribed: unsubSet.has(r.email),
-    lastEventTime: r.lastEventTime.toISOString(),
   }));
 
-  // Summary stats
-  const totalSent = new Set(recipients.map(r => r.email)).size;
+  const totalSent = recipients.length;
   const totalOpened = recipients.filter(r => r.opened).length;
   const totalClicked = recipients.filter(r => r.clicked).length;
   const totalUnsubscribed = recipients.filter(r => r.unsubscribed).length;
