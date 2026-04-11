@@ -28,12 +28,20 @@ export default async function CampaignsPage() {
           <h1 className="text-3xl font-bold text-white">Email Campaigns</h1>
           <p className="text-gray-500 mt-1">Send custom emails to students or gym admins.</p>
         </div>
-        <Link
-          href="/platform/campaigns/new"
-          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition text-sm"
-        >
-          <Plus className="h-4 w-4" /> New Campaign
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/platform/campaigns/reports"
+            className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white font-semibold px-4 py-2 rounded-lg transition text-sm border border-white/10"
+          >
+            View Reports
+          </Link>
+          <Link
+            href="/platform/campaigns/new"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition text-sm"
+          >
+            <Plus className="h-4 w-4" /> New Campaign
+          </Link>
+        </div>
       </div>
 
       {campaigns.length === 0 ? (
