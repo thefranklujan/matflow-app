@@ -8,6 +8,17 @@ export default async function CampaignsPage() {
   const campaigns = await prisma.emailCampaign.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,
+    include: {
+      events: {
+        select: { event: true, email: true },
+      },
+    },
+  });
+
+  const campaignsWithStats = campaigns.map((c) => {
+    const opened = new Set(c.events.filter(e => e.event === "open").map(e => e.email)).size;
+    const clicked = new Set(c.events.filter(e => e.event === "click").map(e => e.email)).size;
+    return { ...c, opened, clicked };
   });
 
   return (
@@ -43,11 +54,13 @@ export default async function CampaignsPage() {
                 <th className="text-left px-4 py-3 font-semibold">Audience</th>
                 <th className="text-left px-4 py-3 font-semibold">Status</th>
                 <th className="text-left px-4 py-3 font-semibold">Sent</th>
+                <th className="text-left px-4 py-3 font-semibold">Opened</th>
+                <th className="text-left px-4 py-3 font-semibold">Clicked</th>
                 <th className="text-left px-4 py-3 font-semibold">Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {campaigns.map((c) => (
+              {campaignsWithStats.map((c) => (
                 <tr key={c.id} className="hover:bg-white/[0.02] transition">
                   <td className="px-4 py-3">
                     <Link href={`/platform/campaigns/${c.id}`} className="text-white font-medium hover:text-orange-400">{c.subject}</Link>
@@ -59,6 +72,12 @@ export default async function CampaignsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-300">{c.sentCount}</td>
+                  <td className="px-4 py-3">
+                    <span className={c.opened > 0 ? "text-emerald-400" : "text-gray-600"}>{c.opened}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={c.clicked > 0 ? "text-purple-400" : "text-gray-600"}>{c.clicked}</span>
+                  </td>
                   <td className="px-4 py-3 text-gray-500">
                     {(c.sentAt || c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
