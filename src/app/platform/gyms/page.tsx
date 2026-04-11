@@ -70,7 +70,16 @@ export default async function GymsListPage() {
                   <td className="px-6 py-4 text-gray-400 text-sm">
                     {gym.trialEndsAt ? new Date(gym.trialEndsAt).toLocaleDateString() : "N/A"}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gym.name + (gym.city ? " " + gym.city : "") + (gym.state ? " " + gym.state : ""))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-500 hover:text-white transition"
+                      title="View on Google Maps"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </a>
                     <Link
                       href={`/platform/gyms/${gym.id}`}
                       className="text-orange-400 hover:text-orange-300 text-sm font-medium"
