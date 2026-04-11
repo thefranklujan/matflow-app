@@ -66,8 +66,9 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
 function injectTracking(html: string, campaignId: string, email: string): string {
   const encodedEmail = encodeURIComponent(email);
 
-  // Add tracking pixel before </body>
-  const pixel = `<img src="${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}" width="1" height="1" style="display:none;" alt="" />`;
+  // Add tracking pixel - cache-bust with timestamp, no display:none (email clients strip it)
+  const pixelUrl = `${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}&t=${Date.now()}`;
+  const pixel = `<img src="${pixelUrl}" width="1" height="1" alt="" style="border:0;width:1px;height:1px;" />`;
   let tracked = html.replace(/<\/body>/i, `${pixel}</body>`);
 
   // Wrap <a href="..."> links with click tracker (skip mailto: and #)
