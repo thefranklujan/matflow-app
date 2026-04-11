@@ -137,6 +137,7 @@ export default function NewCampaignPage() {
               <option value="all_students">All Students</option>
               <option value="all_admins">All Gym Admins</option>
               <optgroup label="Database Leads">
+                <option value="database_leads_unsent">Unsent Leads Only</option>
                 <option value="database_leads">All Database Leads</option>
                 <option value="database_leads_TX">Texas Leads</option>
                 <option value="database_leads_CA">California Leads</option>

@@ -37,6 +37,19 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
     }
     return emails;
   }
+  if (audience === "database_leads_unsent") {
+    const allSent = await prisma.campaignEvent.findMany({
+      where: { event: "sent" },
+      select: { email: true },
+      distinct: ["email"],
+    });
+    const sentSet = new Set(allSent.map(e => e.email));
+    const leads = await prisma.gymDatabase.findMany({
+      where: { email: { not: null } },
+      select: { email: true },
+    });
+    return leads.map(l => l.email).filter((e): e is string => !!e && !sentSet.has(e));
+  }
   if (audience.startsWith("database_leads")) {
     const stateMatch = audience.match(/^database_leads_(.+)$/);
     const where: Record<string, unknown> = { email: { not: null } };
