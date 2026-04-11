@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { formatCurrency, formatTime } from "@/lib/utils";
+import { ShareLinkCard } from "@/components/ShareLinkCard";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
 }
 
 async function AdminDashboard({ gymId }: { gymId: string }) {
-  const [productCount, orderCount, lowStockCount, recentOrders, memberCount] =
+  const [productCount, orderCount, lowStockCount, recentOrders, memberCount, gym] =
     await Promise.all([
       prisma.product.count({ where: { gymId, active: true } }),
       prisma.order.count({ where: { gymId } }),
@@ -39,6 +40,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
         include: { items: true },
       }),
       prisma.member.count({ where: { gymId, active: true } }),
+      prisma.gym.findUnique({ where: { id: gymId }, select: { slug: true } }),
     ]);
 
   const stats = [
@@ -51,6 +53,12 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+
+      {gym?.slug && (
+        <div style={{ marginBottom: "24px" }}>
+          <ShareLinkCard slug={gym.slug} />
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
