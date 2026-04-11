@@ -258,6 +258,28 @@ export function sendWeeklyRecap(
   send(email, "Your week on the mats", html).catch(() => {});
 }
 
+export function sendGymApprovedEmail(email: string, ownerName: string, gymName: string) {
+  const html = wrap({
+    eyebrow: "Approved",
+    headline: `Welcome to MatFlow, ${ownerName}.`,
+    body: `<p style="margin:0 0 16px 0;">Your academy <strong style="color:#ffffff;">${gymName}</strong> has been approved and is now live on MatFlow.</p>
+           <p style="margin:0 0 16px 0;">You now have full access to everything:</p>
+           <table cellpadding="0" cellspacing="0" style="margin:0 0 16px 0;">
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Class scheduling and attendance</td></tr>
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Belt and stripe progression tracking</td></tr>
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Kiosk check-in for your students</td></tr>
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Pro shop with inventory management</td></tr>
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Video library and digital waivers</td></tr>
+             <tr><td style="padding:4px 0;color:#a3a3a3;font-size:14px;">&#10003; &nbsp;Analytics and member management</td></tr>
+           </table>
+           <p style="margin:0;">Log in and start setting up your academy. If you need anything, just reply to this email.</p>`,
+    ctaText: "Open Your Dashboard",
+    ctaHref: "https://app.mymatflow.com/app",
+    footnote: "You are a founding member. Your pricing is locked in for life.",
+  });
+  send(email, `${gymName} is live on MatFlow`, html).catch(() => {});
+}
+
 export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
   const html = wrap({
     eyebrow: "Update",

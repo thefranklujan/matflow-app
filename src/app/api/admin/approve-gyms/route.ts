@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
+import { sendGymApprovedEmail } from "@/lib/email";
 
 const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
   .split(",")
@@ -52,10 +53,24 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === "approve") {
-      await prisma.gym.update({
+      const gym = await prisma.gym.update({
         where: { id: gymId },
         data: { approved: true },
+        include: {
+          members: {
+            take: 1,
+            orderBy: { createdAt: "asc" },
+            select: { firstName: true, lastName: true, email: true },
+          },
+        },
       });
+
+      // Send welcome email to gym owner
+      const owner = gym.members[0];
+      if (owner?.email) {
+        sendGymApprovedEmail(owner.email, `${owner.firstName} ${owner.lastName}`, gym.name);
+      }
+
       return NextResponse.json({ success: true, action: "approved" });
     }
 
