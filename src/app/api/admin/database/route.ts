@@ -1,12 +1,24 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/auth";
+import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
+
+const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
+  .split(",")
+  .map(e => e.trim().toLowerCase());
+
+async function requirePlatformAdmin() {
+  const session = await getSession();
+  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
+    throw new Error("Forbidden");
+  }
+  return session;
+}
 
 export async function GET(request: NextRequest) {
   try {
-    await getAuthContext();
+    await requirePlatformAdmin();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const state = searchParams.get("state");
@@ -68,7 +80,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await getAuthContext();
+    await requirePlatformAdmin();
     const body = await request.json();
 
     if (Array.isArray(body)) {
@@ -126,7 +138,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    await getAuthContext();
+    await requirePlatformAdmin();
     const body = await request.json();
     const { id, ...fields } = body;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -142,7 +154,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await getAuthContext();
+    await requirePlatformAdmin();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, Send, Eye, MousePointerClick, AlertTriangle,
-  TrendingUp, ExternalLink, X,
+  TrendingUp, ExternalLink, X, UserX,
 } from "lucide-react";
 
 interface ReportData {
@@ -26,6 +26,7 @@ interface ReportData {
     openRate: number;
     clickRate: number;
     clickToOpenRate: number;
+    unsubscribed: number;
   };
   clicksByUrl: [string, number][];
   timeline: [string, { opens: number; clicks: number }][];
@@ -35,6 +36,7 @@ interface ReportData {
     opened: string[];
     clicked: string[];
     bounced: string[];
+    unsubscribed: string[];
   };
 }
 
@@ -61,7 +63,7 @@ export default function ReportClient() {
   const id = params.id as string;
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeList, setActiveList] = useState<"sent" | "opened" | "clicked" | "bounced" | null>(null);
+  const [activeList, setActiveList] = useState<"sent" | "opened" | "clicked" | "bounced" | "unsubscribed" | null>(null);
 
   useEffect(() => {
     fetch(`/api/platform/campaigns/${id}/report`)
@@ -106,7 +108,7 @@ export default function ReportClient() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: "32px" }}>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4" style={{ marginBottom: "32px" }}>
         <KPI label="Sent" value={metrics.sent} icon={Send} color="text-blue-400" bgColor="bg-blue-500/10"
           active={activeList === "sent"} onClick={() => setActiveList(activeList === "sent" ? null : "sent")} />
         <KPI label="Opened" value={metrics.opened} sub={`${metrics.openRate}% open rate`} icon={Eye} color="text-emerald-400" bgColor="bg-emerald-500/10"
@@ -116,6 +118,9 @@ export default function ReportClient() {
         <KPI label="Bounced" value={metrics.failed} sub={metrics.sent > 0 ? `${Math.round((metrics.failed / metrics.sent) * 100)}% bounce rate` : undefined}
           icon={AlertTriangle} color={metrics.failed > 0 ? "text-red-400" : "text-gray-600"} bgColor={metrics.failed > 0 ? "bg-red-500/10" : "bg-white/5"}
           active={activeList === "bounced"} onClick={() => setActiveList(activeList === "bounced" ? null : "bounced")} />
+        <KPI label="Unsubscribed" value={metrics.unsubscribed}
+          icon={UserX} color={metrics.unsubscribed > 0 ? "text-orange-400" : "text-gray-600"} bgColor={metrics.unsubscribed > 0 ? "bg-orange-500/10" : "bg-white/5"}
+          active={activeList === "unsubscribed"} onClick={() => setActiveList(activeList === "unsubscribed" ? null : "unsubscribed")} />
       </div>
 
       {/* Email list panel */}

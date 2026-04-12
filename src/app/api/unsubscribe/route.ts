@@ -2,10 +2,21 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyTrackingSignature } from "@/lib/tracking-sig";
 
 export async function GET(request: NextRequest) {
-  const email = new URL(request.url).searchParams.get("e");
-  if (!email) return NextResponse.json({ error: "Missing email" }, { status: 400 });
+  const { searchParams } = new URL(request.url);
+  const email = searchParams.get("e");
+  const sig = searchParams.get("sig");
+
+  if (!email || !sig) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const valid = verifyTrackingSignature({ e: email }, sig);
+  if (!valid) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+  }
 
   try {
     await prisma.emailUnsubscribe.upsert({
@@ -13,8 +24,9 @@ export async function GET(request: NextRequest) {
       update: {},
       create: { email },
     });
-  } catch {}
+  } catch {
+    console.error("Failed to process unsubscribe");
+  }
 
-  // Redirect to unsubscribe confirmation page
   return NextResponse.redirect(new URL(`/unsubscribe?done=1`, request.url));
 }

@@ -9,6 +9,8 @@ const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsy
   .split(",")
   .map((e) => e.trim().toLowerCase());
 
+import { signTrackingParams } from "@/lib/tracking-sig";
+
 const FROM = "MatFlow <noreply@mymatflow.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.mymatflow.com";
 
@@ -66,12 +68,14 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
 function injectTracking(html: string, campaignId: string, email: string): string {
   const encodedEmail = encodeURIComponent(email);
 
-  // Add tracking pixel
-  const pixelUrl = `${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}&t=${Date.now()}`;
+  // Add tracking pixel with HMAC signature
+  const openSig = signTrackingParams({ cid: campaignId, e: encodedEmail });
+  const pixelUrl = `${BASE_URL}/api/track/open?cid=${campaignId}&e=${encodedEmail}&t=${Date.now()}&sig=${openSig}`;
   const pixel = `<img src="${pixelUrl}" width="1" height="1" alt="" style="border:0;width:1px;height:1px;" />`;
 
   // Add unsubscribe link before </body>
-  const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodedEmail}`;
+  const unsubSig = signTrackingParams({ e: encodedEmail });
+  const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodedEmail}&sig=${unsubSig}`;
   const unsubFooter = `<table width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:16px;"><tr><td align="center"><div style="font-size:11px;color:#525252;text-align:center;">You received this because your gym is listed on Google. <a href="${unsubUrl}" style="color:#525252;text-decoration:underline;">Unsubscribe</a></div></td></tr></table>`;
 
   let tracked = html.replace(/<\/body>/i, `${unsubFooter}${pixel}</body>`);
@@ -81,7 +85,8 @@ function injectTracking(html: string, campaignId: string, email: string): string
     /(<a\s[^>]*href=")([^"#][^"]*?)("[^>]*>)/gi,
     (match, before, url, after) => {
       if (url.startsWith("mailto:") || url.startsWith("#") || url.includes("/api/track/")) return match;
-      const trackUrl = `${BASE_URL}/api/track/click?cid=${campaignId}&e=${encodedEmail}&url=${encodeURIComponent(url)}`;
+      const clickSig = signTrackingParams({ cid: campaignId, e: encodedEmail, url });
+      const trackUrl = `${BASE_URL}/api/track/click?cid=${campaignId}&e=${encodedEmail}&url=${encodeURIComponent(url)}&sig=${clickSig}`;
       return `${before}${trackUrl}${after}`;
     }
   );
@@ -123,7 +128,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   for (const to of capped) {
     try {
       const trackedHtml = injectTracking(campaign.html, id, to);
-      const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodeURIComponent(to)}`;
+      const encodedTo = encodeURIComponent(to);
+      const listUnsubSig = signTrackingParams({ e: encodedTo });
+      const unsubUrl = `${BASE_URL}/api/unsubscribe?e=${encodedTo}&sig=${listUnsubSig}`;
       await resend.emails.send({
         from: FROM,
         replyTo: "franklujan@gmail.com",

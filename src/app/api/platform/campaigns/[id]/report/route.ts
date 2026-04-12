@@ -31,6 +31,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const totalClicks = events.filter(e => e.event === "click").length;
 
+  // Get unsubscribes that were in this campaign's sent list
+  const unsubs = await prisma.emailUnsubscribe.findMany({ select: { email: true } });
+  const unsubSet = new Set(unsubs.map(u => u.email));
+  const unsubscribedEmails = new Set([...sentEmails].filter(e => unsubSet.has(e)));
+
   // Click breakdown by URL
   const clicksByUrl: Record<string, number> = {};
   for (const e of events.filter(e => e.event === "click" && e.metadata)) {
@@ -74,6 +79,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       openRate: sentEmails.size > 0 ? Math.round((openedEmails.size / sentEmails.size) * 100) : 0,
       clickRate: sentEmails.size > 0 ? Math.round((clickedEmails.size / sentEmails.size) * 100) : 0,
       clickToOpenRate: openedEmails.size > 0 ? Math.round((clickedEmails.size / openedEmails.size) * 100) : 0,
+      unsubscribed: unsubscribedEmails.size,
     },
     clicksByUrl: Object.entries(clicksByUrl).sort(([, a], [, b]) => b - a),
     timeline: Object.entries(timeline).sort(([a], [b]) => a.localeCompare(b)),
@@ -83,6 +89,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       opened: Array.from(openedEmails),
       clicked: Array.from(clickedEmails),
       bounced: Array.from(failedEmails),
+      unsubscribed: Array.from(unsubscribedEmails),
     },
   });
 }
