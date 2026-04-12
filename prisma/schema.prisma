@@ -23,6 +23,8 @@ model Gym {
   state              String?
   timezone           String          @default("America/Chicago")
   approved           Boolean         @default(false)
+  lat                Float?
+  lng                Float?
   stripeCustomerId   String?
   stripePriceId      String?
   subscriptionStatus String          @default("trialing")

@@ -9,10 +9,10 @@ interface GymPin {
   name: string;
   city: string | null;
   state: string | null;
+  lat: number | null;
+  lng: number | null;
   status: string;
   members: number;
-  lat?: number;
-  lng?: number;
 }
 
 const STATUS_COLORS: Record<string, string> = {
