@@ -4,7 +4,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM = "MatFlow <noreply@mymatflow.com>";
+const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 
 async function send(to: string, subject: string, html: string, bccFrank = false) {
   if (!resend) {

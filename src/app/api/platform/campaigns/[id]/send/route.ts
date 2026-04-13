@@ -11,7 +11,7 @@ const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsy
 
 import { signTrackingParams } from "@/lib/tracking-sig";
 
-const FROM = "MatFlow <noreply@mymatflow.com>";
+const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.mymatflow.com";
 
 async function requireAdmin() {
