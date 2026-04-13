@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   const gyms = await prisma.gym.findMany({
-    where: { id: { notIn: ["platform-owner-gym", "platform-admin-gym"] } },
+    where: { hidden: false },
     select: {
       id: true,
       name: true,

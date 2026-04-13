@@ -9,6 +9,7 @@ const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@cra
 
 export default async function GymsListPage() {
   const gymsRaw = await prisma.gym.findMany({
+    where: { hidden: false },
     include: {
       members: { select: { email: true } },
       _count: { select: { products: true, orders: true } },
