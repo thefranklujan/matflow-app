@@ -14,6 +14,7 @@ function SignUpForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [gymName, setGymName] = useState("");
   const [gymSlug, setGymSlug] = useState("");
@@ -35,8 +36,12 @@ function SignUpForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (step === 1) {
-      if (!firstName || !lastName || !email || !password) {
+      if (!firstName || !lastName || !email || !phone || !password) {
         setError("All fields are required");
+        return;
+      }
+      if (phone.replace(/\D/g, "").length < 10) {
+        setError("Please enter a valid phone number");
         return;
       }
       if (password.length < 6) {
@@ -52,7 +57,7 @@ function SignUpForm() {
           const res = await fetch("/api/auth/join", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ firstName, lastName, email, password, gymSlug: joinSlug }),
+            body: JSON.stringify({ firstName, lastName, email, phone, password, gymSlug: joinSlug }),
           });
           const data = await res.json();
           if (!res.ok) {
@@ -88,7 +93,7 @@ function SignUpForm() {
         const res = await fetch("/api/auth/student-signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firstName, lastName, email, password, role }),
+          body: JSON.stringify({ firstName, lastName, email, phone, password, role }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -115,6 +120,7 @@ function SignUpForm() {
           firstName,
           lastName,
           email,
+          phone,
           password,
           gymName,
           gymSlug,
@@ -269,6 +275,19 @@ function SignUpForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="marcus@ironlion.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Phone</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
+                  placeholder="(555) 123 4567"
+                  autoComplete="tel"
                   required
                 />
               </div>

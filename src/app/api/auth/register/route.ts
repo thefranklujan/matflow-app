@@ -7,10 +7,10 @@ import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, email, password, gymName, gymSlug, timezone } =
+    const { firstName, lastName, email, phone, password, gymName, gymSlug, timezone } =
       await request.json();
 
-    if (!firstName || !lastName || !email || !password || !gymName || !gymSlug) {
+    if (!firstName || !lastName || !email || !phone || !password || !gymName || !gymSlug) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
 
     const result = await registerGymOwner({
       email,
+      phone,
       password,
       firstName,
       lastName,
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     });
 
     sendWelcomeEmail(email, `${firstName} ${lastName}`, gymName);
-    notifyFrankNewGymPending({ gymName, ownerName: `${firstName} ${lastName}`, ownerEmail: email });
+    notifyFrankNewGymPending({ gymName, ownerName: `${firstName} ${lastName}`, ownerEmail: email, ownerPhone: phone });
     logActivity({ gymId: result.gym.id, action: "gym_created", actorName: `${firstName} ${lastName}`, targetName: gymName });
 
     return NextResponse.json(

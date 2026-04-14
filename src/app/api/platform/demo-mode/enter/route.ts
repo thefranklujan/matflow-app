@@ -21,10 +21,50 @@ export async function POST() {
   c.set("demo_mode_origin", session.email, { httpOnly: true, path: "/", sameSite: "lax" });
   c.set("demo_mode", "1", { httpOnly: false, path: "/", sameSite: "lax" });
 
-  const gym = await prisma.gym.findUnique({
+  let gym = await prisma.gym.findUnique({
     where: { id: DEMO_GYM_ID },
     include: { members: { orderBy: { createdAt: "asc" }, take: 1 } },
   });
+
+  // Auto-seed the sample gym if it was deleted or never existed.
+  if (!gym) {
+    await prisma.gym.create({
+      data: {
+        id: DEMO_GYM_ID,
+        clerkOrgId: DEMO_GYM_ID,
+        name: "MatFlow Sample Gym",
+        slug: "matflow-sample-gym",
+        timezone: "America/Chicago",
+        subscriptionStatus: "active",
+      },
+    });
+  }
+
+  gym = await prisma.gym.findUnique({
+    where: { id: DEMO_GYM_ID },
+    include: { members: { orderBy: { createdAt: "asc" }, take: 1 } },
+  });
+
+  if (gym && gym.members.length === 0) {
+    await prisma.member.create({
+      data: {
+        gymId: DEMO_GYM_ID,
+        clerkUserId: `demo-owner-${Date.now()}`,
+        email: "demo-owner@mymatflow.com",
+        firstName: "Demo",
+        lastName: "Owner",
+        approved: true,
+        active: true,
+        beltRank: "black",
+        stripes: 0,
+      },
+    });
+    gym = await prisma.gym.findUnique({
+      where: { id: DEMO_GYM_ID },
+      include: { members: { orderBy: { createdAt: "asc" }, take: 1 } },
+    });
+  }
+
   if (!gym || gym.members.length === 0) {
     return NextResponse.json({ error: "Demo gym not found" }, { status: 404 });
   }

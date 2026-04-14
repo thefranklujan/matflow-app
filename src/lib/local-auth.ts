@@ -63,6 +63,7 @@ export async function destroySession() {
 
 export async function registerGymOwner(data: {
   email: string;
+  phone?: string;
   password: string;
   firstName: string;
   lastName: string;
@@ -98,6 +99,7 @@ export async function registerGymOwner(data: {
         gymId: gym.id,
         clerkUserId: `owner-${Date.now()}`,
         email: data.email,
+        phone: data.phone || null,
         firstName: data.firstName,
         lastName: data.lastName,
         passwordHash,
@@ -121,6 +123,7 @@ export async function registerGymOwner(data: {
 
 export async function registerMember(data: {
   email: string;
+  phone?: string;
   password: string;
   firstName: string;
   lastName: string;
@@ -141,6 +144,7 @@ export async function registerMember(data: {
       gymId: gym.id,
       clerkUserId: `member-${Date.now()}`,
       email: data.email,
+      phone: data.phone || null,
       firstName: data.firstName,
       lastName: data.lastName,
       passwordHash,

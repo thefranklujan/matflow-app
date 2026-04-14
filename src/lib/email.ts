@@ -196,7 +196,7 @@ export function sendJoinRequestApprovedToStudent(email: string, studentName: str
   send(email, `You are approved at ${gymName}`, html).catch(() => {});
 }
 
-export function notifyFrankNewGymPending({ gymName, ownerName, ownerEmail }: { gymName: string; ownerName: string; ownerEmail: string }) {
+export function notifyFrankNewGymPending({ gymName, ownerName, ownerEmail, ownerPhone }: { gymName: string; ownerName: string; ownerEmail: string; ownerPhone?: string | null }) {
   const html = wrap({
     eyebrow: "New Gym Signup",
     headline: "A gym is waiting for approval.",
@@ -204,6 +204,7 @@ export function notifyFrankNewGymPending({ gymName, ownerName, ownerEmail }: { g
              <tr><td><strong style="color:#ffffff;">Gym</strong></td><td>${gymName}</td></tr>
              <tr><td><strong style="color:#ffffff;">Owner</strong></td><td>${ownerName}</td></tr>
              <tr><td><strong style="color:#ffffff;">Email</strong></td><td>${ownerEmail}</td></tr>
+             <tr><td><strong style="color:#ffffff;">Phone</strong></td><td>${ownerPhone || "&mdash;"}</td></tr>
              <tr><td><strong style="color:#ffffff;">When</strong></td><td>${new Date().toLocaleString()}</td></tr>
            </table>`,
     ctaText: "Review and Approve",

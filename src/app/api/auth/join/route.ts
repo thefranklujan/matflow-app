@@ -8,7 +8,7 @@ import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, email, password, gymSlug } =
+    const { firstName, lastName, email, phone, password, gymSlug } =
       await request.json();
 
     if (!firstName || !lastName || !email || !password || !gymSlug) {
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     const result = await registerMember({
       email,
+      phone,
       password,
       firstName,
       lastName,
