@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { LogOut, User, LayoutGrid } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import InstallAppButton from "@/components/InstallAppButton";
 
 export function Header() {
   const { user, signOut, isAdmin, isPlatformAdmin } = useAuth();
@@ -32,7 +33,9 @@ export function Header() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-6">
       <div />
-      <div className="relative" ref={menuRef}>
+      <div className="flex items-center gap-3">
+        <InstallAppButton />
+        <div className="relative" ref={menuRef}>
         <button
           onClick={() => setShowMenu(!showMenu)}
           className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition"
@@ -87,6 +90,7 @@ export function Header() {
             </button>
           </div>
         )}
+        </div>
       </div>
     </header>
   );

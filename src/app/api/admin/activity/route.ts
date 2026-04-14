@@ -15,7 +15,13 @@ export async function GET(request: NextRequest) {
     const cursor = searchParams.get("cursor");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
-    const where: Record<string, unknown> = { gymId };
+    // Platform-level events (e.g. student_signup on MatFlow itself) live under
+    // gymId="platform" and must never surface in a gym's own activity feed.
+    const PLATFORM_ACTIONS = ["student_signup"];
+    const where: Record<string, unknown> = {
+      gymId,
+      action: { notIn: PLATFORM_ACTIONS },
+    };
     if (action) where.action = action;
     if (from || to) {
       where.createdAt = {};

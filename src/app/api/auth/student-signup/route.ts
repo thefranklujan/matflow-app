@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     sendWelcomeEmail(email, `${firstName} ${lastName}`, "MatFlow");
     notifyAdminOfNewStudent({ firstName, lastName, email, phone });
-    logActivity({ gymId: "platform-admin-gym", action: "student_signup", actorId: student.id, actorName: `${firstName} ${lastName}` });
+    logActivity({ gymId: "platform", action: "student_signup", actorId: student.id, actorName: `${firstName} ${lastName}` });
 
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error) {
