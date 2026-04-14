@@ -24,7 +24,7 @@ export default function DemoModeBanner() {
     <div className="bg-[#dc2626] text-white px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0">
       <span className="inline-flex items-center gap-2">
         <Play className="h-3.5 w-3.5" fill="currentColor" />
-        Demo Mode &mdash; viewing MatFlow Sample Gym as a prospect would
+        Demo Mode
       </span>
       <button
         onClick={exit}
