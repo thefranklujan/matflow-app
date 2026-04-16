@@ -17,17 +17,17 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ gy
   });
   if (!member) return NextResponse.redirect(new URL("/student", _req.url));
 
-  // Create a member-context session for this gym
+  // Keep student session but refresh gym context. Students stay in /student.
   await createSession({
-    userId: member.clerkUserId,
+    userId: session.userId,
     email: member.email,
     name: `${member.firstName} ${member.lastName}`,
     role: "member",
     gymId: member.gymId,
     memberId: member.id,
-    userType: "member",
+    userType: "student",
     studentId: session.studentId,
   });
 
-  return NextResponse.redirect(new URL("/app", _req.url));
+  return NextResponse.redirect(new URL("/student", _req.url));
 }

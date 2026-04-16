@@ -85,6 +85,7 @@ export default async function AdminMembersPage() {
                       </Link>
                       <MemberActions
                         memberId={member.id}
+                        memberName={`${member.firstName} ${member.lastName}`}
                         approved={member.approved}
                         active={member.active}
                       />

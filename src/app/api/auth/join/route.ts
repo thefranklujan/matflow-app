@@ -34,13 +34,16 @@ export async function POST(request: NextRequest) {
       gymSlug,
     });
 
+    // Student-flavored session. They live in /student, with gym context attached.
     await createSession({
-      userId: `member-${result.member.id}`,
-      email,
+      userId: `student-${result.studentId}`,
+      email: email.trim().toLowerCase(),
       name: `${firstName} ${lastName}`,
       role: "member",
       gymId: result.member.gymId,
       memberId: result.member.id,
+      userType: "student",
+      studentId: result.studentId,
     });
 
     const gym = await prisma.gym.findUnique({ where: { slug: gymSlug }, select: { name: true } });

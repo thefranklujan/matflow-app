@@ -65,3 +65,27 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { gymId } = await requireAdmin();
+    const { id } = await params;
+
+    // Verify the member belongs to this gym before deleting
+    const existing = await prisma.member.findFirst({ where: { id, gymId } });
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // Cascades clean up attendance, belt progress, waivers, goals, etc.
+    // The underlying Student record is preserved (onDelete: SetNull on studentId).
+    await prisma.member.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+}

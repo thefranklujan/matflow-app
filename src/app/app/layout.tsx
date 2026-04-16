@@ -6,8 +6,15 @@ import { BillingGuard } from "@/components/layout/BillingGuard";
 import ViewAsStudentBanner from "@/components/layout/ViewAsStudentBanner";
 import DemoModeBanner from "@/components/layout/DemoModeBanner";
 import { cookies } from "next/headers";
+import { getSession } from "@/lib/local-auth";
+import { redirect } from "next/navigation";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
+  // Students never access the gym-owner dashboard. One gym, one student.
+  if (session.userType === "student") redirect("/student");
+
   const c = await cookies();
   const viewAsStudent = c.get("view_as_student")?.value === "1";
   const demoMode = c.get("demo_mode")?.value === "1";

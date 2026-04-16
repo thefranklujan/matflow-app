@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getSession, createSession } from "@/lib/local-auth";
+import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -22,26 +22,6 @@ export default async function StudentDashboardPage() {
   });
   const weeklyGoal = studentRecord?.weeklyGoal ?? 4;
   const myHomeGym = studentRecord?.homeGym || null;
-
-  // If a real student has at least one approved membership, switch them straight
-  // into that gym's member portal. they should never see this find-a-gym landing.
-  const firstMember = await prisma.member.findFirst({
-    where: { studentId, approved: true, active: true },
-    orderBy: { createdAt: "desc" },
-  });
-  if (firstMember) {
-    await createSession({
-      userId: firstMember.clerkUserId,
-      email: firstMember.email,
-      name: `${firstMember.firstName} ${firstMember.lastName}`,
-      role: "member",
-      gymId: firstMember.gymId,
-      memberId: firstMember.id,
-      userType: "member",
-      studentId,
-    });
-    redirect("/app");
-  }
 
   const [memberships, requests, activeGyms, nominatedGroups] = await Promise.all([
     prisma.member.findMany({

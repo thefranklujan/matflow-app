@@ -65,7 +65,7 @@ function SignUpForm() {
             setLoading(false);
             return;
           }
-          router.push("/app");
+          router.push("/student");
         } catch {
           setError("Something went wrong. Please try again.");
           setLoading(false);

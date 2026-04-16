@@ -5,10 +5,12 @@ import { useState } from "react";
 
 export default function MemberActions({
   memberId,
+  memberName,
   approved,
   active,
 }: {
   memberId: string;
+  memberName?: string;
   approved: boolean;
   active: boolean;
 }) {
@@ -22,6 +24,24 @@ export default function MemberActions({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ [field]: value }),
     });
+    router.refresh();
+    setLoading(false);
+  }
+
+  async function remove() {
+    const name = memberName || "this member";
+    const confirmed = confirm(
+      `Remove ${name} from your gym?\n\nThis permanently deletes their attendance, belt history, and waiver signatures at this gym. Their student account is preserved.\n\nThis cannot be undone.`
+    );
+    if (!confirmed) return;
+    setLoading(true);
+    const res = await fetch(`/api/admin/members/${memberId}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to remove member");
+      setLoading(false);
+      return;
+    }
     router.refresh();
     setLoading(false);
   }
@@ -47,6 +67,13 @@ export default function MemberActions({
         }`}
       >
         {active ? "Deactivate" : "Activate"}
+      </button>
+      <button
+        disabled={loading}
+        onClick={remove}
+        className="text-xs px-2 py-1 rounded bg-red-600/20 text-red-400 hover:bg-red-600/40 transition disabled:opacity-50"
+      >
+        Remove
       </button>
     </div>
   );

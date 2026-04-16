@@ -128,34 +128,93 @@ export async function registerMember(data: {
   firstName: string;
   lastName: string;
   gymSlug: string;
-}): Promise<{ member: { id: string; gymId: string } }> {
+}): Promise<{ member: { id: string; gymId: string }; studentId: string }> {
   const gym = await prisma.gym.findUnique({ where: { slug: data.gymSlug } });
   if (!gym) throw new Error("Gym not found");
 
-  const existing = await prisma.member.findFirst({
-    where: { email: data.email, gymId: gym.id },
-  });
-  if (existing) throw new Error("An account with this email already exists at this gym");
-
   const passwordHash = await bcrypt.hash(data.password, 10);
+  const emailLower = data.email.trim().toLowerCase();
 
-  const member = await prisma.member.create({
-    data: {
-      gymId: gym.id,
-      clerkUserId: `member-${Date.now()}`,
-      email: data.email,
-      phone: data.phone || null,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      passwordHash,
-      approved: true,
-      active: true,
-      beltRank: "white",
-      stripes: 0,
-    },
+  // Check if the person has a Member record at ANOTHER gym (one gym, one student rule)
+  const otherGymMember = await prisma.member.findFirst({
+    where: { email: emailLower, gymId: { not: gym.id } },
+    include: { gym: { select: { name: true } } },
+  });
+  if (otherGymMember) {
+    throw new Error(
+      `You're already a member of ${otherGymMember.gym.name}. Contact them to transfer.`
+    );
+  }
+
+  // Find or create the underlying Student identity
+  let student = await prisma.student.findUnique({ where: { email: emailLower } });
+  if (!student) {
+    student = await prisma.student.create({
+      data: {
+        email: emailLower,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || null,
+        passwordHash,
+      },
+    });
+  } else {
+    // Update password + profile so this signup replaces any stale credentials
+    student = await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || null,
+        passwordHash,
+      },
+    });
+  }
+
+  // Upsert Member for this gym (self-heal if a stale inactive record blocks re-signup)
+  const existing = await prisma.member.findFirst({
+    where: { email: emailLower, gymId: gym.id },
   });
 
-  return { member: { id: member.id, gymId: gym.id } };
+  let member;
+  if (existing) {
+    if (existing.active && existing.approved) {
+      throw new Error(
+        "You already have an active account at this gym. Sign in instead."
+      );
+    }
+    member = await prisma.member.update({
+      where: { id: existing.id },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || null,
+        passwordHash,
+        approved: true,
+        active: true,
+        studentId: student.id,
+      },
+    });
+  } else {
+    member = await prisma.member.create({
+      data: {
+        gymId: gym.id,
+        clerkUserId: `member-${Date.now()}`,
+        email: emailLower,
+        phone: data.phone || null,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        passwordHash,
+        approved: true,
+        active: true,
+        beltRank: "white",
+        stripes: 0,
+        studentId: student.id,
+      },
+    });
+  }
+
+  return { member: { id: member.id, gymId: gym.id }, studentId: student.id };
 }
 
 // ── Register Student ─────────────────────────────────
@@ -190,19 +249,27 @@ export async function authenticateStudent(
   email: string,
   password: string
 ): Promise<SessionUser | null> {
-  const student = await prisma.student.findUnique({ where: { email } });
+  const emailLower = email.trim().toLowerCase();
+  const student = await prisma.student.findUnique({ where: { email: emailLower } });
   if (!student) return null;
 
   const valid = await bcrypt.compare(password, student.passwordHash);
   if (!valid) return null;
+
+  // If the student has a linked, active gym membership, carry that context
+  // in the session so gym features work. They still stay in the /student portal.
+  const member = await prisma.member.findFirst({
+    where: { studentId: student.id, approved: true, active: true },
+    orderBy: { createdAt: "desc" },
+  });
 
   return {
     userId: `student-${student.id}`,
     email: student.email,
     name: `${student.firstName} ${student.lastName}`,
     role: "member",
-    gymId: "",
-    memberId: "",
+    gymId: member?.gymId || "",
+    memberId: member?.id || "",
     userType: "student",
     studentId: student.id,
   };
