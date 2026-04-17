@@ -1,4 +1,7 @@
-const CACHE_NAME = "matflow-v2";
+// OneSignal push handler — loaded first so push events work alongside PWA caching
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE_NAME = "matflow-v3-onesignal";
 const STATIC_ASSETS = ["/", "/sign-in", "/sign-up", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
