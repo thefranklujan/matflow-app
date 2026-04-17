@@ -45,5 +45,18 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MatFlow uses your location to remind you to log training when you're at your gym.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MatFlow uses your location to remind you to log training when you're near your gym, even when the app is closed.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MatFlow uses the camera to capture your profile photo and training moments.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MatFlow uses your photo library to set your profile picture.</string>
 </dict>
 </plist>
