@@ -48,3 +48,12 @@ prisma/dev.db
 # Environment
 .env
 .env.local
+
+# Capacitor
+ios/App/Pods/
+ios/App/App/public/
+ios/DerivedData/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
