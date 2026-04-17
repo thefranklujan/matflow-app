@@ -12,9 +12,18 @@ export default function PWAInit() {
   const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
-    // Register service worker
+    // Unregister any MatFlow-owned service worker so OneSignal's SDK owns
+    // the root scope. Offline caching gets sacrificed in exchange for
+    // reliable push — a deliberate trade-off documented in MEMORY/notifications.
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const r of regs) {
+          // Leave OneSignal's registration alone, remove our own /sw.js
+          if (r.active?.scriptURL?.endsWith("/sw.js")) {
+            r.unregister().catch(() => {});
+          }
+        }
+      }).catch(() => {});
     }
 
     // Listen for install prompt

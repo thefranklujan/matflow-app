@@ -66,9 +66,9 @@ export default function OneSignalInit() {
           safari_web_id: SAFARI_WEB_ID || undefined,
           notifyButton: { enable: false },
           allowLocalhostAsSecureOrigin: true,
-          // Use MatFlow's unified service worker so OneSignal and PWA caching
-          // coexist. /sw.js importScripts OneSignal's SDK at the top.
-          serviceWorkerPath: "/sw.js",
+          // OneSignal owns root scope exclusively. MatFlow's old /sw.js is
+          // unregistered by PWAInit on page load to prevent conflicts.
+          serviceWorkerPath: "/OneSignalSDKWorker.js",
           serviceWorkerParam: { scope: "/" },
         });
 
