@@ -5,6 +5,7 @@ import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestSubmittedToAdmin } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
+import { sendPush } from "@/lib/push";
 
 export async function GET() {
   const session = await getSession();
@@ -53,6 +54,13 @@ export async function POST(req: NextRequest) {
       `${request.student.firstName} ${request.student.lastName}`,
       request.gym.name
     );
+    // Push the gym owner on whatever device they have tagged
+    sendPush({
+      externalIds: [owner.clerkUserId, owner.studentId ? `student-${owner.studentId}` : ""].filter(Boolean),
+      title: "New join request",
+      body: `${request.student.firstName} ${request.student.lastName} wants to join ${request.gym.name}`,
+      url: "/app/requests",
+    });
   }
 
   logActivity({ gymId, action: "join_request", actorId: session.studentId, actorName: `${request.student.firstName} ${request.student.lastName}`, targetName: request.gym.name });

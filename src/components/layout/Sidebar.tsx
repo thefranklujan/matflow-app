@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { NAV_ITEMS } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useUnreadCounts } from "@/lib/useUnreadCounts";
 import {
   Activity, BarChart3, Target, Users, Calendar, CheckSquare, Video,
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
@@ -25,6 +26,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { role, gym } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const unread = useUnreadCounts();
 
   useEffect(() => {
     try {
@@ -97,6 +99,7 @@ export function Sidebar() {
           const Icon = ICON_MAP[item.icon] || LayoutDashboard;
           const href = `/app/${item.slug}`;
           const isActive = pathname === href || pathname.startsWith(`${href}/`);
+          const badge = unread[item.slug] || 0;
 
           return (
             <Link
@@ -109,10 +112,33 @@ export function Sidebar() {
                   : "text-gray-400 hover:bg-white/5 hover:text-white",
                 collapsed && "justify-center px-0"
               )}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? `${item.label}${badge > 0 ? ` (${badge})` : ""}` : undefined}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
+              <div className="relative shrink-0">
+                <Icon className="h-4 w-4" />
+                {badge > 0 && collapsed && (
+                  <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                    {badge > 9 ? "9+" : badge}
+                  </span>
+                )}
+              </div>
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{item.label}</span>
+                  {badge > 0 && (
+                    <span
+                      className={cn(
+                        "shrink-0 h-5 min-w-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center leading-none",
+                        isActive
+                          ? "bg-black text-white"
+                          : "bg-red-500 text-white"
+                      )}
+                    >
+                      {badge > 99 ? "99+" : badge}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}

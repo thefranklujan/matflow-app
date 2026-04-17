@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import PWAInit from "@/components/PWAInit";
+import OneSignalInit from "@/components/OneSignalInit";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +48,20 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
         </CartProvider>
         <PWAInit />
+        <OneSignalInit />
+        <Toaster
+          theme="dark"
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              background: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff",
+            },
+          }}
+        />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import NotificationSettings from "@/components/NotificationSettings";
 
 interface StudentProfile {
   firstName: string;
@@ -226,6 +227,11 @@ export default function StudentProfilePage() {
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </form>
+
+      <div className="mt-10">
+        <h2 className="text-lg font-bold text-white mb-3">Notifications</h2>
+        <NotificationSettings />
+      </div>
     </div>
   );
 }

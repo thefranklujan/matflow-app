@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendBulkPush } from "@/lib/push";
 
 export async function GET() {
   try {
@@ -35,6 +36,22 @@ export async function POST(request: NextRequest) {
 
     const template = await prisma.waiverTemplate.create({
       data: { gymId, title, content, active: true },
+    });
+
+    // Push every active member — they need to re-sign the new waiver.
+    const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
+    const members = await prisma.member.findMany({
+      where: { gymId, active: true, approved: true, studentId: { not: null } },
+      select: { studentId: true },
+    });
+    const externalIds = members
+      .map((m) => (m.studentId ? `student-${m.studentId}` : null))
+      .filter((x): x is string => Boolean(x));
+    sendBulkPush({
+      externalIds,
+      title: `${gym?.name || "Your gym"} needs your signature`,
+      body: `New waiver: ${title}. Tap to review and sign.`,
+      url: "/student/waiver",
     });
 
     return NextResponse.json(template, { status: 201 });

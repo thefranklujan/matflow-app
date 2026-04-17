@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendJoinRequestApprovedToStudent } from "@/lib/email";
 import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
+import { sendPush } from "@/lib/push";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -56,6 +57,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       `${request.student.firstName} ${request.student.lastName}`,
       request.gym.name
     );
+    sendPush({
+      externalIds: [`student-${request.student.id}`],
+      title: `You're in at ${request.gym.name}!`,
+      body: "Your join request was approved. Tap to open your training home.",
+      url: "/student",
+    });
     logActivity({ gymId, action: "join_approved", actorName: "Admin", targetId: request.student.id, targetName: `${request.student.firstName} ${request.student.lastName}` });
 
     return NextResponse.json({ success: true });
