@@ -45,6 +45,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -52,6 +54,8 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MatFlow uses your location while the app is open to suggest your home gym and mark attendance when you arrive at class.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MatFlow uses your location while the app is open to suggest your home gym and mark attendance when you arrive at class. MatFlow does not track your location when the app is closed.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>MatFlow uses your camera when you choose to take a new profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
