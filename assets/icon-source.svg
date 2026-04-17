@@ -2,21 +2,29 @@
   <!-- Black background -->
   <rect x="0" y="0" width="1024" height="1024" fill="#000000"/>
 
-  <!-- MatFlow wordmark, centered -->
-  <text x="512" y="540"
+  <!-- Red square tile with 3 white bars (top, centered) -->
+  <g>
+    <rect x="362" y="180" width="300" height="300" rx="54" fill="#dc2626"/>
+    <rect x="424" y="250" width="176" height="30" rx="6" fill="#ffffff"/>
+    <rect x="424" y="315" width="124" height="30" rx="6" fill="#ffffff"/>
+    <rect x="424" y="380" width="176" height="30" rx="6" fill="#ffffff"/>
+  </g>
+
+  <!-- MatFlow wordmark, centered below the red square -->
+  <text x="512" y="660"
         text-anchor="middle"
         font-family="'Helvetica Neue', Arial, sans-serif"
-        font-size="180"
+        font-size="140"
         font-weight="900"
         fill="#ffffff"
-        letter-spacing="-8">MatFlow</text>
+        letter-spacing="-6">MatFlow</text>
 
-  <!-- Belt color bar underneath wordmark (white, blue, purple, brown, black) -->
+  <!-- Belt color bar at the bottom (white, blue, purple, brown, black) -->
   <g>
-    <rect x="192"  y="600" width="128" height="32" fill="#ffffff" stroke="#333333" stroke-width="2"/>
-    <rect x="320"  y="600" width="128" height="32" fill="#2563eb"/>
-    <rect x="448"  y="600" width="128" height="32" fill="#7c3aed"/>
-    <rect x="576"  y="600" width="128" height="32" fill="#92400e"/>
-    <rect x="704"  y="600" width="128" height="32" fill="#000000" stroke="#ffffff" stroke-width="2"/>
+    <rect x="232" y="720" width="112" height="28" fill="#ffffff" stroke="#333333" stroke-width="2"/>
+    <rect x="344" y="720" width="112" height="28" fill="#2563eb"/>
+    <rect x="456" y="720" width="112" height="28" fill="#7c3aed"/>
+    <rect x="568" y="720" width="112" height="28" fill="#92400e"/>
+    <rect x="680" y="720" width="112" height="28" fill="#000000" stroke="#ffffff" stroke-width="2"/>
   </g>
 </svg>
