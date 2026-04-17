@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
-import { sendBulkPush } from "@/lib/push";
+import { notify } from "@/lib/push";
 
 export async function GET() {
   try {
@@ -52,11 +52,13 @@ export async function POST(req: NextRequest) {
     const externalIds = members
       .map((m) => (m.studentId ? `student-${m.studentId}` : null))
       .filter((x): x is string => Boolean(x));
-    sendBulkPush({
+    notify({
       externalIds,
+      kind: "announcement",
       title: gym?.name ? `${gym.name}: ${title}` : title,
       body: content.length > 140 ? content.slice(0, 137) + "..." : content,
       url: "/student?tab=announcements",
+      gymId,
     });
 
     return NextResponse.json(announcement, { status: 201 });

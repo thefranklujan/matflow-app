@@ -7,6 +7,8 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
+  // Notifications — always first so unread badge is immediately visible
+  { slug: "notifications", label: "Notifications", icon: "Bell", roles: ["admin", "member"], section: "main" },
   // Admin-only
   { slug: "activity", label: "Activity", icon: "Activity", roles: ["admin"], section: "main" },
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"], section: "main" },

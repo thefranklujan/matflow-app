@@ -16,6 +16,15 @@ export async function GET() {
 
   const counts: Record<string, number> = {};
 
+  // Unread in-app notifications for everyone
+  const aliases = [session.userId, session.studentId ? `student-${session.studentId}` : ""].filter(
+    Boolean
+  );
+  const unreadNotifs = await prisma.notification.count({
+    where: { externalId: { in: aliases }, readAt: null },
+  });
+  counts.notifications = unreadNotifs;
+
   // Gym owner / admin counts
   if (session.role === "admin" && session.gymId) {
     const [pendingRequests, pendingWaivers] = await Promise.all([

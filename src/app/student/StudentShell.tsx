@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy, Timer } from "lucide-react";
+import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy, Timer, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ShareMatFlow from "@/components/student/ShareMatFlow";
 import QuickLogFAB from "@/components/student/QuickLogFAB";
+import { useUnreadCounts } from "@/lib/useUnreadCounts";
 
 const NAV = [
   { href: "/student", label: "Home", icon: Home },
+  { href: "/student/notifications", label: "Notifications", icon: Bell, badgeKey: "notifications" },
   { href: "/student/schedule", label: "Training Schedule", icon: CalendarDays },
   { href: "/student/training", label: "Training Log", icon: ClipboardList },
   { href: "/student/clock", label: "BJJ Clock", icon: Timer },
@@ -23,6 +25,7 @@ const NAV = [
 // Mobile bottom tab bar: only 4 primary items. Everything else goes into "More".
 const MOBILE_PRIMARY = [
   { href: "/student", label: "Home", icon: Home },
+  { href: "/student/notifications", label: "Inbox", icon: Bell, badgeKey: "notifications" },
   { href: "/student/schedule", label: "Schedule", icon: CalendarDays },
   { href: "/student/training", label: "Log", icon: ClipboardList },
 ];
@@ -62,6 +65,7 @@ export default function StudentShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const unread = useUnreadCounts();
   const [collapsed, setCollapsed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -115,6 +119,7 @@ export default function StudentShell({
             {NAV.map((item) => {
               const Icon = item.icon;
               const isActive = item.href === "/student" ? pathname === "/student" : pathname.startsWith(item.href);
+              const badge = item.badgeKey ? (unread[item.badgeKey] || 0) : 0;
               return (
                 <Link
                   key={item.href}
@@ -124,10 +129,29 @@ export default function StudentShell({
                     isActive ? "bg-[#dc2626] text-white" : "text-gray-400 hover:bg-white/5 hover:text-white",
                     collapsed && "justify-center px-0"
                   )}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? `${item.label}${badge > 0 ? ` (${badge})` : ""}` : undefined}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
+                  <div className="relative shrink-0">
+                    <Icon className="h-4 w-4" />
+                    {badge > 0 && collapsed && (
+                      <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    )}
+                  </div>
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1">{item.label}</span>
+                      {badge > 0 && (
+                        <span className={cn(
+                          "shrink-0 h-5 min-w-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center leading-none",
+                          isActive ? "bg-white text-[#dc2626]" : "bg-red-500 text-white"
+                        )}>
+                          {badge > 99 ? "99+" : badge}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </Link>
               );
             })}
@@ -189,16 +213,24 @@ export default function StudentShell({
             {MOBILE_PRIMARY.map((item) => {
               const Icon = item.icon;
               const isActive = item.href === "/student" ? pathname === "/student" : pathname.startsWith(item.href);
+              const badge = item.badgeKey ? (unread[item.badgeKey] || 0) : 0;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
+                    "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors relative",
                     isActive ? "text-[#dc2626]" : "text-gray-500"
                   )}
                 >
-                  <Icon className={cn("h-5 w-5", isActive && "text-[#dc2626]")} />
+                  <div className="relative">
+                    <Icon className={cn("h-5 w-5", isActive && "text-[#dc2626]")} />
+                    {badge > 0 && (
+                      <span className="absolute -top-1.5 -right-2 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    )}
+                  </div>
                   {item.label}
                 </Link>
               );

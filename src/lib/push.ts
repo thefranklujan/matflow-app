@@ -1,5 +1,5 @@
 /**
- * OneSignal push notification helper.
+ * OneSignal push notification helper + in-app inbox persistence.
  * Env-var driven: no-ops gracefully when credentials aren't set so the app
  * keeps working in dev or before OneSignal is provisioned in Vercel.
  *
@@ -8,6 +8,8 @@
  * Works for both gym owners ("member-...", "owner-...") and students
  * ("student-..."). Safer than segments because it targets specific users.
  */
+
+import { prisma } from "@/lib/prisma";
 
 const APP_ID = process.env.ONESIGNAL_APP_ID || "";
 const REST_KEY = process.env.ONESIGNAL_REST_API_KEY || "";
@@ -88,4 +90,60 @@ export async function sendBulkPush(opts: PushOptions): Promise<void> {
  */
 export function externalIdForSession(session: { userId: string }) {
   return session.userId;
+}
+
+export type NotificationKind =
+  | "announcement"
+  | "join_request"
+  | "join_approved"
+  | "join_rejected"
+  | "belt_promotion"
+  | "waiver_required"
+  | "test";
+
+interface NotifyOptions {
+  externalIds: string[];
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  url?: string;
+  iconUrl?: string;
+  gymId?: string;
+}
+
+/**
+ * One call = persist to the Notification inbox AND fire the push.
+ * Use this instead of sendPush/sendBulkPush for any user-facing event.
+ * Inbox writes are best-effort; push is still attempted even if DB write fails.
+ */
+export async function notify(opts: NotifyOptions): Promise<void> {
+  const externalIds = opts.externalIds.filter(Boolean);
+  if (externalIds.length === 0) return;
+
+  // Persist inbox rows first — we want a log even if push is disabled/unavailable.
+  try {
+    await prisma.notification.createMany({
+      data: externalIds.map((externalId) => ({
+        externalId,
+        gymId: opts.gymId || null,
+        kind: opts.kind,
+        title: opts.title,
+        body: opts.body,
+        url: opts.url || null,
+        iconUrl: opts.iconUrl || null,
+      })),
+    });
+  } catch (err) {
+    console.error("[notify] inbox persist failed:", err);
+  }
+
+  // Fire push in parallel/after — failures don't affect the inbox row.
+  await sendBulkPush({
+    externalIds,
+    title: opts.title,
+    body: opts.body,
+    url: opts.url,
+    iconUrl: opts.iconUrl,
+    data: { kind: opts.kind, gymId: opts.gymId },
+  });
 }

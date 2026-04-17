@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendBulkPush } from "@/lib/push";
+import { notify } from "@/lib/push";
 
 export async function GET() {
   try {
@@ -47,11 +47,13 @@ export async function POST(request: NextRequest) {
     const externalIds = members
       .map((m) => (m.studentId ? `student-${m.studentId}` : null))
       .filter((x): x is string => Boolean(x));
-    sendBulkPush({
+    notify({
       externalIds,
+      kind: "waiver_required",
       title: `${gym?.name || "Your gym"} needs your signature`,
       body: `New waiver: ${title}. Tap to review and sign.`,
       url: "/student/waiver",
+      gymId,
     });
 
     return NextResponse.json(template, { status: 201 });

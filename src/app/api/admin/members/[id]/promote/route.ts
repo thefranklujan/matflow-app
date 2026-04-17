@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBeltPromotion } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
-import { sendPush } from "@/lib/push";
+import { notify } from "@/lib/push";
 
 export async function POST(
   req: NextRequest,
@@ -46,17 +46,19 @@ export async function POST(
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
     sendBeltPromotion(existing.email, `${existing.firstName} ${existing.lastName}`, beltRank, stripes, gym?.name || "Your Gym");
-    sendPush({
+    notify({
       externalIds: [
         existing.clerkUserId,
         existing.studentId ? `student-${existing.studentId}` : "",
       ].filter(Boolean),
+      kind: "belt_promotion",
       title: `Congrats, ${existing.firstName} 🥋`,
       body:
         stripes > 0
           ? `${beltRank.charAt(0).toUpperCase() + beltRank.slice(1)} belt, ${stripes} stripe${stripes === 1 ? "" : "s"}${gym?.name ? ` at ${gym.name}` : ""}.`
           : `${beltRank.charAt(0).toUpperCase() + beltRank.slice(1)} belt${gym?.name ? ` at ${gym.name}` : ""}.`,
       url: "/student/profile",
+      gymId,
     });
     logActivity({ gymId, action: "belt_promotion", actorName: "Admin", targetId: id, targetName: `${existing.firstName} ${existing.lastName}`, meta: { beltRank, stripes } });
 

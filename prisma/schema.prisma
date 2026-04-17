@@ -597,3 +597,23 @@ model GymDatabase {
   @@index([city, state])
   @@index([createdAt])
 }
+
+/// Unified notification inbox. Every push we fire also writes one row here so
+/// users have an in-app history that survives even if they tap the push away
+/// or miss it entirely. Keyed by externalId (same id used by OneSignal.login)
+/// so we don't need FKs across student/member identity boundaries.
+model Notification {
+  id          String    @id @default(cuid())
+  externalId  String // matches session.userId used as OneSignal external_id
+  gymId       String? // optional gym context for scoping/audit
+  kind        String // "announcement" | "join_request" | "join_approved" | "join_rejected" | "belt_promotion" | "waiver_required" | "test"
+  title       String
+  body        String
+  url         String?
+  iconUrl     String?
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([externalId, readAt])
+  @@index([externalId, createdAt])
+}
