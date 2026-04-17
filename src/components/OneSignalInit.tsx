@@ -14,8 +14,13 @@ import { useEffect } from "react";
  * requires a fresh deploy (see feedback_push_notifications.md).
  */
 
-const APP_ID = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "";
-const SAFARI_WEB_ID = process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || "";
+// v2 — triggers fresh chunk hash so Vercel picks up env vars on rebuild
+const APP_ID = (process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "").trim();
+const SAFARI_WEB_ID = (process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || "").trim();
+
+if (typeof window !== "undefined" && APP_ID) {
+  console.log("[OneSignal] init v2 — app_id:", APP_ID.slice(0, 8) + "...");
+}
 
 declare global {
   interface Window {
