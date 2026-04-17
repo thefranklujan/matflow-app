@@ -3,7 +3,7 @@ import Capacitor
 import OneSignalFramework
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, OSNotificationClickListener {
 
     var window: UIWindow?
 
@@ -18,7 +18,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("MatFlow push permission: \(accepted)")
         }, fallbackToSettings: true)
 
+        // Intercept notification clicks so we can route the user to the relevant
+        // in-app screen instead of opening Safari.
+        OneSignal.Notifications.addClickListener(self)
+
         return true
+    }
+
+    // MARK: - OSNotificationClickListener
+
+    func onClick(event: OSNotificationClickEvent) {
+        // Prefer launchURL (set by server push `url` field) — it's an absolute
+        // https URL pointing at app.mymatflow.com. Load it into the Capacitor
+        // webview so the user stays inside the app.
+        if let launchURL = event.result.url, let url = URL(string: launchURL),
+           let vc = window?.rootViewController as? CAPBridgeViewController {
+            DispatchQueue.main.async {
+                vc.webView?.load(URLRequest(url: url))
+            }
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {}

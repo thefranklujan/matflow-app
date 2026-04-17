@@ -116,12 +116,25 @@ interface NotifyOptions {
  * Use this instead of sendPush/sendBulkPush for any user-facing event.
  * Inbox writes are best-effort; push is still attempted even if DB write fails.
  */
+// Base origin for absolute URLs in push payloads. OneSignal's native iOS SDK
+// opens http/https URLs inside the Capacitor webview when the origin matches
+// the web app, giving real deep-link behavior (tap push → opens inbox page).
+const PUSH_URL_BASE = process.env.PUSH_URL_BASE || "https://app.mymatflow.com";
+
+function absolutize(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${PUSH_URL_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export async function notify(opts: NotifyOptions): Promise<void> {
   // Dedupe aliases — callers often pass both session.userId and the student-id
   // form of the same user, which would double-deliver both the push and the
   // inbox row.
   const externalIds = Array.from(new Set(opts.externalIds.filter(Boolean)));
   if (externalIds.length === 0) return;
+
+  const absoluteUrl = absolutize(opts.url);
 
   // Persist inbox rows first — we want a log even if push is disabled/unavailable.
   try {
@@ -132,6 +145,7 @@ export async function notify(opts: NotifyOptions): Promise<void> {
         kind: opts.kind,
         title: opts.title,
         body: opts.body,
+        // Store the RELATIVE URL in the inbox so in-app links stay within the app
         url: opts.url || null,
         iconUrl: opts.iconUrl || null,
       })),
@@ -141,12 +155,14 @@ export async function notify(opts: NotifyOptions): Promise<void> {
   }
 
   // Fire push in parallel/after — failures don't affect the inbox row.
+  // For native clients (iOS/Android), use absolute URL so OneSignal can open
+  // the deep link correctly.
   await sendBulkPush({
     externalIds,
     title: opts.title,
     body: opts.body,
-    url: opts.url,
+    url: absoluteUrl,
     iconUrl: opts.iconUrl,
-    data: { kind: opts.kind, gymId: opts.gymId },
+    data: { kind: opts.kind, gymId: opts.gymId, path: opts.url },
   });
 }
