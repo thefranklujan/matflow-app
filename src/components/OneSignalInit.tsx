@@ -3,40 +3,81 @@
 import { useEffect } from "react";
 
 /**
- * Boots the OneSignal Web SDK and tags the current user with their session
- * userId (external_id) so the server-side push helper can target them.
+ * Two-mode OneSignal bootstrap.
  *
- * Safe to mount on every page — if credentials aren't set OR the user isn't
- * authenticated, it no-ops.
+ * 1. **Native wrapper (iOS/Android Capacitor build)**: AppDelegate/Application
+ *    already called OneSignal.initialize() at launch. We only need to link
+ *    the authenticated MatFlow session to the device via `login(externalId)`.
+ *    We detect this mode by checking for Capacitor's bridge on `window`.
  *
- * NEXT_PUBLIC_ONESIGNAL_APP_ID and NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID must
- * be set in Vercel env vars. Both are baked at build time, so bumping them
- * requires a fresh deploy (see feedback_push_notifications.md).
+ * 2. **Plain web (browser / PWA)**: inject OneSignal's web SDK, init, request
+ *    permission, and link external_id. Same flow we've had since the start.
+ *
+ * External_id = session.userId so the server-side notify() helper targets
+ * the right user regardless of where they're signed in.
  */
 
-// v2 — triggers fresh chunk hash so Vercel picks up env vars on rebuild
 const APP_ID = (process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "").trim();
 const SAFARI_WEB_ID = (process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || "").trim();
-
-if (typeof window !== "undefined" && APP_ID) {
-  console.log("[OneSignal] init v2 — app_id:", APP_ID.slice(0, 8) + "...");
-}
 
 declare global {
   interface Window {
     OneSignalDeferred?: Array<(os: unknown) => void>;
     __matflowOneSignalReady?: boolean;
+    Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string };
+    plugins?: {
+      OneSignal?: {
+        login: (externalId: string) => void;
+        setLanguage?: (lang: string) => void;
+      };
+    };
+  }
+}
+
+async function linkSessionToOneSignal(): Promise<void> {
+  try {
+    const res = await fetch("/api/auth/session", { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    const userId = data?.user?.userId;
+    if (!data.authenticated || !userId) return;
+
+    // Native mode: Capacitor + OneSignal Cordova plugin at window.plugins.OneSignal
+    if (window.Capacitor?.isNativePlatform?.() && window.plugins?.OneSignal) {
+      window.plugins.OneSignal.login(userId);
+      console.log("[OneSignal] native login", userId.slice(0, 12) + "...");
+      return;
+    }
+
+    // Web mode: web SDK exposes itself via window.OneSignalDeferred queue
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async function (OneSignal) {
+      const os = OneSignal as { login: (id: string) => Promise<void> };
+      await os.login(userId);
+      console.log("[OneSignal] web login", userId.slice(0, 12) + "...");
+    });
+  } catch {
+    // Silent — push will just target anonymously
   }
 }
 
 export default function OneSignalInit() {
   useEffect(() => {
-    if (!APP_ID) return; // No creds → skip entirely, don't even inject the SDK
     if (typeof window === "undefined") return;
     if (window.__matflowOneSignalReady) return;
     window.__matflowOneSignalReady = true;
 
-    // 1. Inject the OneSignal SDK script once
+    const isNative = window.Capacitor?.isNativePlatform?.() || false;
+
+    if (isNative) {
+      // Native wrapper already initialized OneSignal at launch. Just link identity.
+      linkSessionToOneSignal();
+      return;
+    }
+
+    if (!APP_ID) return; // Web mode but no creds → skip
+
+    // Inject the OneSignal Web SDK once
     const existing = document.querySelector('script[data-onesignal="1"]');
     if (!existing) {
       const s = document.createElement("script");
@@ -47,49 +88,31 @@ export default function OneSignalInit() {
       document.head.appendChild(s);
     }
 
-    // 2. Queue init — the SDK drains this array on load
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function (OneSignal) {
       const os = OneSignal as {
         init: (opts: Record<string, unknown>) => Promise<void>;
-        login: (externalId: string) => Promise<void>;
-        logout: () => Promise<void>;
-        Notifications: {
-          permission: boolean;
-          requestPermission: () => Promise<void>;
-        };
+        Notifications: { permission: boolean; requestPermission: () => Promise<void> };
       };
-
       try {
         await os.init({
           appId: APP_ID,
           safari_web_id: SAFARI_WEB_ID || undefined,
           notifyButton: { enable: false },
           allowLocalhostAsSecureOrigin: true,
-          // OneSignal owns root scope exclusively. MatFlow's old /sw.js is
-          // unregistered by PWAInit on page load to prevent conflicts.
           serviceWorkerPath: "/OneSignalSDKWorker.js",
           serviceWorkerParam: { scope: "/" },
         });
-
-        // 3. Link the current MatFlow session to OneSignal via external_id
-        const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-        if (sessionRes.ok) {
-          const data = await sessionRes.json();
-          if (data.authenticated && data.user?.userId) {
-            await os.login(data.user.userId);
-          }
-        }
-
-        // 4. Auto-prompt for permission if we don't have it yet. iOS PWA
-        // requires this gesture to happen after the page is interactive.
         if (!os.Notifications.permission) {
           await os.Notifications.requestPermission();
         }
       } catch (err) {
-        console.error("[OneSignal] init failed:", err);
+        console.error("[OneSignal] web init failed:", err);
       }
     });
+
+    // Link identity regardless of whether init fully completes (queued in both paths)
+    linkSessionToOneSignal();
   }, []);
 
   return null;
