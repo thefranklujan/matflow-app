@@ -39,6 +39,17 @@ async function waitForOneSignal(timeoutMs = 4000): Promise<OneSignalHandle | nul
   });
 }
 
+// Reject the wrapped promise after `ms` so iOS/APNs hiccups don't hang the UI.
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    p.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); },
+    );
+  });
+}
+
 /**
  * Notification preferences surface. Shows push permission state, a master
  * enable/disable toggle, a test-notification button, and the list of
@@ -70,14 +81,19 @@ export default function NotificationSettings() {
       const os = await waitForOneSignal();
       if (!os) throw new Error("OneSignal not loaded");
       if (Notification.permission !== "granted") {
-        await os.Notifications.requestPermission();
+        await withTimeout(os.Notifications.requestPermission(), 10_000, "Permission request");
       }
-      await os.User.PushSubscription.optIn();
+      await withTimeout(os.User.PushSubscription.optIn(), 10_000, "Subscribing");
       setSubscribed(true);
       setPermission(Notification.permission as PermissionState);
       toast.success("Notifications enabled");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to enable");
+      const msg = err instanceof Error ? err.message : "Failed to enable";
+      toast.error(msg, {
+        description: msg.includes("timed out")
+          ? "iOS can stall here. Try: delete the MatFlow home-screen icon, reinstall via Safari, and re-enable."
+          : undefined,
+      });
     } finally {
       setBusy(false);
     }
@@ -88,7 +104,7 @@ export default function NotificationSettings() {
     try {
       const os = await waitForOneSignal();
       if (!os) throw new Error("OneSignal not loaded");
-      await os.User.PushSubscription.optOut();
+      await withTimeout(os.User.PushSubscription.optOut(), 10_000, "Unsubscribing");
       setSubscribed(false);
       toast("Notifications disabled");
     } catch (err) {
