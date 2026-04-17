@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import NotificationSettings from "@/components/NotificationSettings";
+import DeleteAccountSection from "@/components/DeleteAccountSection";
 
 interface GymSettings {
   name: string;
@@ -233,6 +234,11 @@ export default function SettingsPage() {
       <div className="mt-10">
         <h2 className="text-xl font-bold text-white mb-4">Notifications</h2>
         <NotificationSettings />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-white mb-4">Danger zone</h2>
+        <DeleteAccountSection />
       </div>
     </div>
   );

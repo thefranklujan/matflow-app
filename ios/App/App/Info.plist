@@ -51,12 +51,10 @@
 		<string>fetch</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>MatFlow uses your location to remind you to log training when you're at your gym.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>MatFlow uses your location to remind you to log training when you're near your gym, even when the app is closed.</string>
+	<string>MatFlow uses your location while the app is open to suggest your home gym and mark attendance when you arrive at class.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>MatFlow uses the camera to capture your profile photo and training moments.</string>
+	<string>MatFlow uses your camera when you choose to take a new profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>MatFlow uses your photo library to set your profile picture.</string>
+	<string>MatFlow uses your photo library when you choose to upload an existing photo as your profile picture.</string>
 </dict>
 </plist>

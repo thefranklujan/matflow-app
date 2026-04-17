@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import NotificationSettings from "@/components/NotificationSettings";
+import DeleteAccountSection from "@/components/DeleteAccountSection";
 
 interface StudentProfile {
   firstName: string;
@@ -231,6 +232,11 @@ export default function StudentProfilePage() {
       <div className="mt-10">
         <h2 className="text-lg font-bold text-white mb-3">Notifications</h2>
         <NotificationSettings />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-lg font-bold text-white mb-3">Danger zone</h2>
+        <DeleteAccountSection />
       </div>
     </div>
   );
