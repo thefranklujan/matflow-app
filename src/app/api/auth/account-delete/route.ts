@@ -67,9 +67,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Deletion failed. Please contact support." }, { status: 500 });
   }
 
-  // Clear the session cookie so the user is signed out
-  const c = await cookies();
-  c.delete("matflow-session");
-
-  return NextResponse.json({ success: true });
+  // Clear the session cookie on the outgoing response. Setting maxAge=0 with
+  // an empty value is the most reliable way to delete a cookie across all
+  // Next.js runtime variants; cookies().delete() alone has been unreliable.
+  const response = NextResponse.json({ success: true });
+  response.cookies.set("matflow-session", "", {
+    maxAge: 0,
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  // Belt-and-suspenders: also call cookies().delete() in case the runtime prefers it
+  try {
+    const c = await cookies();
+    c.delete("matflow-session");
+  } catch {
+    // ignore
+  }
+  return response;
 }
