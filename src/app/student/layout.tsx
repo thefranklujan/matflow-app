@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import StudentShell from "./StudentShell";
 import ViewingStudentBanner from "@/components/layout/ViewingStudentBanner";
+import UnreadBanner from "@/components/UnreadBanner";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -27,6 +28,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {viewingStudent && <ViewingStudentBanner studentName={viewedStudentName} />}
+      <UnreadBanner variant="student" />
       <div className="flex-1 min-h-0">
         <StudentShell
           name={session.name}

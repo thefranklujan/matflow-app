@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import PWAInit from "@/components/PWAInit";
 import OneSignalInit from "@/components/OneSignalInit";
+import NotificationBadgeSync from "@/components/NotificationBadgeSync";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -49,6 +50,7 @@ export default function RootLayout({
         </CartProvider>
         <PWAInit />
         <OneSignalInit />
+        <NotificationBadgeSync />
         <Toaster
           theme="dark"
           position="top-right"

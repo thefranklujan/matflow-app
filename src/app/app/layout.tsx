@@ -6,6 +6,7 @@ import { BillingGuard } from "@/components/layout/BillingGuard";
 import ViewAsStudentBanner from "@/components/layout/ViewAsStudentBanner";
 import ViewingGymBanner from "@/components/layout/ViewingGymBanner";
 import DemoModeBanner from "@/components/layout/DemoModeBanner";
+import UnreadBanner from "@/components/UnreadBanner";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {demoMode && <DemoModeBanner />}
           {viewingGym && <ViewingGymBanner gymName={viewGymName} />}
           {viewAsStudent && <ViewAsStudentBanner />}
+          <UnreadBanner variant="app" />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar />
             <div className="flex flex-1 flex-col overflow-hidden">
@@ -43,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {demoMode && <DemoModeBanner />}
           {viewingGym && <ViewingGymBanner gymName={viewGymName} />}
           {viewAsStudent && <ViewAsStudentBanner />}
+          <UnreadBanner variant="app" />
           <MobileLayout>
             <div className="bg-[#111] p-4">{children}</div>
           </MobileLayout>

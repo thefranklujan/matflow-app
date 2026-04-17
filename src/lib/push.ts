@@ -117,7 +117,10 @@ interface NotifyOptions {
  * Inbox writes are best-effort; push is still attempted even if DB write fails.
  */
 export async function notify(opts: NotifyOptions): Promise<void> {
-  const externalIds = opts.externalIds.filter(Boolean);
+  // Dedupe aliases — callers often pass both session.userId and the student-id
+  // form of the same user, which would double-deliver both the push and the
+  // inbox row.
+  const externalIds = Array.from(new Set(opts.externalIds.filter(Boolean)));
   if (externalIds.length === 0) return;
 
   // Persist inbox rows first — we want a log even if push is disabled/unavailable.
