@@ -15,6 +15,8 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
       where: {
         id: { notIn: HIDDEN_GYM_IDS },
         subscriptionStatus: { not: "cancelled" },
+        approved: true,
+        hidden: false,
         ...(search
           ? {
               OR: [
@@ -105,67 +107,93 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cards.map((card) => {
-            const initials = card.name
-              .split(" ")
-              .map((w) => w[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase();
-            const inner = (
-              <div
-                className={`bg-[#0a0a0a] border rounded-xl p-5 transition h-full ${
-                  card.isActive ? "border-white/10 hover:border-[#dc2626]" : "border-yellow-500/20 hover:border-yellow-500/50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`h-12 w-12 rounded-lg flex items-center justify-center text-base font-bold ${
-                        card.isActive ? "bg-[#dc2626]/10 text-[#dc2626]" : "bg-yellow-500/10 text-yellow-400"
-                      }`}
-                    >
-                      {initials}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-white font-semibold truncate">{card.name}</p>
-                      {(card.city || card.state) && (
-                        <p className="text-gray-500 text-xs">
-                          {card.city}
-                          {card.city && card.state ? ", " : ""}
-                          {card.state}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {!card.isActive && (
-                    <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
-                      Not Active
-                    </span>
-                  )}
-                </div>
-                {card.isActive && card.description && (
-                  <p className="text-gray-400 text-xs line-clamp-2">{card.description}</p>
-                )}
-                {!card.isActive && (
-                  <p className="text-gray-500 text-xs">
-                    {card.memberCount ?? 0} student{(card.memberCount ?? 0) === 1 ? "" : "s"} have nominated this gym.
-                    Nominate it too to grow the group, we&apos;ll reach out to the owner.
-                  </p>
-                )}
+        <div className="space-y-10">
+          {/* Active gyms section */}
+          {cards.filter((c) => c.isActive).length > 0 && (
+            <section>
+              <div className="mb-4">
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">Gyms on MatFlow</h2>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  These academies are active. Tap to view and request to join.
+                </p>
               </div>
-            );
-            return card.href ? (
-              <Link key={card.key} href={card.href}>
-                {inner}
-              </Link>
-            ) : (
-              <Link key={card.key} href="/student/nominate">
-                {inner}
-              </Link>
-            );
-          })}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cards.filter((c) => c.isActive).map((card) => {
+                  const initials = card.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+                  return (
+                    <Link
+                      key={card.key}
+                      href={card.href || "#"}
+                      className="bg-[#0a0a0a] border border-white/10 hover:border-[#dc2626] rounded-xl p-5 transition h-full"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 mb-3">
+                        <div className="h-12 w-12 rounded-lg flex items-center justify-center text-base font-bold bg-[#dc2626]/10 text-[#dc2626] shrink-0">
+                          {initials}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white font-semibold truncate">{card.name}</p>
+                          {(card.city || card.state) && (
+                            <p className="text-gray-500 text-xs">
+                              {card.city}{card.city && card.state ? ", " : ""}{card.state}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {card.description && (
+                        <p className="text-gray-400 text-xs line-clamp-2">{card.description}</p>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* Nominated — not yet live */}
+          {cards.filter((c) => !c.isActive).length > 0 && (
+            <section>
+              <div className="mb-4">
+                <h2 className="text-sm font-bold text-yellow-400 uppercase tracking-wider">Not Yet on MatFlow</h2>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  Students nominated these gyms. Nominate yours too to grow the group, we&apos;ll reach out to the owner.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cards.filter((c) => !c.isActive).map((card) => {
+                  const initials = card.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+                  return (
+                    <Link
+                      key={card.key}
+                      href="/student/nominate"
+                      className="bg-[#0a0a0a] border border-yellow-500/20 hover:border-yellow-500/50 rounded-xl p-5 transition h-full"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-12 w-12 rounded-lg flex items-center justify-center text-base font-bold bg-yellow-500/10 text-yellow-400 shrink-0">
+                            {initials}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-white font-semibold truncate">{card.name}</p>
+                            {(card.city || card.state) && (
+                              <p className="text-gray-500 text-xs">
+                                {card.city}{card.city && card.state ? ", " : ""}{card.state}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
+                          Not Active
+                        </span>
+                      </div>
+                      <p className="text-gray-500 text-xs">
+                        {card.memberCount ?? 0} student{(card.memberCount ?? 0) === 1 ? "" : "s"} nominating.
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>

@@ -26,6 +26,8 @@ model Gym {
   hidden             Boolean         @default(false)
   lat                Float?
   lng                Float?
+  address            String?
+  geofenceRadiusM    Int             @default(200)
   stripeCustomerId   String?
   stripePriceId      String?
   subscriptionStatus String          @default("trialing")

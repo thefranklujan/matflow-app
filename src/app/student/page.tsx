@@ -39,6 +39,8 @@ export default async function StudentDashboardPage() {
       where: {
         id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
         subscriptionStatus: { not: "cancelled" },
+        approved: true,
+        hidden: false,
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -461,41 +463,69 @@ export default async function StudentDashboardPage() {
         </section>
       )}
 
-      {/* Suggested Gyms */}
-      {memberships.length === 0 && suggestedGyms.length > 0 && (
+      {/* Active gyms on MatFlow */}
+      {memberships.length === 0 && suggestedGyms.filter((g) => g.isActive).length > 0 && (
         <section>
-          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Suggested Gyms</h2>
+          <div className="mb-4">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Gyms on MatFlow</h2>
+            <p className="text-gray-500 text-xs mt-0.5">
+              These academies are active — tap to request to join.
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {suggestedGyms.map((gym) => (
+            {suggestedGyms.filter((g) => g.isActive).map((gym) => (
               <Link
                 key={gym.key}
                 href={gym.href}
-                className={`bg-[#0a0a0a] border rounded-xl p-5 transition ${
-                  gym.isActive ? "border-white/10 hover:border-[#dc2626]" : "border-yellow-500/20 hover:border-yellow-500/50"
-                }`}
+                className="bg-[#0a0a0a] border border-white/10 hover:border-[#dc2626] rounded-xl p-5 transition"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold bg-[#dc2626]/10 text-[#dc2626] shrink-0">
+                    {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white font-semibold truncate">{gym.name}</p>
+                    {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Nominated gyms — not yet on MatFlow */}
+      {memberships.length === 0 && suggestedGyms.filter((g) => !g.isActive).length > 0 && (
+        <section>
+          <div className="mb-4">
+            <h2 className="text-sm font-bold text-yellow-400 uppercase tracking-wider">Not Yet on MatFlow</h2>
+            <p className="text-gray-500 text-xs mt-0.5">
+              Students nominated these gyms. Nominate yours too, and we'll reach out to the owner.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {suggestedGyms.filter((g) => !g.isActive).map((gym) => (
+              <Link
+                key={gym.key}
+                href={gym.href}
+                className="bg-[#0a0a0a] border border-yellow-500/20 hover:border-yellow-500/50 rounded-xl p-5 transition"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold ${
-                      gym.isActive ? "bg-[#dc2626]/10 text-[#dc2626]" : "bg-yellow-500/10 text-yellow-400"
-                    }`}>
+                    <div className="h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold bg-yellow-500/10 text-yellow-400 shrink-0">
                       {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <p className="text-white font-semibold truncate">{gym.name}</p>
                       {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
-                      {!gym.isActive && (
-                        <p className="text-yellow-400/80 text-[10px] mt-0.5">
-                          {gym.memberCount ?? 0} student{(gym.memberCount ?? 0) === 1 ? "" : "s"} nominating
-                        </p>
-                      )}
+                      <p className="text-yellow-400/80 text-[10px] mt-0.5">
+                        {gym.memberCount ?? 0} student{(gym.memberCount ?? 0) === 1 ? "" : "s"} nominating
+                      </p>
                     </div>
                   </div>
-                  {!gym.isActive && (
-                    <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
-                      Not Active
-                    </span>
-                  )}
+                  <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
+                    Not Active
+                  </span>
                 </div>
               </Link>
             ))}

@@ -26,7 +26,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const viewedStudentName = c.get("view_student_name")?.value || session.name;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-[100dvh] overflow-hidden">
       {viewingStudent && <ViewingStudentBanner studentName={viewedStudentName} />}
       <UnreadBanner variant="student" />
       <div className="flex-1 min-h-0">

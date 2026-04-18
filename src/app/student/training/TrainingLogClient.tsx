@@ -154,7 +154,7 @@ export default function TrainingLogClient({
       {showForm && (
         <form onSubmit={submit} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Date</label>
               <input
                 type="date"
@@ -164,12 +164,12 @@ export default function TrainingLogClient({
                   try { (e.target as HTMLInputElement).showPicker(); } catch {}
                 }}
                 required
-                className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm cursor-pointer [color-scheme:dark]"
+                className="w-full max-w-full box-border appearance-none bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm cursor-pointer [color-scheme:dark]"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Duration (min)</label>
-              <input type="number" min={0} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm" />
+              <input type="number" min={0} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-full max-w-full box-border appearance-none bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm" />
             </div>
             <div>
               <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Session Type</label>

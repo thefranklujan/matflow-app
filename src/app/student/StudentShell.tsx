@@ -100,7 +100,7 @@ export default function StudentShell({
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:flex h-screen overflow-hidden bg-[#080808]">
+      <div className="hidden md:flex h-[100dvh] overflow-hidden bg-[#080808]">
         <aside className={cn("flex h-screen flex-col border-r border-white/10 bg-[#0a0a0a] transition-all duration-200", collapsed ? "w-[60px]" : "w-[240px]")}>
           <div className="flex items-center justify-between px-3 py-4 border-b border-white/5">
             {!collapsed ? (
@@ -201,14 +201,35 @@ export default function StudentShell({
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden flex h-screen flex-col bg-[#080808]">
+      <div className="md:hidden flex h-[100dvh] flex-col overflow-hidden bg-[#080808]">
         <header className="flex h-12 items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-4 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="h-7 w-auto" />
-          <button onClick={signOut} className="h-7 w-7 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-[10px] font-bold">{initials}</button>
+          <Link
+            href="/student/profile"
+            className="flex items-center gap-2"
+            title={`${beltRank} belt${stripes > 0 ? `, ${stripes} stripe${stripes > 1 ? "s" : ""}` : ""}`}
+          >
+            <span className="inline-flex items-stretch h-5 w-20 rounded-sm overflow-hidden border border-white/60 shadow-inner">
+              <span className={`flex-1 ${BELT_BAR[beltRank] || BELT_BAR.white}`} />
+              <span className="w-8 bg-black flex items-center justify-center gap-[2px] px-1">
+                {Array.from({ length: stripes }).map((_, i) => (
+                  <span key={i} className="inline-block h-3 w-[2px] rounded-[1px] bg-white" />
+                ))}
+              </span>
+            </span>
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt={name} className="h-7 w-7 rounded-full object-cover" />
+            ) : (
+              <span className="h-7 w-7 rounded-full bg-[#dc2626] flex items-center justify-center text-white text-[10px] font-bold">
+                {initials}
+              </span>
+            )}
+          </Link>
         </header>
-        <main className="flex-1 overflow-y-auto bg-[#111] p-4 pb-20">{children}</main>
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]">
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-[#111] p-4 [-webkit-overflow-scrolling:touch]">{children}</main>
+        <nav className="shrink-0 z-50 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]">
           <div className="flex h-16 items-stretch">
             {MOBILE_PRIMARY.map((item) => {
               const Icon = item.icon;
