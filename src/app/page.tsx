@@ -1,7 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { MATFLOW } from "@/lib/constants";
+import { getSession } from "@/lib/local-auth";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  // If the visitor already has a valid session, skip the landing page and
+  // bounce them straight to their dashboard. This happens server-side so
+  // there's zero visual flash — particularly important for the native iOS
+  // shell which always loads `/` on launch.
+  const session = await getSession();
+  if (session) {
+    redirect(session.userType === "student" ? "/student" : "/app");
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-brand-black px-4">
       <div className="text-center max-w-2xl">
