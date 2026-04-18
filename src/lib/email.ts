@@ -8,19 +8,31 @@ const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 
 async function send(to: string, subject: string, html: string, bccFrank = false) {
   if (!resend) {
-    console.log(`[Email] Would send to ${to}: ${subject}`);
+    console.log(`[Email] No RESEND_API_KEY set — would send to ${to}: ${subject}`);
     return;
   }
   try {
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: FROM,
       to,
       subject,
       html,
       ...(bccFrank ? { bcc: "franklujan@gmail.com" } : {}),
     });
+    // Resend returns { data, error } — it does NOT throw on API failures
+    // like unverified domain, rate limit, invalid recipient, etc. We have
+    // to check the error field ourselves or the failure silently vanishes.
+    if (res?.error) {
+      console.error("[Email] Resend API error:", {
+        to,
+        subject,
+        error: res.error,
+      });
+      return;
+    }
+    console.log("[Email] Sent:", { to, subject, id: res?.data?.id });
   } catch (err) {
-    console.error("[Email] Failed:", err);
+    console.error("[Email] Threw:", { to, subject, err });
   }
 }
 

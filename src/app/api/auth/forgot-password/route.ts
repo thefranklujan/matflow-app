@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     const emailLower = email.trim().toLowerCase();
+    console.log("[forgot-password] request for", emailLower);
 
     // Look up both sides: a Student account or a (gym-owner) Member account
     const [student, member] = await Promise.all([
@@ -38,6 +39,14 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
+    console.log("[forgot-password] found", {
+      email: emailLower,
+      studentFound: !!student,
+      memberFound: !!member,
+      studentHasHash: !!student?.passwordHash,
+      memberHasHash: !!member?.passwordHash,
+    });
+
     // Prefer Student (direct signup path). Fall back to Member (gym owner).
     const target =
       student
@@ -46,7 +55,12 @@ export async function POST(request: NextRequest) {
         ? { kind: "member" as const, id: member.id, name: member.firstName, email: member.email, passwordHash: member.passwordHash }
         : null;
 
+    if (!target || !target.passwordHash) {
+      console.log("[forgot-password] no target found, returning success anyway");
+    }
+
     if (target && target.passwordHash) {
+      console.log("[forgot-password] sending reset email to", target.email, "kind=", target.kind);
       const token = await new SignJWT({
         sub: target.id,
         kind: target.kind,
