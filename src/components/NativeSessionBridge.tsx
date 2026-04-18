@@ -119,7 +119,20 @@ export default function NativeSessionBridge() {
         });
 
         if (restoreRes.ok) {
-          // Cookie is back — reload so the whole tree re-renders as signed-in.
+          // Cookie is back. Figure out where to send the user — we can't
+          // just reload, because the current URL might be /sign-in or /
+          // (landing), which don't auto-redirect authenticated users.
+          try {
+            const freshSession = await fetch("/api/auth/session", { cache: "no-store" });
+            if (freshSession.ok) {
+              const d = await freshSession.json();
+              const dest = d?.user?.userType === "student" ? "/student" : "/app";
+              window.location.replace(dest);
+              return;
+            }
+          } catch {
+            /* fall through to reload */
+          }
           window.location.reload();
         } else {
           // Token is stale/expired — drop it so we stop retrying.
