@@ -108,6 +108,12 @@ export default function SignInPage() {
               Start free trial
             </Link>
           </p>
+
+          <p className="text-center">
+            <Link href="/debug/auth" className="text-gray-600 hover:text-gray-400 text-[11px] underline">
+              Debug sign-out issue
+            </Link>
+          </p>
         </form>
       </div>
     </div>
