@@ -315,3 +315,16 @@ export function sendJoinRequestRejectedToStudent(email: string, studentName: str
   });
   send(email, `Update from ${gymName}`, html).catch(() => {});
 }
+
+export function sendPasswordReset(email: string, name: string, resetUrl: string) {
+  const html = wrap({
+    eyebrow: "Reset Password",
+    headline: "Reset your MatFlow password.",
+    body: `<p style="margin:0 0 12px 0;">Hey ${name},</p>
+           <p style="margin:0 0 12px 0;">We got a request to reset the password on your MatFlow account. Tap the button below to set a new one. This link expires in 1 hour.</p>
+           <p style="margin:0;color:#737373;font-size:13px;">If you did not request this, you can ignore this email. Your password will stay the same.</p>`,
+    ctaText: "Reset Password",
+    ctaHref: resetUrl,
+  });
+  send(email, "Reset your MatFlow password", html).catch(() => {});
+}
