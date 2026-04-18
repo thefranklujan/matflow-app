@@ -500,7 +500,7 @@ export default async function StudentDashboardPage() {
           <div className="mb-4">
             <h2 className="text-sm font-bold text-yellow-400 uppercase tracking-wider">Not Yet on MatFlow</h2>
             <p className="text-gray-500 text-xs mt-0.5">
-              Students nominated these gyms. Nominate yours too, and we'll reach out to the owner.
+              Students nominated these gyms. Nominate yours too, and we&apos;ll reach out to the owner.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -61,7 +61,6 @@ type AppModule = {
 };
 
 function log(...args: unknown[]) {
-  // eslint-disable-next-line no-console
   console.log("[NativeSessionBridge]", ...args);
 }
 
