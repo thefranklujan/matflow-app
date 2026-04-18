@@ -26,22 +26,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <AuthProvider>
       <BillingGuard>
         {/* Desktop layout */}
-        <div className="hidden md:flex md:flex-col h-screen overflow-hidden">
+        <div className="hidden md:flex md:flex-col h-[100dvh] overflow-hidden">
           {demoMode && <DemoModeBanner />}
           {viewingGym && <ViewingGymBanner gymName={viewGymName} />}
           {viewAsStudent && <ViewAsStudentBanner />}
           <UnreadBanner variant="app" />
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
             <Sidebar />
             <div className="flex flex-1 flex-col overflow-hidden">
               <Header />
-              <main className="flex-1 overflow-y-auto bg-[#111] p-6">{children}</main>
+              <main className="flex-1 min-h-0 overflow-y-auto bg-[#111] p-6">{children}</main>
             </div>
           </div>
         </div>
 
         {/* Mobile layout */}
-        <div className="md:hidden flex flex-col h-screen overflow-hidden">
+        <div className="md:hidden flex flex-col h-[100dvh] overflow-hidden">
           {demoMode && <DemoModeBanner />}
           {viewingGym && <ViewingGymBanner gymName={viewGymName} />}
           {viewAsStudent && <ViewAsStudentBanner />}

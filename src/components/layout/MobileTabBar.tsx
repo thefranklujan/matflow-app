@@ -22,7 +22,7 @@ export function MobileTabBar() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]">
+      <nav className="shrink-0 z-50 border-t border-white/10 bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]">
         <div className="flex h-16 items-stretch">
           {visibleTabs.map((tab) => {
             const Icon = TAB_ICONS[tab.icon] || Home;

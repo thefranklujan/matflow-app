@@ -101,7 +101,7 @@ export default function StudentShell({
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:flex h-[100dvh] overflow-hidden bg-[#080808]">
+      <div className="hidden md:flex h-full overflow-hidden bg-[#080808]">
         <aside className={cn("flex h-screen flex-col border-r border-white/10 bg-[#0a0a0a] transition-all duration-200", collapsed ? "w-[60px]" : "w-[240px]")}>
           <div className="flex items-center justify-between px-3 py-4 border-b border-white/5">
             {!collapsed ? (
@@ -202,7 +202,7 @@ export default function StudentShell({
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden flex h-[100dvh] flex-col overflow-hidden bg-[#080808]">
+      <div className="md:hidden flex h-full flex-col overflow-hidden bg-[#080808]">
         <header className="flex h-12 items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-4 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="h-7 w-auto" />

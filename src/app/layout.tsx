@@ -6,6 +6,7 @@ import PWAInit from "@/components/PWAInit";
 import OneSignalInit from "@/components/OneSignalInit";
 import NativeSessionBridge from "@/components/NativeSessionBridge";
 import NotificationBadgeSync from "@/components/NotificationBadgeSync";
+import LaunchAnimation from "@/components/LaunchAnimation";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -49,6 +50,7 @@ export default function RootLayout({
         <CartProvider>
           <main className="flex-1">{children}</main>
         </CartProvider>
+        <LaunchAnimation />
         <PWAInit />
         <OneSignalInit />
         <NativeSessionBridge />
