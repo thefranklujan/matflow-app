@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
+import { notifyStreakMilestonesForMembers } from "@/lib/attendance-streak";
 
 export async function GET(req: NextRequest) {
   try {
@@ -65,6 +66,14 @@ export async function POST(req: NextRequest) {
     });
 
     logActivity({ gymId, action: "check_in", actorName: "Admin", meta: { count: result.count, classType, classDate } });
+
+    // Fire streak-milestone pushes (5/10/25/50/100 classes) for each member
+    // checked in. Fire-and-forget so the response stays fast.
+    if (result.count > 0) {
+      notifyStreakMilestonesForMembers(memberIds, gymId).catch((e) =>
+        console.error("[attendance_streak batch] failed:", e)
+      );
+    }
 
     return NextResponse.json({ count: result.count }, { status: 201 });
   } catch {

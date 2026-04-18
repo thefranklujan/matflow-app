@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { notify } from "@/lib/push";
 
 export async function GET() {
   try {
@@ -46,6 +47,20 @@ export async function POST(req: NextRequest) {
         gymId,
       },
     });
+
+    // Notify the competing student (when their Member record is linked to a
+    // Student account). Skip silently if no linked student.
+    if (member.studentId) {
+      const memberName = `${member.firstName} ${member.lastName}`.trim() || "You";
+      notify({
+        externalIds: [`student-${member.studentId}`],
+        kind: "competition_result",
+        title: `${placement} at ${competitionName}`,
+        body: `${memberName}${division ? ` — ${division}` : ""}. Tap to see your competition history.`,
+        url: "/student/profile",
+        gymId,
+      }).catch((e) => console.error("[competition_result notify] failed:", e));
+    }
 
     return NextResponse.json(result, { status: 201 });
   } catch {

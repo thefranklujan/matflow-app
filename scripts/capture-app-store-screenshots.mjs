@@ -25,7 +25,7 @@ async function main() {
   try {
     for (const n of PAGES) {
       const page = await browser.newPage();
-      await page.setViewport({ width: 1290, height: 2796, deviceScaleFactor: 1 });
+      await page.setViewport({ width: 1284, height: 2778, deviceScaleFactor: 1 });
       const url = `${ORIGIN}/app-store/${n}`;
       console.log(`[screenshot] capturing ${url}`);
       await page.goto(url, { waitUntil: "networkidle0", timeout: 60_000 });

@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestRejectedToStudent } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
+import { notify } from "@/lib/push";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,6 +29,14 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       `${request.student.firstName} ${request.student.lastName}`,
       request.gym.name
     );
+    notify({
+      externalIds: [`student-${request.student.id}`],
+      kind: "join_rejected",
+      title: `Update on your ${request.gym.name} request`,
+      body: "Your join request wasn't approved. Tap to find another gym or message the owner.",
+      url: "/student",
+      gymId,
+    });
     logActivity({ gymId, action: "join_rejected", actorName: "Admin", targetId: request.student.id, targetName: `${request.student.firstName} ${request.student.lastName}` });
 
     return NextResponse.json({ success: true });

@@ -99,6 +99,10 @@ export type NotificationKind =
   | "join_rejected"
   | "belt_promotion"
   | "waiver_required"
+  | "class_reminder"
+  | "post_reply"
+  | "attendance_streak"
+  | "competition_result"
   | "test";
 
 interface NotifyOptions {

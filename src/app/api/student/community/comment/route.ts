@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { effectiveStudentId } from "@/lib/community-auth";
+import { notify } from "@/lib/push";
 
 export async function POST(req: NextRequest) {
   const studentId = await effectiveStudentId();
@@ -30,6 +31,19 @@ export async function POST(req: NextRequest) {
     data: { postId, studentId, body: body.trim() },
     include: { student: { select: { firstName: true, lastName: true, avatarUrl: true, beltRank: true } } },
   });
+
+  // Notify the post author (skip if they're commenting on their own post).
+  if (post.studentId && post.studentId !== studentId) {
+    const commenterName = `${comment.student.firstName} ${comment.student.lastName}`.trim() || "Someone";
+    const preview = body.trim().slice(0, 80);
+    notify({
+      externalIds: [`student-${post.studentId}`],
+      kind: "post_reply",
+      title: `${commenterName} replied to your post`,
+      body: preview.length === 80 ? `${preview}…` : preview,
+      url: `/student/community/post/${postId}`,
+    }).catch((e) => console.error("[post_reply notify] failed:", e));
+  }
 
   return NextResponse.json({
     id: comment.id,

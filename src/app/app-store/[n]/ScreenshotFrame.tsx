@@ -57,8 +57,8 @@ export default function ScreenshotFrame({
   return (
     <div
       style={{
-        width: 1290,
-        height: 2796,
+        width: 1284,
+        height: 2778,
         margin: 0,
         padding: 0,
         overflow: "hidden",
