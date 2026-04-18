@@ -24,9 +24,15 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1000,
+      // Static launch screen is kept short; LaunchScreen.storyboard now
+      // renders a small centered logo rather than a full-screen image.
+      launchShowDuration: 600,
+      launchAutoHide: true,
+      launchFadeOutDuration: 350,
       backgroundColor: "#0a0a0a",
       showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
