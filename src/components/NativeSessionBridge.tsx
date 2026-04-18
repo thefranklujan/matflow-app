@@ -147,6 +147,21 @@ export default function NativeSessionBridge() {
             lastResult: ok ? "stashed" : "error",
             hasStoredToken: ok,
           };
+          // Native app always boots at `/` (landing) or `/sign-in` because
+          // that's what Capacitor loads. If the user is actually signed in,
+          // bounce them to their real dashboard so they don't think they
+          // got logged out.
+          const path = window.location.pathname;
+          const dead =
+            path === "/" ||
+            path === "/sign-in" ||
+            path === "/sign-up" ||
+            path === "/forgot-password";
+          if (dead) {
+            const dest = sessionData?.user?.userType === "student" ? "/student" : "/app";
+            log("sync: already authed on landing page — jumping to", dest);
+            window.location.replace(dest);
+          }
           return;
         }
 
