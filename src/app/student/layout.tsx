@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import StudentShell from "./StudentShell";
 import ViewingStudentBanner from "@/components/layout/ViewingStudentBanner";
 import UnreadBanner from "@/components/UnreadBanner";
+import ProximityPing from "@/components/student/ProximityPing";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -40,6 +41,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         >
           {children}
         </StudentShell>
+        <ProximityPing />
       </div>
     </div>
   );

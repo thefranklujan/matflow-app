@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import NotificationSettings from "@/components/NotificationSettings";
 import DeleteAccountSection from "@/components/DeleteAccountSection";
+import GymLocationCard from "@/components/admin/GymLocationCard";
 
 interface GymSettings {
   name: string;
@@ -230,6 +231,11 @@ export default function SettingsPage() {
           {saving ? "Saving..." : "Save Settings"}
         </button>
       </form>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-white mb-4">Gym Location</h2>
+        <GymLocationCard />
+      </div>
 
       <div className="mt-10">
         <h2 className="text-xl font-bold text-white mb-4">Notifications</h2>
