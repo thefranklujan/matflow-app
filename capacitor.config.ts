@@ -24,11 +24,14 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      // Static launch screen is kept short; LaunchScreen.storyboard now
-      // renders a small centered logo rather than a full-screen image.
-      launchShowDuration: 600,
+      // LaunchScreen.storyboard is now a plain black rectangle — the
+      // branded animation plays in the web view once it loads. Keep the
+      // native splash on just long enough to cover the webview handoff,
+      // with a fast fade so the transition into the JS animation is
+      // invisible to the user.
+      launchShowDuration: 0,
       launchAutoHide: true,
-      launchFadeOutDuration: 350,
+      launchFadeOutDuration: 200,
       backgroundColor: "#0a0a0a",
       showSpinner: false,
       splashFullScreen: true,

@@ -6,7 +6,12 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 
-async function send(to: string, subject: string, html: string, bccFrank = false) {
+async function send(
+  to: string,
+  subject: string,
+  html: string,
+  opts: { bccFrank?: boolean; text?: string; replyTo?: string } = {}
+) {
   if (!resend) {
     console.log(`[Email] No RESEND_API_KEY set — would send to ${to}: ${subject}`);
     return;
@@ -17,17 +22,14 @@ async function send(to: string, subject: string, html: string, bccFrank = false)
       to,
       subject,
       html,
-      ...(bccFrank ? { bcc: "franklujan@gmail.com" } : {}),
+      // Plain-text fallback heavily improves deliverability vs HTML-only,
+      // especially for transactional stuff like password resets.
+      ...(opts.text ? { text: opts.text } : {}),
+      ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
+      ...(opts.bccFrank ? { bcc: "franklujan@gmail.com" } : {}),
     });
-    // Resend returns { data, error } — it does NOT throw on API failures
-    // like unverified domain, rate limit, invalid recipient, etc. We have
-    // to check the error field ourselves or the failure silently vanishes.
     if (res?.error) {
-      console.error("[Email] Resend API error:", {
-        to,
-        subject,
-        error: res.error,
-      });
+      console.error("[Email] Resend API error:", { to, subject, error: res.error });
       return;
     }
     console.log("[Email] Sent:", { to, subject, id: res?.data?.id });
@@ -312,7 +314,7 @@ export function sendGymApprovedEmail(email: string, ownerName: string, gymName: 
     ctaHref: "https://app.mymatflow.com/app",
     footnote: "You are a founding member. Your pricing is locked in for life.",
   });
-  send(email, `${gymName} is live on MatFlow`, html, true).catch(() => {});
+  send(email, `${gymName} is live on MatFlow`, html, { bccFrank: true }).catch(() => {});
 }
 
 export function sendJoinRequestRejectedToStudent(email: string, studentName: string, gymName: string) {
@@ -329,14 +331,30 @@ export function sendJoinRequestRejectedToStudent(email: string, studentName: str
 }
 
 export function sendPasswordReset(email: string, name: string, resetUrl: string) {
-  const html = wrap({
-    eyebrow: "Reset Password",
-    headline: "Reset your MatFlow password.",
-    body: `<p style="margin:0 0 12px 0;">Hey ${name},</p>
-           <p style="margin:0 0 12px 0;">We got a request to reset the password on your MatFlow account. Tap the button below to set a new one. This link expires in 1 hour.</p>
-           <p style="margin:0;color:#737373;font-size:13px;">If you did not request this, you can ignore this email. Your password will stay the same.</p>`,
-    ctaText: "Reset Password",
-    ctaHref: resetUrl,
-  });
-  send(email, "Reset your MatFlow password", html).catch(() => {});
+  // Deliberately plain HTML — no marketing shell, no big CTA button, no
+  // gradients or banners. Spam filters grade transactional emails on how
+  // "transactional" they look. Plain text-forward + matching text/plain
+  // fallback beats a heavily styled template every time.
+  const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a;">
+<p>Hi ${name},</p>
+<p>You asked to reset the password on your MatFlow account. Open this link to pick a new one:</p>
+<p><a href="${resetUrl}">${resetUrl}</a></p>
+<p>This link expires in 1 hour. If you did not request a password reset, ignore this email and your password will not change.</p>
+<p>- MatFlow</p>
+</body></html>`;
+
+  const text = `Hi ${name},
+
+You asked to reset the password on your MatFlow account. Open this link to pick a new one:
+
+${resetUrl}
+
+This link expires in 1 hour. If you did not request a password reset, ignore this email and your password will not change.
+
+- MatFlow`;
+
+  send(email, "Reset your MatFlow password", html, {
+    text,
+    replyTo: "frank@mymatflow.com",
+  }).catch(() => {});
 }

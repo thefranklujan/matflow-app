@@ -56,7 +56,8 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-40 h-14 w-14 rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white shadow-lg shadow-[#dc2626]/40 flex items-center justify-center transition active:scale-95"
+        className="fixed right-4 md:right-8 md:bottom-8 z-[60] h-14 w-14 rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white shadow-lg shadow-[#dc2626]/40 flex items-center justify-center transition active:scale-95"
+        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         aria-label="Quick log session"
       >
         <Plus className="h-6 w-6" />
