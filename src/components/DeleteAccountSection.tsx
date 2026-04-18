@@ -35,6 +35,8 @@ export default function DeleteAccountSection() {
         setBusy(false);
         return;
       }
+      // Wipe any stashed native token so the bridge doesn't try to restore a dead session
+      try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
       toast.success("Account deleted. You're signed out.");
       // Let the toast render, then bounce to the landing page
       setTimeout(() => {

@@ -32,6 +32,8 @@ export default function StudentSignUpPage() {
         return;
       }
 
+      try { await (window as unknown as { __matflowStashNativeAuth?: () => Promise<void> }).__matflowStashNativeAuth?.(); } catch {}
+
       router.push("/student");
     } catch {
       setError("Something went wrong");

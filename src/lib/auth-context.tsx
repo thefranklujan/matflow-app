@@ -87,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchSession]);
 
   const signOut = useCallback(async () => {
+    try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setGym(null);

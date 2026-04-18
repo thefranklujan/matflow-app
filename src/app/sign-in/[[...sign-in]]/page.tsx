@@ -31,6 +31,9 @@ export default function SignInPage() {
         return;
       }
 
+      // On native iOS/Android, stash the JWT so the app doesn't sign out when OS kills it
+      try { await (window as unknown as { __matflowStashNativeAuth?: () => Promise<void> }).__matflowStashNativeAuth?.(); } catch {}
+
       if (data.isStudent) {
         router.push("/student");
       } else {

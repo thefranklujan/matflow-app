@@ -18,6 +18,7 @@ export default function PlatformUserMenu({ name, email }: { name: string; email:
   const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   async function signOut() {
+    try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/sign-in";
   }

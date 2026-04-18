@@ -91,6 +91,7 @@ export default function StudentShell({
   }
 
   async function signOut() {
+    try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/sign-in";
   }

@@ -21,6 +21,7 @@ export default function MemberSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const signOut = async () => {
+    try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/sign-in");
   };

@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import PWAInit from "@/components/PWAInit";
 import OneSignalInit from "@/components/OneSignalInit";
+import NativeSessionBridge from "@/components/NativeSessionBridge";
 import NotificationBadgeSync from "@/components/NotificationBadgeSync";
 import { Toaster } from "sonner";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         </CartProvider>
         <PWAInit />
         <OneSignalInit />
+        <NativeSessionBridge />
         <NotificationBadgeSync />
         <Toaster
           theme="dark"
