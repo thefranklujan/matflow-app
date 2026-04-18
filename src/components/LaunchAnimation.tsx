@@ -52,6 +52,11 @@ export default function LaunchAnimation() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Skip entirely on marketing / diagnostic routes that need a clean
+    // render (App Store screenshot capture, debug pages)
+    if (window.location.pathname.startsWith("/app-store") ||
+        window.location.pathname.startsWith("/debug")) return;
+
     // Already played this session — skip entirely
     if (sessionStorage.getItem(SESSION_KEY)) return;
 

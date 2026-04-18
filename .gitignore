@@ -57,3 +57,6 @@ android/.gradle/
 android/build/
 android/app/build/
 android/local.properties
+
+# App Store marketing screenshots (generated)
+app-store-screenshots/

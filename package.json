@@ -8,7 +8,8 @@
     "postinstall": "prisma generate",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "screenshots": "node scripts/capture-app-store-screenshots.mjs"
   },
   "dependencies": {
     "@awesome-cordova-plugins/onesignal": "^9.1.4",
@@ -53,6 +54,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "puppeteer": "^24.41.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
