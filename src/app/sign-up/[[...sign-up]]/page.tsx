@@ -36,12 +36,12 @@ function SignUpForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (step === 1) {
-      if (!firstName || !lastName || !email || !phone || !password) {
-        setError("All fields are required");
+      if (!firstName || !lastName || !email || !password) {
+        setError("Please fill in your name, email, and password");
         return;
       }
-      if (phone.replace(/\D/g, "").length < 10) {
-        setError("Please enter a valid phone number");
+      if (phone && phone.replace(/\D/g, "").length < 10) {
+        setError("Please enter a valid phone number, or leave it blank");
         return;
       }
       if (password.length < 6) {
@@ -284,7 +284,9 @@ function SignUpForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Phone</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Phone <span className="text-gray-500 font-normal">(optional)</span>
+                </label>
                 <input
                   type="tel"
                   value={phone}
@@ -292,7 +294,6 @@ function SignUpForm() {
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                   placeholder="(555) 123 4567"
                   autoComplete="tel"
-                  required
                 />
               </div>
 

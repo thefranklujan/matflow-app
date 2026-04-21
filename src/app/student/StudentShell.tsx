@@ -116,7 +116,7 @@ export default function StudentShell({
             </button>
           </div>
 
-          <nav className="flex-1 space-y-0.5 px-2 py-2">
+          <nav className="flex-1 space-y-0.5 px-2 py-2 overflow-y-auto min-h-0">
             {NAV.map((item) => {
               const Icon = item.icon;
               const isActive = item.href === "/student" ? pathname === "/student" : pathname.startsWith(item.href);

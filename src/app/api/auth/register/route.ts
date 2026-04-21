@@ -10,9 +10,9 @@ export async function POST(request: NextRequest) {
     const { firstName, lastName, email, phone, password, gymName, gymSlug, timezone } =
       await request.json();
 
-    if (!firstName || !lastName || !email || !phone || !password || !gymName || !gymSlug) {
+    if (!firstName || !lastName || !email || !password || !gymName || !gymSlug) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "Please fill in your name, email, password, gym name and gym URL" },
         { status: 400 }
       );
     }
