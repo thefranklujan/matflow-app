@@ -34,8 +34,17 @@ export default function SignInPage() {
       // On native iOS/Android, stash the JWT so the app doesn't sign out when OS kills it
       try { await (window as unknown as { __matflowStashNativeAuth?: () => Promise<void> }).__matflowStashNativeAuth?.(); } catch {}
 
+      const isNative = (window as unknown as {
+        Capacitor?: { isNativePlatform?: () => boolean };
+      }).Capacitor?.isNativePlatform?.() || false;
+
       if (data.isStudent) {
         router.push("/student");
+      } else if (isNative) {
+        // Gym owner on the iOS shell: gym management is web only per
+        // App Store 3.1.1 (no in app access to subscription-backed
+        // functionality without IAP). Send them to the web only page.
+        router.push("/native-web-only");
       } else {
         router.push("/app");
       }

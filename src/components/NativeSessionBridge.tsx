@@ -158,7 +158,9 @@ export default function NativeSessionBridge() {
             path === "/sign-up" ||
             path === "/forgot-password";
           if (dead) {
-            const dest = sessionData?.user?.userType === "student" ? "/student" : "/app";
+            // Native iOS is students + community only per App Store 3.1.1.
+            // Gym owners restored on native land on /native-web-only instead.
+            const dest = sessionData?.user?.userType === "student" ? "/student" : "/native-web-only";
             log("sync: already authed on landing page — jumping to", dest);
             window.location.replace(dest);
           }
@@ -205,7 +207,7 @@ export default function NativeSessionBridge() {
           const freshSession = await fetch("/api/auth/session", { cache: "no-store", credentials: "include" });
           if (freshSession.ok) {
             const d = await freshSession.json();
-            const dest = d?.user?.userType === "student" ? "/student" : "/app";
+            const dest = d?.user?.userType === "student" ? "/student" : "/native-web-only";
             log("sync: redirecting to", dest);
             window.__matflowBridgeState = {
               ...(window.__matflowBridgeState as BridgeState),

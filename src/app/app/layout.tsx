@@ -7,6 +7,7 @@ import ViewAsStudentBanner from "@/components/layout/ViewAsStudentBanner";
 import ViewingGymBanner from "@/components/layout/ViewingGymBanner";
 import DemoModeBanner from "@/components/layout/DemoModeBanner";
 import UnreadBanner from "@/components/UnreadBanner";
+import OwnerNativeGuard from "@/components/OwnerNativeGuard";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/local-auth";
 import { redirect } from "next/navigation";
@@ -24,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const viewGymName = c.get("view_gym_name")?.value || session.name;
   return (
     <AuthProvider>
+      <OwnerNativeGuard />
       <BillingGuard>
         {/* Desktop layout */}
         <div className="hidden md:flex md:flex-col h-[100dvh] overflow-hidden">
