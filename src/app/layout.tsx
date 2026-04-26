@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import PWAInit from "@/components/PWAInit";
 import OneSignalInit from "@/components/OneSignalInit";
 import NativeSessionBridge from "@/components/NativeSessionBridge";
+import NativeCookieMarker from "@/components/NativeCookieMarker";
 import NotificationBadgeSync from "@/components/NotificationBadgeSync";
 import LaunchAnimation from "@/components/LaunchAnimation";
 import { Toaster } from "sonner";
@@ -54,6 +55,7 @@ export default function RootLayout({
         <PWAInit />
         <OneSignalInit />
         <NativeSessionBridge />
+        <NativeCookieMarker />
         <NotificationBadgeSync />
         <Toaster
           theme="dark"

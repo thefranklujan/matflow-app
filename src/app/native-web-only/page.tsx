@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/local-auth";
 
@@ -7,9 +6,9 @@ export const dynamic = "force-dynamic";
 /**
  * Destination page for gym owners who sign in from the iOS app. The iOS
  * build is a Students and Community only experience. Gym management
- * (members, schedule, attendance, announcements, billing, analytics) lives
- * exclusively on the web dashboard at app.mymatflow.com. This page exists
- * so the user is not dropped into owner dashboard views on mobile.
+ * lives exclusively on the web dashboard at app.mymatflow.com. This page
+ * exists so the user is not dropped into owner dashboard views on
+ * mobile.
  */
 export default async function NativeWebOnlyPage() {
   const session = await getSession();
@@ -31,11 +30,10 @@ export default async function NativeWebOnlyPage() {
         </h1>
 
         <p className="text-gray-400 mb-8 leading-relaxed">
-          Hi {name}. Your gym owner dashboard (members, schedule, attendance,
-          announcements, billing, analytics) lives at
+          Hi {name}. Manage your gym at
           {" "}
           <span className="text-white font-medium">app.mymatflow.com</span>.
-          Open it in Safari or Chrome on any device to manage your gym.
+          Open it in Safari or Chrome on any device.
         </p>
 
         <div className="rounded-xl border border-white/10 bg-[#111] p-5 mb-6 text-left">
@@ -59,12 +57,7 @@ export default async function NativeWebOnlyPage() {
         </form>
 
         <p className="text-gray-600 text-xs mt-5">
-          Sign in again with a student or instructor account to use the app,
-          or open{" "}
-          <Link href="https://app.mymatflow.com" className="text-[#dc2626] hover:underline">
-            app.mymatflow.com
-          </Link>
-          {" "}on the web to manage your gym.
+          Sign in again with a student or instructor account to use the app.
         </p>
       </div>
     </div>

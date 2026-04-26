@@ -19,6 +19,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (session.userType === "student") redirect("/student");
 
   const c = await cookies();
+
+  // Native iOS shell never renders the gym owner dashboard. Apple App
+  // Store 3.1.1 requires that paid functionality not be reachable in
+  // the iOS app. Server side redirect happens before any owner UI is
+  // generated, so there is zero flash of dashboard HTML.
+  if (c.get("matflow-native")?.value === "1") {
+    redirect("/native-web-only");
+  }
+
   const viewAsStudent = c.get("view_as_student")?.value === "1";
   const demoMode = c.get("demo_mode")?.value === "1";
   const viewingGym = c.get("viewing_gym")?.value === "1";

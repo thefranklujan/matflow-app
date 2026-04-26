@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -11,6 +11,18 @@ function SignUpForm() {
   const joinSlug = searchParams.get("join");
   const [step, setStep] = useState(1);
   const [role, setRole] = useState<"owner" | "student" | "instructor" | null>(null);
+  // Native iOS hides the Academy Owner role choice. Owner accounts are
+  // managed exclusively on the web at app.mymatflow.com per App Store
+  // 3.1.1. Defaults to false on the server so the marketing page is
+  // unaffected; flips on first paint inside the Capacitor shell.
+  const [isNative, setIsNative] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const native =
+      (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
+        .Capacitor?.isNativePlatform?.() || false;
+    setIsNative(native);
+  }, []);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -186,20 +198,22 @@ function SignUpForm() {
 
           {step === 2 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole("owner")}
-                  className={`text-left p-5 rounded-lg border transition ${
-                    role === "owner"
-                      ? "border-brand-accent bg-brand-accent/10"
-                      : "border-brand-gray hover:border-brand-accent/50"
-                  }`}
-                >
-                  <div className="text-2xl mb-2">🥋</div>
-                  <div className="text-white font-semibold mb-1">Academy Owner</div>
-                  <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
-                </button>
+              <div className={`grid grid-cols-1 ${isNative ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-3`}>
+                {!isNative && (
+                  <button
+                    type="button"
+                    onClick={() => setRole("owner")}
+                    className={`text-left p-5 rounded-lg border transition ${
+                      role === "owner"
+                        ? "border-brand-accent bg-brand-accent/10"
+                        : "border-brand-gray hover:border-brand-accent/50"
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">🥋</div>
+                    <div className="text-white font-semibold mb-1">Academy Owner</div>
+                    <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setRole("instructor")}

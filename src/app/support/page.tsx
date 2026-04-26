@@ -96,9 +96,9 @@ export default function SupportPage() {
                 I&apos;m a gym owner. How do I get my academy on MatFlow?
               </summary>
               <p className="text-gray-400 text-sm mt-3">
-                Sign up at the &ldquo;Start Free Trial&rdquo; link and select &ldquo;I own a gym.&rdquo;
-                You get 30 days free to manage schedules, students, attendance, and more.
-                Email us if you&apos;d like a walkthrough.
+                Open <span className="text-white">app.mymatflow.com</span> in Safari or Chrome on
+                any device to sign up your academy. Gym management lives on the web. Email us at
+                frank@mymatflow.com if you&apos;d like a walkthrough.
               </p>
             </details>
             <details className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
