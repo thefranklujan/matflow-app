@@ -13,7 +13,13 @@ async function send(
   opts: { bccFrank?: boolean; text?: string; replyTo?: string } = {}
 ) {
   if (!resend) {
-    console.log(`[Email] No RESEND_API_KEY set — would send to ${to}: ${subject}`);
+    // In dev this is expected; in prod it means Vercel is missing the env var
+    // and EVERY transactional email is silently dropping (incl. password reset).
+    if (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production") {
+      console.error(`[Email] CRITICAL: RESEND_API_KEY missing in production. Dropped: to=${to} subject="${subject}"`);
+    } else {
+      console.log(`[Email] No RESEND_API_KEY set — would send to ${to}: ${subject}`);
+    }
     return;
   }
   try {

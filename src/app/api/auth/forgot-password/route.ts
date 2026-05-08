@@ -27,14 +27,16 @@ export async function POST(request: NextRequest) {
     const emailLower = email.trim().toLowerCase();
     console.log("[forgot-password] request for", emailLower);
 
-    // Look up both sides: a Student account or a (gym-owner) Member account
+    // Look up both sides: a Student account or a (gym-owner) Member account.
+    // Case-insensitive — older records were stored with whatever case the user
+    // typed at signup, so a strict equals on the lowercased value would miss them.
     const [student, member] = await Promise.all([
-      prisma.student.findUnique({
-        where: { email: emailLower },
+      prisma.student.findFirst({
+        where: { email: { equals: emailLower, mode: "insensitive" } },
         select: { id: true, firstName: true, email: true, passwordHash: true },
       }),
       prisma.member.findFirst({
-        where: { email: emailLower },
+        where: { email: { equals: emailLower, mode: "insensitive" } },
         select: { id: true, firstName: true, email: true, passwordHash: true },
       }),
     ]);

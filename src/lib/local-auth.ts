@@ -71,8 +71,12 @@ export async function registerGymOwner(data: {
   gymSlug: string;
   timezone?: string;
 }): Promise<{ gym: { id: string; name: string; slug: string }; member: { id: string } }> {
-  // Check if email already exists
-  const existing = await prisma.member.findFirst({ where: { email: data.email } });
+  const emailLower = data.email.trim().toLowerCase();
+
+  // Check if email already exists (case-insensitive)
+  const existing = await prisma.member.findFirst({
+    where: { email: { equals: emailLower, mode: "insensitive" } },
+  });
   if (existing) throw new Error("An account with this email already exists");
 
   // Check if slug is taken
@@ -98,7 +102,7 @@ export async function registerGymOwner(data: {
       data: {
         gymId: gym.id,
         clerkUserId: `owner-${Date.now()}`,
-        email: data.email,
+        email: emailLower,
         phone: data.phone || null,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -276,13 +280,16 @@ export async function registerStudent(data: {
   lastName: string;
   phone?: string;
 }): Promise<{ id: string; email: string; firstName: string; lastName: string }> {
-  const existing = await prisma.student.findUnique({ where: { email: data.email } });
+  const emailLower = data.email.trim().toLowerCase();
+  const existing = await prisma.student.findFirst({
+    where: { email: { equals: emailLower, mode: "insensitive" } },
+  });
   if (existing) throw new Error("An account with this email already exists");
 
   const passwordHash = await bcrypt.hash(data.password, 10);
   const student = await prisma.student.create({
     data: {
-      email: data.email,
+      email: emailLower,
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone || null,
@@ -335,9 +342,12 @@ export async function authenticateUser(
   const studentSession = await authenticateStudent(email, password);
   if (studentSession) return studentSession;
 
-  // Find member by email (could be in any gym)
+  // Find member by email (could be in any gym). Case-insensitive — older
+  // records were stored with whatever case the user typed at signup, and the
+  // login form may pass either. authenticateStudent already lowercases.
+  const emailLower = email.trim().toLowerCase();
   const member = await prisma.member.findFirst({
-    where: { email },
+    where: { email: { equals: emailLower, mode: "insensitive" } },
     include: { gym: true },
   });
 
