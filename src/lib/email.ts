@@ -359,7 +359,10 @@ This link expires in 1 hour. If you did not request a password reset, ignore thi
 
 - MatFlow`;
 
-  send(email, "Reset your MatFlow password", html, {
+  // Return the promise so callers in serverless contexts can await delivery
+  // before the lambda terminates. Errors are still swallowed so caller code
+  // never branches on whether the email existed.
+  return send(email, "Reset your MatFlow password", html, {
     text,
     replyTo: "frank@mymatflow.com",
   }).catch(() => {});

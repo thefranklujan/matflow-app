@@ -79,7 +79,11 @@ export async function POST(request: NextRequest) {
         "https://app.mymatflow.com";
       const resetUrl = `${base}/reset-password?token=${encodeURIComponent(token)}`;
 
-      sendPasswordReset(target.email, target.name, resetUrl);
+      // MUST await — without it the lambda returns and Vercel freezes the
+      // function before the Resend HTTP request finishes, so the email never
+      // actually leaves. send() already swallows its own errors so this won't
+      // throw and reveal whether the email existed.
+      await sendPasswordReset(target.email, target.name, resetUrl);
     }
 
     // Constant-time-ish response — don't leak whether the email exists
