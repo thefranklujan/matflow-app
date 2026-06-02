@@ -4,10 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "matflow-dev-secret-change-in-production"
-);
+import { JWT_SECRET } from "@/lib/jwt-secret";
 
 /**
  * Verifies a reset token and updates the account password. The token is

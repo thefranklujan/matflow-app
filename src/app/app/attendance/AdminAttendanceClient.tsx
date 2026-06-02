@@ -19,7 +19,8 @@ export default function AdminAttendanceClient() {
     new Date().toISOString().split("T")[0]
   );
   const [classType, setClassType] = useState<string>(CLASS_TYPES[0].value);
-  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0]?.value ?? "");
+  // Default to "main" so attendance saves work even before per-gym locations exist.
+  const [locationSlug, setLocationSlug] = useState<string>(LOCATIONS[0]?.value ?? "main");
   const [members, setMembers] = useState<MemberItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState<Set<string>>(new Set());

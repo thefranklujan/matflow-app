@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 
 import { BELT_RANKS } from "@/lib/constants";
 
@@ -18,9 +19,11 @@ export default async function AdminMemberDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { gymId } = await requireAdmin();
 
-  const member = await prisma.member.findUnique({
-    where: { id },
+  // Scope by gymId so an owner cannot read another academy's member by id.
+  const member = await prisma.member.findFirst({
+    where: { id, gymId },
     include: {
       beltHistory: { orderBy: { awardedAt: "desc" } },
     },
@@ -29,7 +32,7 @@ export default async function AdminMemberDetailPage({
   if (!member) notFound();
 
   const attendanceCount = await prisma.attendance.count({
-    where: { memberId: id },
+    where: { memberId: id, gymId },
   });
 
   const beltLabel =

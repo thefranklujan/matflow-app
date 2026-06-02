@@ -4,10 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordReset } from "@/lib/email";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "matflow-dev-secret-change-in-production"
-);
+import { JWT_SECRET } from "@/lib/jwt-secret";
 
 /**
  * Email-based password reset. Issues a 1-hour signed token that encodes the

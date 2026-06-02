@@ -6,10 +6,8 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { JWT_SECRET } from "@/lib/jwt-secret";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "matflow-dev-secret-change-in-production"
-);
 const COOKIE_NAME = "matflow-session";
 
 export interface SessionUser {
@@ -95,6 +93,10 @@ export async function registerGymOwner(data: {
         timezone: data.timezone || "America/Chicago",
         subscriptionStatus: "trialing",
         trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        // Auto-approve self-serve owner signups. The 30-day trial already gates
+        // monetization, so a manual approval wall only froze cold prospects out
+        // of their own gym and hid new gyms from the student directory.
+        approved: true,
       },
     });
 

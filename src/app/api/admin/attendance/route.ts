@@ -45,9 +45,12 @@ export async function POST(req: NextRequest) {
     const { gymId } = await requireAdmin();
 
     const body = await req.json();
-    const { classDate, classType, locationSlug, memberIds } = body;
+    const { classDate, classType, memberIds } = body;
+    // locationSlug is optional; default to "main" (mirrors the schedule route)
+    // so attendance saves even before per-gym locations are configured.
+    const locationSlug = body.locationSlug || "main";
 
-    if (!classDate || !classType || !locationSlug || !Array.isArray(memberIds) || memberIds.length === 0) {
+    if (!classDate || !classType || !Array.isArray(memberIds) || memberIds.length === 0) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
+import { requireAdmin } from "@/lib/auth";
 import OrderStatusUpdater from "./OrderStatusUpdater";
 
 
@@ -12,9 +13,11 @@ export default async function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { gymId } = await requireAdmin();
 
-  const order = await prisma.order.findUnique({
-    where: { id },
+  // Scope by gymId so an owner cannot read another gym's order by id.
+  const order = await prisma.order.findFirst({
+    where: { id, gymId },
     include: {
       items: {
         include: { product: true, variant: true },
