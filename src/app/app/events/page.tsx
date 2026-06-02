@@ -55,7 +55,7 @@ export default async function AdminEventsPage() {
                 <tr key={event.id} className="hover:bg-brand-gray/30 transition">
                   <td className="py-3 pr-4">
                     <Link
-                      href={`/admin/events/${event.id}/edit`}
+                      href={`/app/events/${event.id}/edit`}
                       className="text-white hover:text-brand-accent transition font-medium"
                     >
                       {event.title}
@@ -84,7 +84,7 @@ export default async function AdminEventsPage() {
                   </td>
                   <td className="py-3 pr-4 text-right flex items-center justify-end gap-3">
                     <Link
-                      href={`/admin/events/${event.id}/edit`}
+                      href={`/app/events/${event.id}/edit`}
                       className="text-sm text-gray-400 hover:text-white transition"
                     >
                       Edit

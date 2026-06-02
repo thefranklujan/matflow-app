@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { CATEGORY_SIZE_MAP, PRODUCT_COLORS } from "@/lib/constants";
 
 interface Variant {
@@ -38,6 +38,10 @@ interface ProductFormProps {
 
 export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
+  // Return to whichever shell the form was opened from (/app or legacy /admin)
+  // instead of always dumping the owner into the /admin twin.
+  const pathname = usePathname();
+  const productsListPath = pathname?.startsWith("/app") ? "/app/products" : "/admin/products";
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -137,7 +141,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     setSaving(false);
 
     if (res.ok) {
-      router.push("/admin/products");
+      router.push(productsListPath);
       router.refresh();
     } else {
       const data = await res.json();
@@ -377,7 +381,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/products")}
+          onClick={() => router.push(productsListPath)}
           className="text-gray-400 hover:text-white transition"
         >
           Cancel
