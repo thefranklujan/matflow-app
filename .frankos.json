@@ -1,0 +1,8 @@
+{
+  "allow_commit": true,
+  "allow_pre_review_commit": false,
+  "allow_push": true,
+  "push_remote": "origin",
+  "push_branch": "main",
+  "protected_branches": ["main", "master"]
+}
