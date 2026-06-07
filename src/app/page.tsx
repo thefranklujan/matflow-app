@@ -71,10 +71,29 @@ export default async function HomePage() {
           {MATFLOW.name}
         </h1>
         <p className="text-xl text-gray-400 mb-2">{MATFLOW.tagline}</p>
-        <p className="text-gray-500 mb-10 max-w-lg mx-auto">
+        <p className="text-gray-500 mb-8 max-w-lg mx-auto">
           The all in one platform for Jiu Jitsu academies. Manage members, track attendance,
           run your pro shop, and grow your gym.
         </p>
+
+        <div className="mb-8 rounded-lg border border-brand-accent/30 bg-brand-black px-6 py-5 text-center">
+          <h2 className="text-lg font-semibold text-white mb-2">
+            MatFlow is being actively rebuilt
+          </h2>
+          <p className="text-gray-400 text-sm mb-2">
+            Academy owners can{" "}
+            <a
+              href="mailto:frank@craftedsystems.io"
+              className="text-brand-accent underline hover:text-brand-accent/80"
+            >
+              email Frank
+            </a>{" "}
+            to share what they need as MatFlow restarts.
+          </p>
+          <p className="text-gray-500 text-sm">
+            Students: the app still works during the rebuild.
+          </p>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
