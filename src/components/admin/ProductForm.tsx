@@ -57,11 +57,48 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   const [images, setImages] = useState<ProductImage[]>(initialData?.images || []);
   const [uploading, setUploading] = useState(false);
 
+  // Inline "create a category" so an owner with zero categories isn't blocked
+  // from ever creating a product.
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
+  async function loadCategories(): Promise<Category[]> {
+    const r = await fetch("/api/categories");
+    if (!r.ok) return [];
+    const data = await r.json();
+    setCategories(data);
+    return data;
+  }
+
   useEffect(() => {
-    fetch("/api/categories")
-      .then((r) => r.json())
-      .then(setCategories);
+    loadCategories();
   }, []);
+
+  async function createCategory() {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    setCreatingCategory(true);
+    setCategoryError("");
+    const res = await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    setCreatingCategory(false);
+    if (res.ok) {
+      const created = await res.json();
+      await loadCategories();
+      setCategoryId(created.id);
+      setVariants([]);
+      setNewCategoryName("");
+      setAddingCategory(false);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setCategoryError(data.error || "Failed to create category");
+    }
+  }
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
   const availableSizes = selectedCategory
@@ -209,23 +246,74 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1">Category *</label>
-          <select
-            value={categoryId}
-            onChange={(e) => {
-              setCategoryId(e.target.value);
-              setVariants([]);
-            }}
-            className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm text-gray-300">Category *</label>
+            <button
+              type="button"
+              onClick={() => {
+                setAddingCategory((v) => !v);
+                setCategoryError("");
+              }}
+              className="text-xs text-brand-accent hover:underline"
+            >
+              {addingCategory ? "Cancel" : "+ New category"}
+            </button>
+          </div>
+
+          {addingCategory ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    createCategory();
+                  }
+                }}
+                placeholder="e.g. Gis, Rash Guards, Memberships"
+                autoFocus
+                className="flex-1 px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={createCategory}
+                disabled={creatingCategory || !newCategoryName.trim()}
+                className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50 whitespace-nowrap"
+              >
+                {creatingCategory ? "Adding..." : "Add"}
+              </button>
+            </div>
+          ) : (
+            <select
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+                setVariants([]);
+              }}
+              className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white focus:border-brand-accent focus:outline-none transition"
+              required
+            >
+              <option value="">
+                {categories.length === 0 ? "No categories yet — add one" : "Select a category"}
               </option>
-            ))}
-          </select>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {categoryError && (
+            <p className="text-xs text-red-400 mt-1">{categoryError}</p>
+          )}
+          {!addingCategory && categories.length === 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              Create your first category to start adding products.
+            </p>
+          )}
         </div>
 
         <div className="flex gap-6">

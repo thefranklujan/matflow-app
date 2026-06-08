@@ -80,7 +80,7 @@ export default function SettingsPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">URL Slug</label>
-          <p className="text-gray-500 text-sm mb-1">mymatflow.com/join/{settings.slug}</p>
+          <p className="text-gray-500 text-sm mb-1">app.mymatflow.com/join/{settings.slug}</p>
           <p className="text-gray-600 text-xs">Slug cannot be changed after creation.</p>
         </div>
 

@@ -11,7 +11,10 @@ export default async function WaiversPage() {
     where: { gymId },
     include: {
       signatures: {
-        include: { member: { select: { firstName: true, lastName: true, email: true } } },
+        include: {
+          member: { select: { firstName: true, lastName: true, email: true } },
+          dropIn: { select: { firstName: true, lastName: true } },
+        },
         orderBy: { signedAt: "desc" },
       },
     },

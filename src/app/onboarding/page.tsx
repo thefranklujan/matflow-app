@@ -88,7 +88,7 @@ export default function OnboardingPage() {
               URL Slug
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-sm">mymatflow.com/join/</span>
+              <span className="text-gray-500 text-sm">app.mymatflow.com/join/</span>
               <input
                 type="text"
                 value={slug}

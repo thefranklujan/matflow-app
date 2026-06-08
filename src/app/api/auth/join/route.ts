@@ -5,6 +5,7 @@ import { registerMember, createSession } from "@/lib/local-auth";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
+import { checkMemberLimit } from "@/lib/billing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +24,22 @@ export async function POST(request: NextRequest) {
         { error: "Password must be at least 6 characters" },
         { status: 400 }
       );
+    }
+
+    // Enforce the gym's plan member cap on the self-serve join link, same as the
+    // owner-approval path. Without this the share link bypassed billing caps.
+    const gymForLimit = await prisma.gym.findUnique({
+      where: { slug: gymSlug },
+      select: { id: true },
+    });
+    if (gymForLimit) {
+      const limit = await checkMemberLimit(gymForLimit.id);
+      if (!limit.allowed) {
+        return NextResponse.json(
+          { error: "This gym has reached its member limit. Please contact the gym." },
+          { status: 403 }
+        );
+      }
     }
 
     const result = await registerMember({

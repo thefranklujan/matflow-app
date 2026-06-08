@@ -7,7 +7,8 @@ interface Signature {
   id: string;
   signedName: string;
   signedAt: string;
-  member: { firstName: string; lastName: string; email: string };
+  member: { firstName: string; lastName: string; email: string } | null;
+  dropIn: { firstName: string; lastName: string } | null;
 }
 
 interface Template {
@@ -20,28 +21,89 @@ interface Template {
   signatures: Signature[];
 }
 
+const DEFAULT_CONTENT = `I, the undersigned, hereby acknowledge that Jiu Jitsu training involves inherent risks including but not limited to physical injury. I voluntarily assume all risks associated with participation in classes, open mats, and events at this academy.
+
+I release and hold harmless the academy, its instructors, staff, and affiliates from any claims, damages, or liabilities arising from my participation.
+
+I confirm that I am in good health and have no medical conditions that would prevent safe participation. I agree to follow all safety rules and instructor guidance.
+
+I understand this waiver remains in effect for the duration of my membership.`;
+
+function signerName(sig: Signature) {
+  if (sig.member) return `${sig.member.firstName} ${sig.member.lastName}`;
+  if (sig.dropIn) return `${sig.dropIn.firstName} ${sig.dropIn.lastName}`;
+  return sig.signedName;
+}
+
 export default function WaiversClient({ templates, totalMembers }: { templates: Template[]; totalMembers: number }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("Liability Waiver & Release of Claims");
-  const [content, setContent] = useState(
-    `I, the undersigned, hereby acknowledge that Jiu Jitsu training involves inherent risks including but not limited to physical injury. I voluntarily assume all risks associated with participation in classes, open mats, and events at this academy.\n\nI release and hold harmless the academy, its instructors, staff, and affiliates from any claims, damages, or liabilities arising from my participation.\n\nI confirm that I am in good health and have no medical conditions that would prevent safe participation. I agree to follow all safety rules and instructor guidance.\n\nI understand this waiver remains in effect for the duration of my membership.`
-  );
+  const [content, setContent] = useState(DEFAULT_CONTENT);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   const activeTemplate = templates.find((t) => t.active);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await fetch("/api/admin/waivers", {
+    setError("");
+    const res = await fetch("/api/admin/waivers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content }),
     });
     setLoading(false);
-    setShowForm(false);
-    router.refresh();
+    if (res.ok) {
+      setShowForm(false);
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to create waiver");
+    }
+  }
+
+  function startEdit(t: Template) {
+    setEditingId(t.id);
+    setEditTitle(t.title);
+    setEditContent(t.content);
+    setError("");
+  }
+
+  async function saveEdit() {
+    setLoading(true);
+    setError("");
+    const res = await fetch("/api/admin/waivers", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingId, title: editTitle, content: editContent }),
+    });
+    setLoading(false);
+    if (res.ok) {
+      setEditingId(null);
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to update waiver");
+    }
+  }
+
+  async function deleteTemplate(t: Template) {
+    if (!confirm(`Delete "${t.title}"? This can't be undone.`)) return;
+    setError("");
+    const res = await fetch(`/api/admin/waivers?id=${t.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to delete waiver");
+    }
   }
 
   return (
@@ -55,6 +117,12 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
           {showForm ? "Cancel" : "+ New Waiver"}
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm mb-4">
+          {error}
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={handleCreate} className="bg-brand-dark border border-brand-gray rounded-lg p-6 mb-6 space-y-4">
@@ -81,34 +149,70 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
           <button type="submit" disabled={loading} className="bg-brand-accent text-brand-black font-bold px-6 py-2 rounded-lg disabled:opacity-50">
             {loading ? "Creating..." : "Create Waiver"}
           </button>
-          <p className="text-gray-500 text-xs">Creating a new waiver will deactivate any existing active waiver.</p>
+          <p className="text-gray-500 text-xs">Creating a new waiver will deactivate any existing active waiver and bump the version.</p>
         </form>
       )}
 
       {activeTemplate && (
         <div className="bg-brand-dark border border-brand-accent/30 rounded-lg p-6 mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-medium">Active</span>
-            <h2 className="text-white font-semibold">{activeTemplate.title}</h2>
-          </div>
-          <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
-            <span className="text-gray-600">Version {activeTemplate.version}</span>
-          </div>
-
-          {activeTemplate.signatures.length > 0 && (
-            <div className="mt-4 border-t border-brand-gray pt-4">
-              <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-2">Recent Signatures</h3>
-              <div className="space-y-1">
-                {activeTemplate.signatures.slice(0, 10).map((sig) => (
-                  <div key={sig.id} className="flex items-center justify-between text-sm">
-                    <span className="text-white">{sig.member.firstName} {sig.member.lastName}</span>
-                    <span className="text-gray-500">{new Date(sig.signedAt).toLocaleDateString()}</span>
-                  </div>
-                ))}
+          {editingId === activeTemplate.id ? (
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white"
+              />
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={10}
+                className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm"
+              />
+              <p className="text-gray-500 text-xs">
+                Changing the wording bumps the version — members will be asked to re-sign.
+              </p>
+              <div className="flex items-center gap-3">
+                <button onClick={saveEdit} disabled={loading} className="bg-brand-accent text-brand-black font-bold px-5 py-2 rounded-lg disabled:opacity-50">
+                  {loading ? "Saving..." : "Save"}
+                </button>
+                <button onClick={() => setEditingId(null)} className="text-sm text-gray-400 hover:text-white">Cancel</button>
               </div>
             </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-xs font-medium">Active</span>
+                  <h2 className="text-white font-semibold">{activeTemplate.title}</h2>
+                </div>
+                <button onClick={() => startEdit(activeTemplate)} className="text-sm text-gray-400 hover:text-brand-accent transition">
+                  Edit
+                </button>
+              </div>
+              <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
+                <span className="text-gray-600">Version {activeTemplate.version}</span>
+              </div>
+
+              {activeTemplate.signatures.length > 0 && (
+                <div className="mt-4 border-t border-brand-gray pt-4">
+                  <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-2">Recent Signatures</h3>
+                  <div className="space-y-1">
+                    {activeTemplate.signatures.slice(0, 10).map((sig) => (
+                      <div key={sig.id} className="flex items-center justify-between text-sm">
+                        <span className="text-white">
+                          {signerName(sig)}
+                          {sig.dropIn && <span className="text-gray-500 text-xs ml-2">drop-in</span>}
+                        </span>
+                        <span className="text-gray-500">{new Date(sig.signedAt).toLocaleDateString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -120,7 +224,14 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
             <div key={t.id} className="bg-brand-dark border border-brand-gray rounded-lg p-4 mb-2">
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">{t.title} (v{t.version})</span>
-                <span className="text-gray-500 text-sm">{t.signatures.length} signatures</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-500 text-sm">{t.signatures.length} signatures</span>
+                  {t.signatures.length === 0 && (
+                    <button onClick={() => deleteTemplate(t)} className="text-sm text-gray-500 hover:text-red-400 transition">
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

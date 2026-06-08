@@ -23,12 +23,20 @@ export default async function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Products</h1>
-        <Link
-          href="/app/products/new"
-          className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
-        >
-          + Add Product
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/app/products/categories"
+            className="border border-brand-gray text-gray-300 font-medium px-4 py-2 rounded-lg hover:border-gray-500 transition text-sm"
+          >
+            Manage Categories
+          </Link>
+          <Link
+            href="/app/products/new"
+            className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
+          >
+            + Add Product
+          </Link>
+        </div>
       </div>
 
       <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden">

@@ -23,9 +23,14 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let gymId: string;
   try {
-    const { gymId } = await requireAdmin();
+    ({ gymId } = await requireAdmin());
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const body = await req.json();
     const { name, description, price, compareAt, categoryId, featured, active, variants, images } = body;
 
@@ -33,7 +38,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Category must belong to this gym — never trust a client-supplied id that
+    // could point at another tenant's category.
+    const category = await prisma.category.findFirst({ where: { id: categoryId, gymId } });
+    if (!category) {
+      return NextResponse.json({ error: "Select a valid category" }, { status: 400 });
+    }
+
     const slug = slugify(name);
+
+    // Product slugs are unique per gym; surface a clear message instead of a 500.
+    const slugTaken = await prisma.product.findFirst({ where: { gymId, slug } });
+    if (slugTaken) {
+      return NextResponse.json(
+        { error: "A product with this name already exists" },
+        { status: 409 }
+      );
+    }
 
     const product = await prisma.product.create({
       data: {
@@ -67,6 +88,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(product, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
 }

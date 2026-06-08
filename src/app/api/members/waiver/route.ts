@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
         gymId,
         memberId,
         templateId,
+        version: template.version,
         signedName,
         waiverContentSnapshot: template.content,
       },

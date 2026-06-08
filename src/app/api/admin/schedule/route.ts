@@ -18,11 +18,16 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let gymId: string;
   try {
-    const { gymId } = await requireAdmin();
+    ({ gymId } = await requireAdmin());
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const body = await req.json();
-    const { dayOfWeek, startTime, endTime, classType, instructor, locationSlug, topic } = body;
+    const { dayOfWeek, startTime, endTime, classType, instructor, instructorId, locationSlug, topic } = body;
 
     if (
       typeof dayOfWeek !== "number" ||
@@ -34,13 +39,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // If an instructor was picked from the roster, verify it belongs to this gym.
+    let resolvedInstructorId: string | null = null;
+    if (instructorId) {
+      const instr = await prisma.instructor.findFirst({ where: { id: instructorId, gymId } });
+      if (!instr) {
+        return NextResponse.json({ error: "Invalid instructor" }, { status: 400 });
+      }
+      resolvedInstructorId = instr.id;
+    }
+
     const entry = await prisma.classSchedule.create({
       data: {
         dayOfWeek,
         startTime,
         endTime,
         classType,
-        instructor,
+        instructor, // legacy display name, always set
+        instructorId: resolvedInstructorId,
         locationSlug: locationSlug || "main",
         topic: topic || null,
         gymId,
@@ -49,6 +65,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(entry, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Failed to create class" }, { status: 500 });
   }
 }

@@ -13,6 +13,7 @@ import {
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
   FileSignature, UserCircle, Settings, CreditCard, ChevronLeft,
   ChevronRight, LayoutDashboard, Home, UserPlus, Database, ShieldCheck, Bell,
+  GraduationCap, UserCheck,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -20,6 +21,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Package, ShoppingBag, ClipboardList, Megaphone, FileText,
   CalendarDays, Trophy, TrendingUp, CalendarCheck, Award,
   FileSignature, UserCircle, Settings, CreditCard, LayoutDashboard, Home, UserPlus, Database, ShieldCheck, Bell,
+  GraduationCap, UserCheck,
 };
 
 export function Sidebar() {

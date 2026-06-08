@@ -6,12 +6,18 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 
+export interface SendResult {
+  ok: boolean;
+  skipped?: boolean; // no API key configured — nothing was sent
+  error?: string;
+}
+
 async function send(
   to: string,
   subject: string,
   html: string,
-  opts: { bccFrank?: boolean; text?: string; replyTo?: string } = {}
-) {
+  opts: { bccFrank?: boolean; text?: string; replyTo?: string; headers?: Record<string, string> } = {}
+): Promise<SendResult> {
   if (!resend) {
     // In dev this is expected; in prod it means Vercel is missing the env var
     // and EVERY transactional email is silently dropping (incl. password reset).
@@ -20,7 +26,7 @@ async function send(
     } else {
       console.log(`[Email] No RESEND_API_KEY set — would send to ${to}: ${subject}`);
     }
-    return;
+    return { ok: false, skipped: true };
   }
   try {
     const res = await resend.emails.send({
@@ -33,14 +39,17 @@ async function send(
       ...(opts.text ? { text: opts.text } : {}),
       ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
       ...(opts.bccFrank ? { bcc: "franklujan@gmail.com" } : {}),
+      ...(opts.headers ? { headers: opts.headers } : {}),
     });
     if (res?.error) {
       console.error("[Email] Resend API error:", { to, subject, error: res.error });
-      return;
+      return { ok: false, error: String(res.error?.message || res.error) };
     }
     console.log("[Email] Sent:", { to, subject, id: res?.data?.id });
+    return { ok: true };
   } catch (err) {
     console.error("[Email] Threw:", { to, subject, err });
+    return { ok: false, error: err instanceof Error ? err.message : "send failed" };
   }
 }
 
@@ -334,6 +343,37 @@ export function sendJoinRequestRejectedToStudent(email: string, studentName: str
     ctaHref: "https://app.mymatflow.com/student/gyms",
   });
   send(email, `Update from ${gymName}`, html).catch(() => {});
+}
+
+/**
+ * Send a gym announcement to one member by email. Reuses the brand shell and the
+ * shared Resend client (so the no-key dev guard applies automatically). Returns a
+ * per-recipient result the caller records for delivery status.
+ */
+export function sendAnnouncementEmail(
+  to: string,
+  opts: { gymName: string; title: string; content: string; unsubUrl?: string }
+): Promise<SendResult> {
+  const bodyHtml = opts.content
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 12px 0;">${p.replace(/\n/g, "<br>")}</p>`)
+    .join("");
+
+  const html = wrap({
+    eyebrow: opts.gymName,
+    headline: opts.title,
+    body: bodyHtml,
+    ctaText: "Open MatFlow",
+    ctaHref: "https://app.mymatflow.com",
+    footnote: opts.unsubUrl
+      ? `You're receiving this because you're a member of ${opts.gymName}. <a href="${opts.unsubUrl}" style="color:#737373;">Unsubscribe</a>.`
+      : undefined,
+  });
+
+  return send(to, `${opts.gymName}: ${opts.title}`, html, {
+    replyTo: "frank@mymatflow.com",
+    ...(opts.unsubUrl ? { headers: { "List-Unsubscribe": `<${opts.unsubUrl}>` } } : {}),
+  });
 }
 
 export function sendPasswordReset(email: string, name: string, resetUrl: string) {

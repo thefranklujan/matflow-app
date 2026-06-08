@@ -15,7 +15,7 @@ export default async function SchedulePage() {
       })
     : null;
 
-  const [schedule, commitments, allCommitments, events, videos] = await Promise.all([
+  const [schedule, commitments, allCommitments, events, videos, instructors] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { gymId, active: true },
       orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
@@ -42,11 +42,17 @@ export default async function SchedulePage() {
       where: { gymId, published: true },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.instructor.findMany({
+      where: { gymId, active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
   ]);
 
   return (
     <ScheduleClient
       isAdmin={isAdmin}
+      instructors={instructors}
       currentMember={me ? {
         firstName: me.firstName,
         lastName: me.lastName,

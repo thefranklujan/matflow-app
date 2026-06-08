@@ -83,6 +83,7 @@ export default function ScheduleClient({
   attendees: initialAttendees = [],
   events = [],
   videos = [],
+  instructors = [],
   isAdmin,
   currentMember = null,
 }: {
@@ -91,6 +92,7 @@ export default function ScheduleClient({
   attendees?: Attendee[];
   events?: EventItem[];
   videos?: VideoItem[];
+  instructors?: { id: string; name: string }[];
   isAdmin: boolean;
   currentMember?: { firstName: string; lastName: string; beltRank: string; isAmbassador: boolean } | null;
 }) {
@@ -103,9 +105,14 @@ export default function ScheduleClient({
   const [adminStart, setAdminStart] = useState("09:00");
   const [adminEnd, setAdminEnd] = useState("10:00");
   const [adminClassType, setAdminClassType] = useState<string>(CLASS_TYPES[0].value);
+  // Instructor: pick from the roster, or "__manual__" to type a one-off name.
+  const [adminInstructorId, setAdminInstructorId] = useState(
+    instructors.length > 0 ? instructors[0].id : "__manual__"
+  );
   const [adminInstructor, setAdminInstructor] = useState("");
   const [adminTopic, setAdminTopic] = useState("");
   const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const manualInstructor = adminInstructorId === "__manual__";
 
   async function reloadSchedule() {
     const res = await fetch("/api/admin/schedule");
@@ -117,6 +124,12 @@ export default function ScheduleClient({
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    // Resolve the instructor name from the roster pick, or the typed name.
+    const selected = instructors.find((i) => i.id === adminInstructorId);
+    const instructorName = manualInstructor ? adminInstructor.trim() : selected?.name || "";
+    const instructorId = manualInstructor ? null : adminInstructorId;
+    if (!instructorName) return;
+
     setAdminSubmitting(true);
     const res = await fetch("/api/admin/schedule", {
       method: "POST",
@@ -126,7 +139,8 @@ export default function ScheduleClient({
         startTime: adminStart,
         endTime: adminEnd,
         classType: adminClassType,
-        instructor: adminInstructor,
+        instructor: instructorName,
+        instructorId,
         topic: adminTopic || null,
       }),
     });
@@ -314,7 +328,33 @@ export default function ScheduleClient({
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Instructor</label>
-              <input type="text" value={adminInstructor} onChange={(e) => setAdminInstructor(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+              <select
+                value={adminInstructorId}
+                onChange={(e) => setAdminInstructorId(e.target.value)}
+                className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm"
+              >
+                {instructors.map((i) => (
+                  <option key={i.id} value={i.id}>{i.name}</option>
+                ))}
+                <option value="__manual__">Other (type a name)…</option>
+              </select>
+              {manualInstructor && (
+                <input
+                  type="text"
+                  value={adminInstructor}
+                  onChange={(e) => setAdminInstructor(e.target.value)}
+                  placeholder="Instructor name"
+                  required
+                  className="mt-2 w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm"
+                />
+              )}
+              {instructors.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Tip: add instructors under{" "}
+                  <a href="/app/instructors" className="text-brand-accent hover:underline">Instructors</a>{" "}
+                  to pick them from a list.
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Topic (Optional)</label>

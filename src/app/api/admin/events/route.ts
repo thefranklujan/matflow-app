@@ -18,14 +18,28 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let gymId: string;
   try {
-    const { gymId } = await requireAdmin();
+    ({ gymId } = await requireAdmin());
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const body = await req.json();
-    const { title, description, date, endDate, eventType, locationSlug } = body;
+    const { title, description, date, endDate, eventType, locationSlug, instructorId } = body;
 
     if (!title || !date || !eventType || !locationSlug) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    let resolvedInstructorId: string | null = null;
+    if (instructorId) {
+      const instr = await prisma.instructor.findFirst({ where: { id: instructorId, gymId } });
+      if (!instr) {
+        return NextResponse.json({ error: "Invalid instructor" }, { status: 400 });
+      }
+      resolvedInstructorId = instr.id;
     }
 
     const event = await prisma.event.create({
@@ -36,12 +50,13 @@ export async function POST(req: NextRequest) {
         endDate: endDate ? new Date(endDate) : null,
         eventType,
         locationSlug,
+        instructorId: resolvedInstructorId,
         gymId,
       },
     });
 
     return NextResponse.json(event, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
   }
 }

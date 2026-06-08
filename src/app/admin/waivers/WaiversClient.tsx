@@ -7,7 +7,7 @@ interface Signature {
   id: string;
   signedName: string;
   signedAt: string;
-  member: { firstName: string; lastName: string; email: string };
+  member: { firstName: string; lastName: string; email: string } | null;
 }
 
 interface Template {
@@ -103,7 +103,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
               <div className="space-y-1">
                 {activeTemplate.signatures.slice(0, 10).map((sig) => (
                   <div key={sig.id} className="flex items-center justify-between text-sm">
-                    <span className="text-white">{sig.member.firstName} {sig.member.lastName}</span>
+                    <span className="text-white">{sig.member ? `${sig.member.firstName} ${sig.member.lastName}` : sig.signedName}</span>
                     <span className="text-gray-500">{new Date(sig.signedAt).toLocaleDateString()}</span>
                   </div>
                 ))}

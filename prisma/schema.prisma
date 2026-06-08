@@ -47,6 +47,29 @@ model Gym {
   waiverSignatures   WaiverSignature[]
   waiverTemplates    WaiverTemplate[]
   activityLogs       ActivityLog[]
+  instructors        Instructor[]
+  dropIns            DropIn[]
+}
+
+/// A teacher/professor at a gym. Standalone roster the owner manages so it can be
+/// selected in class/event dropdowns. memberId optionally links to a Member who
+/// self-created or logs in; null means a name-only profile the owner created.
+model Instructor {
+  id             String          @id @default(cuid())
+  gymId          String
+  name           String
+  beltRank       String?
+  bio            String?
+  memberId       String?
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  gym            Gym             @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  classSchedules ClassSchedule[]
+  events         Event[]
+  dropIns        DropIn[]
+
+  @@index([gymId, active])
 }
 
 model Category {
@@ -382,28 +405,48 @@ model BeltProgress {
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
-  gymId       String
-  title       String
-  content     String
-  pinned      Boolean  @default(false)
-  publishedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  gym         Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  id             String                 @id @default(cuid())
+  gymId          String
+  title          String
+  content        String
+  pinned         Boolean                @default(false)
+  emailSentAt    DateTime?
+  emailSentCount Int                    @default(0)
+  publishedAt    DateTime               @default(now())
+  createdAt      DateTime               @default(now())
+  gym            Gym                    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  deliveries     AnnouncementDelivery[]
+}
+
+/// Per-recipient delivery record for an announcement's email channel. Mirrors the
+/// proven CampaignEvent pattern so the owner can see who was emailed and any errors.
+model AnnouncementDelivery {
+  id             String       @id @default(cuid())
+  announcementId String
+  email          String
+  channel        String       @default("email")
+  status         String       // "sent" | "failed" | "skipped_unsubscribed"
+  error          String?
+  createdAt      DateTime     @default(now())
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId])
 }
 
 model ClassSchedule {
-  id           String  @id @default(cuid())
+  id           String      @id @default(cuid())
   gymId        String
   dayOfWeek    Int
   startTime    String
   endTime      String
   classType    String
-  instructor   String
+  instructor   String      // legacy free-text display name; kept for back-compat
+  instructorId String?
   locationSlug String
   topic        String?
-  active       Boolean @default(true)
-  gym          Gym     @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  active       Boolean     @default(true)
+  gym          Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  instructorRef Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
 }
 
 model ScheduleCommitment {
@@ -432,7 +475,7 @@ model TechniqueProgress {
 }
 
 model Event {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   gymId        String
   title        String
   description  String?
@@ -440,10 +483,12 @@ model Event {
   endDate      DateTime?
   eventType    String
   locationSlug String
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  gym          Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  instructorId String?
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  gym          Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  instructorRef Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
 }
 
 model CompetitionResult {
@@ -505,14 +550,44 @@ model WaiverTemplate {
 model WaiverSignature {
   id                    String         @id @default(cuid())
   gymId                 String
-  memberId              String
+  memberId              String?        // null for drop-in/guest signatures
+  dropInId              String?        // set when signed by a drop-in instead of a member
   templateId            String
+  version               Int            @default(1) // template version captured at signing
   signedName            String
   signedAt              DateTime       @default(now())
   waiverContentSnapshot String
   gym                   Gym            @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  member                Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member                Member?        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  dropIn                DropIn?        @relation(fields: [dropInId], references: [id], onDelete: Cascade)
   template              WaiverTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([gymId])
+  @@index([dropInId])
+}
+
+/// A temporary / drop-in visitor. Lightweight, no login — captured via a public
+/// QR link or created by the owner. Optionally convertible to a full Member.
+model DropIn {
+  id               String            @id @default(cuid())
+  gymId            String
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  emergencyName    String?
+  emergencyPhone   String?
+  visitDate        DateTime          @default(now())
+  classType        String?
+  instructorId     String?
+  notes            String?
+  convertedMemberId String?          // set once converted to a full member
+  createdAt        DateTime          @default(now())
+  gym              Gym               @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  instructorRef    Instructor?       @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  signatures       WaiverSignature[]
+
+  @@index([gymId, visitDate])
 }
 
 model ActivityLog {

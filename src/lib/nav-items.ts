@@ -15,6 +15,8 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "leads", label: "Leads", icon: "Target", roles: ["admin"], section: "main" },
   { slug: "requests", label: "Join Requests", icon: "UserPlus", roles: ["admin"], section: "main" },
   { slug: "members", label: "Members", icon: "Users", roles: ["admin"], section: "main" },
+  { slug: "instructors", label: "Instructors", icon: "GraduationCap", roles: ["admin"], section: "main" },
+  { slug: "dropins", label: "Drop-ins", icon: "UserCheck", roles: ["admin"], section: "main" },
   // Shared
   { slug: "schedule", label: "Schedule", icon: "Calendar", roles: ["admin", "member"], section: "main" },
   { slug: "attendance", label: "Attendance", icon: "CheckSquare", roles: ["admin", "member"], section: "main" },

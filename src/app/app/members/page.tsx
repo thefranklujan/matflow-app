@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
+import { ShareLinkCard } from "@/components/ShareLinkCard";
 
 import { BELT_RANKS } from "@/lib/constants";
 
@@ -16,6 +17,7 @@ const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@cra
 
 export default async function AdminMembersPage() {
   const { gymId } = await requireAdmin();
+  const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { slug: true } });
   const allMembers = await prisma.member.findMany({
     where: { gymId },
     orderBy: { createdAt: "desc" },
@@ -33,7 +35,13 @@ export default async function AdminMembersPage() {
 
   return (
       <div>
-        <h1 className="text-2xl font-bold text-white mb-8">Members</h1>
+        <h1 className="text-2xl font-bold text-white mb-6">Members</h1>
+
+        {gym?.slug && (
+          <div className="mb-6">
+            <ShareLinkCard slug={gym.slug} />
+          </div>
+        )}
 
         <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden">
           <table className="w-full">

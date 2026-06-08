@@ -273,6 +273,64 @@ export async function registerMember(data: {
   return { member: { id: member.id, gymId: gym.id }, studentId: student.id };
 }
 
+// ── Join a gym as an already-signed-in student ───────
+// Used by the member link when the visitor is already logged in, so they don't
+// have to retype email/password. Reuses the existing Student identity.
+export async function joinGymAsStudent(
+  studentId: string,
+  gymSlug: string
+): Promise<{ member: { id: string; gymId: string }; gymName: string }> {
+  const gym = await prisma.gym.findUnique({ where: { slug: gymSlug } });
+  if (!gym) throw new Error("Gym not found");
+
+  const student = await prisma.student.findUnique({ where: { id: studentId } });
+  if (!student) throw new Error("Student not found");
+
+  // One gym, one student: block if they already belong to a different gym.
+  const otherGymMember = await prisma.member.findFirst({
+    where: { studentId, gymId: { not: gym.id } },
+    include: { gym: { select: { name: true } } },
+  });
+  if (otherGymMember) {
+    throw new Error(
+      `You're already a member of ${otherGymMember.gym.name}. Contact them to transfer.`
+    );
+  }
+
+  const existing = await prisma.member.findFirst({
+    where: { gymId: gym.id, studentId },
+  });
+
+  let member;
+  if (existing) {
+    if (existing.active && existing.approved) {
+      return { member: { id: existing.id, gymId: gym.id }, gymName: gym.name };
+    }
+    member = await prisma.member.update({
+      where: { id: existing.id },
+      data: { approved: true, active: true },
+    });
+  } else {
+    member = await prisma.member.create({
+      data: {
+        gymId: gym.id,
+        clerkUserId: `member-${Date.now()}`,
+        email: student.email,
+        phone: student.phone,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        approved: true,
+        active: true,
+        beltRank: "white",
+        stripes: 0,
+        studentId: student.id,
+      },
+    });
+  }
+
+  return { member: { id: member.id, gymId: gym.id }, gymName: gym.name };
+}
+
 // ── Register Student ─────────────────────────────────
 
 export async function registerStudent(data: {

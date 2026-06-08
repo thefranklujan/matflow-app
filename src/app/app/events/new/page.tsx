@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
@@ -16,8 +16,17 @@ export default function AdminNewEventPage() {
   const [endDate, setEndDate] = useState("");
   const [eventType, setEventType] = useState("seminar");
   const [locationSlug, setLocationSlug] = useState("magnolia");
+  const [instructorId, setInstructorId] = useState("");
+  const [instructors, setInstructors] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/instructors")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setInstructors(data.filter((i: { active: boolean }) => i.active)))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,6 +43,7 @@ export default function AdminNewEventPage() {
         endDate: endDate || null,
         eventType,
         locationSlug,
+        instructorId: instructorId || null,
       }),
     });
 
@@ -132,6 +142,29 @@ export default function AdminNewEventPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Instructor (optional)</label>
+            <select
+              value={instructorId}
+              onChange={(e) => setInstructorId(e.target.value)}
+              className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
+            >
+              <option value="">No instructor</option>
+              {instructors.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.name}
+                </option>
+              ))}
+            </select>
+            {instructors.length === 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                Add instructors under{" "}
+                <Link href="/app/instructors" className="text-brand-accent hover:underline">Instructors</Link>{" "}
+                to assign one.
+              </p>
+            )}
           </div>
 
           {error && <p className="text-sm text-red-400">{error}</p>}

@@ -39,6 +39,14 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // Category must belong to this gym (guard against cross-tenant ids).
+    if (categoryId) {
+      const category = await prisma.category.findFirst({ where: { id: categoryId, gymId } });
+      if (!category) {
+        return NextResponse.json({ error: "Select a valid category" }, { status: 400 });
+      }
+    }
+
     // Delete existing variants and images, recreate them
     await prisma.productVariant.deleteMany({ where: { productId: id } });
     await prisma.productImage.deleteMany({ where: { productId: id } });
