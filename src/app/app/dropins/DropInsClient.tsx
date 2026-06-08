@@ -93,8 +93,8 @@ export default function DropInsClient({
         </div>
       )}
 
-      <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden">
-        <table className="w-full">
+      <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead>
             <tr className="border-b border-brand-gray">
               <th className="text-left text-xs text-gray-400 uppercase tracking-wider px-4 py-3">Name</th>
