@@ -23,7 +23,7 @@ shell pointing at https://app.mymatflow.com.
 
 Shown above the description. Can be updated without resubmitting.
 
-> The Jiu Jitsu training companion built for BJJ academies. Log sessions, track belt progression, run your gym — all from one app.
+> The free Jiu Jitsu companion for students. View your academy schedule, check in, read announcements, sign waivers, and track belt progression.
 
 ---
 
@@ -32,30 +32,21 @@ Shown above the description. Can be updated without resubmitting.
 Full marketing text. Apple lets you edit this without re-review.
 
 ```
-MatFlow is the training companion built for Brazilian Jiu Jitsu.
+MatFlow is the free training companion built for Brazilian Jiu Jitsu students.
 
-Whether you're a white belt just starting out or a gym owner running a hundred-student academy, MatFlow gives you everything you need to track your progress, find training partners, and run your mats.
+Whether you're a white belt just starting out or a seasoned competitor, MatFlow gives you everything you need to stay connected to your academy and track your progress.
 
 
 FOR STUDENTS
 
-• Log every training session in ten seconds — gi, no-gi, open mat, competition
+• View your academy's class schedule and check in on arrival
+• Read announcements from your academy
+• Sign required waivers right from your phone
+• Log every training session in ten seconds: gi, no-gi, open mat, competition
 • Track your belt and stripe progression with your coach's sign-off
 • See your 90-day training heatmap and build real consistency
-• View your academy's class schedule and check in on arrival
 • Connect with training partners across MatFlow's community
-• Nominate your gym if it's not already here — and we'll reach out to the owner
-
-
-FOR GYM OWNERS
-
-• Manage your students, schedule, and attendance from one clean dashboard
-• Approve join requests as new students find your academy
-• Track belt promotions and send automatic congratulations notifications
-• Build and share your class schedule — students see it live
-• Run your pro shop with integrated inventory and orders
-• Send announcements, class reminders, and promotion emails
-• See who's on the mats with geofence-based auto check-in
+• Nominate your gym if it's not already here, and we'll reach out to them
 
 
 BUILT FOR JIU JITSU, NOT GENERIC FITNESS
@@ -107,13 +98,14 @@ First release — short and confident:
 ```
 Welcome to MatFlow 1.0.
 
+- Your academy class schedule with arrival check in
+- Academy announcements
+- Sign required waivers from your phone
 - Training log with session history and belt progression
-- Class schedule and live attendance tracking  
 - Community and training partner connections
-- Gym management for owners: students, pro shop, announcements
 - Secure push notifications for class reminders and updates
 
-Email frank@mymatflow.com — we read every message.
+Email frank@mymatflow.com, we read every message.
 ```
 
 ---
@@ -130,41 +122,62 @@ that concern by listing the native capabilities + niche audience.
 - Phone: (your phone from GoDaddy 2FA, or your main)
 - Email: frank@mymatflow.com
 
-**Sign-in Information** (if apple asks for a demo account):
-- Email: `reviewer@mymatflow.com`  (I can create this before submission — just say the word)
-- Password: `MatFlow2026!Review`  (or whatever you prefer; tell me and I'll provision)
+**Sign-in Information** (demo student account — provision before submission, see section 6a):
+- Email: `reviewer.student@mymatflow.com`
+- Password: `MatFlow2026!Review`
 
 **Notes for Reviewer** (paste this verbatim):
 
 ```
 Hi team,
 
-Thanks for reviewing MatFlow. A few notes that may help the review:
+Thanks for reviewing MatFlow.
 
-1. NICHE AUDIENCE
-MatFlow is built specifically for Brazilian Jiu Jitsu academies — not a generic fitness app. Every feature (belt+stripe progression, gi/no-gi session types, rolling win/loss tracking, competition results) is designed around how BJJ gyms actually operate. We are currently partnered with Ceconi BJJ (Henderson, NV) as our founding academy, and their students and coach are actively using the app in production.
+WHAT THIS APP IS
+MatFlow is a free companion app for Brazilian Jiu Jitsu students. It is not a paid app and contains no in-app purchases. Students use it to view their academy class schedule, check in on arrival, read announcements, sign required waivers, track belt progression, and log training. Gym owners manage their academy separately on the web dashboard and are not part of this iOS app. There is no billing, subscription, pricing, upgrade, or purchase flow anywhere in the iOS app.
 
-2. NATIVE FUNCTIONALITY (per 4.2)
-MatFlow is not a web wrapper. It uses:
-- Native push notifications via APNs for class reminders, belt promotions, and join-request approvals
-- Native geolocation for auto-arrival check-ins when a student arrives at their gym (Haversine distance check vs gym geofence, owner-configured)
-- Native device keyboard + camera integration for future belt-promotion photo flow
-- Native session persistence via iOS UserDefaults so sign-in survives app kills
-- Custom icon and launch experience
+NATIVE FUNCTIONALITY (per 4.2)
+MatFlow is not a generic web page. It uses:
+- Native push notifications via APNs for class reminders and academy announcements
+- Native geolocation for arrival check-ins against an academy geofence
+- Native session persistence so sign-in survives app kills
+- Native share sheet, custom icon, and launch experience
 
-3. ACCOUNT DELETION (per 5.1.1(v))
-Account deletion is available in-app: sign in → Settings → Danger zone → Delete Account. Removes the account, all training sessions, belt history, and gym membership data from our database. Reviewer can test this with the demo account.
+NICHE AUDIENCE
+Every feature (belt and stripe progression, gi and no-gi session types, rolling win/loss tracking, competition results) is designed around how BJJ academies actually operate. The app is in active production use at a live academy (Renzo Gracie Riverstone).
 
-4. DEMO ACCOUNT
-The demo account above is preloaded with realistic data (a few training sessions, blue belt at demo gym) so you can see the main flows without needing to sign up fresh. If you'd like gym-owner access instead, email us and we'll provision a separate reviewer admin account.
+ACCOUNT DELETION (per 5.1.1(v))
+Sign in, open Profile, scroll to the Danger Zone section, tap Delete Account. This removes the account, training sessions, belt history, and academy membership from our database. The demo student account can be used to verify.
 
-5. CONTENT RIGHTS
-All content in the app is owned by MatFlow or entered by the user. No third-party copyrighted material is embedded.
+DEMO ACCOUNT
+The student demo account above is preloaded with a belt rank, an academy membership, a visible class schedule, an announcement, and a waiver to review.
 
-Happy to answer any questions at frank@mymatflow.com within an hour during business hours.
+CONTENT RIGHTS
+All content is owned by MatFlow or entered by the user. No third-party copyrighted material is embedded.
 
-— Frank Lujan, MatFlow Founder
+Happy to answer any questions at frank@mymatflow.com.
+
+Frank Lujan, MatFlow Founder
 ```
+
+---
+
+## 6a. Reviewer Demo Account (student) — PROVISION BEFORE SUBMIT
+
+Apple needs a working student login (2.1(a)). Do NOT give them owner credentials.
+The account must belong to a demo academy and show real student data:
+
+- **Email:** `reviewer.student@mymatflow.com`  **Password:** `MatFlow2026!Review`
+- Member of a demo academy (e.g. "Apple Review Academy") that is `approved=true`
+- Belt rank set (e.g. blue, 2 stripes)
+- The demo academy has: a class schedule (a few `ClassSchedule` rows), at least one
+  `Announcement`, and one active `WaiverTemplate` so the reviewer can view + sign it
+- A few logged training sessions / attendance rows so the log isn't empty
+
+This is **production data**, so it is NOT created automatically by this work. Frank
+approves provisioning, then it can be seeded via the Supabase MCP (owner-level) or a
+one-time SQL insert. Account deletion review path: **Sign in → Profile → Danger Zone
+→ Delete Account.**
 
 ---
 
@@ -204,11 +217,12 @@ Likely rating: **4+**.
 - **Price**: Free
 - **Availability**: All territories (or start US-only for easier launch; can expand later with one click)
 
-Pricing for gym-owner subscriptions is NOT handled via IAP — it's Stripe-based
-billing on the web dashboard. This is permitted under Apple Guideline 3.1.3(b)
-since gym-owner subscriptions are for a "Reader" experience / external purchase
-flow, and the iOS app does not promote or funnel users to pay. Keep any gym-
-owner paywall OUT of the iOS app during review — the student-side app is free.
+The iOS app is **free with no in-app purchases**. It is a student companion only.
+Academy-owner subscriptions are sold and managed exclusively on the web
+(app.mymatflow.com) via Stripe. The iOS app does not contain, promote, link to,
+or funnel users toward any purchase, billing, pricing, upgrade, or subscription
+flow. Owner/admin/billing routes are blocked server-side in the native shell
+(User-Agent gating in middleware), so they cannot render inside the app.
 
 ---
 
@@ -247,13 +261,15 @@ Click "Edit" on the Data Types section. Declare:
 You need at minimum **6.7" iPhone** (iPhone 15 Pro Max / 16 Pro Max) screenshots.
 Apple recommends 3-10, best around **5**.
 
-Recommended capture list (in order, each should tell a different story):
+Recommended capture list (student-only — NO owner dashboard screenshots):
 
-1. **Home screen** — dashboard with belt band visible + training heatmap. "Track every session."
-2. **Training Log** — session history with types (gi, no-gi, rolls). "Log in ten seconds."
-3. **Schedule** — class schedule grid with Attend buttons. "Your academy's week at a glance."
-4. **Community / Leaderboard** — students ranked by streak or training hours. "Roll with your team."
-5. **Gym owner dashboard** (if submitting as combined app) — pending requests + announcements. "Run your mats."
+1. **Schedule + check in** — class schedule with arrival check in. "Your academy's week at a glance."
+2. **Announcements** — academy announcements feed. "Never miss an update."
+3. **Waiver signing** — sign a required waiver from your phone. "Sign waivers in seconds."
+4. **Training log / belt progression** — session history + belt band. "Track every session."
+5. **Community / Leaderboard** — students ranked by streak or training hours. "Roll with your team."
+
+Do NOT include the gym-owner dashboard, billing, pricing, or any owner-management screen.
 
 For each screenshot, I can build a companion text-overlay image if you want a
 polished "App Store marketing" look rather than raw screenshots. Say the word
@@ -300,16 +316,17 @@ This is the standard answer for Next.js apps on HTTPS with no custom crypto.
 
 Run through before you hit Submit:
 
-- [ ] Build 10 is the one selected for review (newer than Build 9)
+- [ ] Latest build selected for review, with the native User-Agent marker (`MatFlowNative`) shipped
 - [ ] Privacy policy at `/privacy` is up to date and covers location + push
 - [ ] Support page at `/support` resolves and shows contact info
-- [ ] Account deletion in `/app/settings` and `/student/profile` both work end-to-end
-- [ ] Demo reviewer account exists and has at least 3 training sessions logged
+- [ ] Account deletion at `/student/profile` (Profile → Danger Zone → Delete Account) works end-to-end
+- [ ] Student demo account exists with belt rank, academy membership, schedule, an announcement, and a waiver (section 6a)
 - [ ] App icon looks good at 1024×1024 (check `ios/App/App/Assets.xcassets/AppIcon.appiconset/`)
-- [ ] At least 5 screenshots captured in 6.7" size
-- [ ] "Sign in with Apple" is NOT required (we only need it if we offer any other third-party sign-in per 4.8 — we don't)
-- [ ] No gym-owner subscription paywall visible in the iOS app (keep it web-only per 3.1.3(b))
-- [ ] TestFlight external testing is healthy and has real test data from Ceconi if possible
+- [ ] At least 5 student-only screenshots captured in 6.7" size (no owner dashboard)
+- [ ] "Sign in with Apple" is NOT required (only needed if we offer third-party social sign-in per 4.8 — we don't)
+- [ ] Verified in the native shell: `/app`, `/admin`, `/platform`, `/app/billing`, `/cart`, `/checkout`, `/sign-up?role=owner` are all blocked/redirected with no owner or payment content
+- [ ] No billing, pricing, trial, subscription, or upgrade text appears anywhere in the native shell
+- [ ] Production has the native gating deployed (middleware UA detection) before the build points at it
 
 ---
 

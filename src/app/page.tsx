@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { MATFLOW } from "@/lib/constants";
 import { getSession } from "@/lib/local-auth";
+import { isNativeRequest } from "@/lib/native";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  // Server-authoritative native detection (User-Agent first, cookie fallback)
+  // so the gym-owner trial pitch never flashes inside the native shell.
+  const isNative = await isNativeRequest();
+
   // If the visitor already has a valid session, skip the landing page and
   // bounce them straight to their dashboard. This happens server-side so
   // there's zero visual flash, particularly important for the native iOS
@@ -16,16 +20,8 @@ export default async function HomePage() {
     if (session.userType === "student") redirect("/student");
     // Native iOS gym owners go to the web only landing per App Store
     // 3.1.1. Web owners get the full dashboard.
-    const c = await cookies();
-    const isNative = c.get("matflow-native")?.value === "1";
     redirect(isNative ? "/native-web-only" : "/app");
   }
-
-  // Detect native iOS shell so we hide the gym owner trial pitch and
-  // render only the student facing call to action. The marker cookie is
-  // set on first paint by NativeCookieMarker.
-  const c = await cookies();
-  const isNative = c.get("matflow-native")?.value === "1";
 
   if (isNative) {
     return (

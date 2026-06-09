@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { Mail, Shield, Trash2, HelpCircle } from "lucide-react";
+import { isNativeRequest } from "@/lib/native";
 
 export const metadata = {
   title: "Support | MatFlow",
-  description: "Get help with MatFlow — Jiu Jitsu training companion and gym management platform.",
+  description: "Get help with MatFlow, the Jiu Jitsu training companion.",
 };
 
-export default function SupportPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SupportPage() {
+  // Native shell is student-only: hide owner/billing oriented help content.
+  const native = await isNativeRequest();
   return (
     <div className="min-h-[100dvh] bg-[#080808] text-white">
       <div className="max-w-3xl mx-auto px-6 py-16">
@@ -26,7 +31,9 @@ export default function SupportPage() {
             <div>
               <h2 className="font-semibold text-white text-lg mb-1">Email us</h2>
               <p className="text-gray-400 text-sm mb-2">
-                Questions about training log, belt tracking, gym management, billing, or anything else.
+                {native
+                  ? "Questions about training log, belt tracking, schedule, waivers, or anything else."
+                  : "Questions about training log, belt tracking, gym management, billing, or anything else."}
               </p>
               <a href="mailto:frank@mymatflow.com" className="text-[#dc2626] hover:underline">
                 frank@mymatflow.com
@@ -88,19 +95,20 @@ export default function SupportPage() {
               <p className="text-gray-400 text-sm mt-3">
                 Create a student account, then tap Nominate Gym. Once enough students from the
                 same academy nominate it, we reach out to the gym directly to get them set up.
-                Active is free for the owner.
               </p>
             </details>
-            <details className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-              <summary className="font-semibold text-white cursor-pointer">
-                I&apos;m a gym owner. How do I get my academy on MatFlow?
-              </summary>
-              <p className="text-gray-400 text-sm mt-3">
-                Open <span className="text-white">app.mymatflow.com</span> in Safari or Chrome on
-                any device to sign up your academy. Gym management lives on the web. Email us at
-                frank@mymatflow.com if you&apos;d like a walkthrough.
-              </p>
-            </details>
+            {!native && (
+              <details className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
+                <summary className="font-semibold text-white cursor-pointer">
+                  I&apos;m a gym owner. How do I get my academy on MatFlow?
+                </summary>
+                <p className="text-gray-400 text-sm mt-3">
+                  Open <span className="text-white">app.mymatflow.com</span> in Safari or Chrome on
+                  any device to sign up your academy. Gym management lives on the web. Email us at
+                  frank@mymatflow.com if you&apos;d like a walkthrough.
+                </p>
+              </details>
+            )}
             <details className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
               <summary className="font-semibold text-white cursor-pointer">
                 How does the geofence gym-arrival work?

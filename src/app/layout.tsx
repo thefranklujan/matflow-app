@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MatFlow",
-  description: "Gym management platform for Jiu Jitsu academies",
+  description: "The Jiu Jitsu training companion for students and academies",
   manifest: "/manifest.json",
   themeColor: "#c4b5a0",
   appleWebApp: {

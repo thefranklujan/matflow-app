@@ -26,11 +26,12 @@ export default async function NativeWebOnlyPage() {
         <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-8 h-14 w-auto" />
 
         <h1 className="text-3xl font-bold text-white mb-3">
-          Gym management is on the web
+          This app is for students
         </h1>
 
         <p className="text-gray-400 mb-8 leading-relaxed">
-          Hi {name}. Manage your gym at
+          Hi {name}. Academy owners can manage their academy from the MatFlow web
+          dashboard at
           {" "}
           <span className="text-white font-medium">app.mymatflow.com</span>.
           Open it in Safari or Chrome on any device.

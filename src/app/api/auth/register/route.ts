@@ -7,6 +7,17 @@ import { logActivity } from "@/lib/activity-log";
 
 export async function POST(request: NextRequest) {
   try {
+    // Academy owner accounts are a paid, web-only product. Never allow owner
+    // (gym) creation from the native iOS/Android shell (App Store 3.1.1).
+    const ua = request.headers.get("user-agent") || "";
+    const nativeCookie = request.cookies.get("matflow-native")?.value === "1";
+    if (ua.includes("MatFlowNative") || nativeCookie) {
+      return NextResponse.json(
+        { error: "Academy owners set up their gym on the web at app.mymatflow.com." },
+        { status: 403 }
+      );
+    }
+
     const { firstName, lastName, email, phone, password, gymName, gymSlug, timezone } =
       await request.json();
 

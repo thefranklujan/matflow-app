@@ -5,23 +5,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 
-function SignUpForm() {
+function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const joinSlug = searchParams.get("join");
   const [step, setStep] = useState(1);
   const [role, setRole] = useState<"owner" | "student" | "instructor" | null>(null);
-  // Native iOS hides the Academy Owner role choice. Owner accounts are
-  // managed exclusively on the web at app.mymatflow.com per App Store
-  // 3.1.1. Defaults to false on the server so the marketing page is
-  // unaffected; flips on first paint inside the Capacitor shell.
-  const [isNative, setIsNative] = useState(false);
+  // Native iOS/Android hides the Academy Owner role choice and all paid trial
+  // copy. Owner accounts are web-only (App Store 3.1.1). initialNative is
+  // detected server-side from the User-Agent so the SSR HTML is already
+  // student-only; the Capacitor check below is a client-side refinement.
+  const [isNative, setIsNative] = useState(initialNative);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const native =
       (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
-        .Capacitor?.isNativePlatform?.() || false;
-    setIsNative(native);
+        .Capacitor?.isNativePlatform?.() ||
+      navigator.userAgent.includes("MatFlowNative") ||
+      false;
+    if (native) setIsNative(true);
   }, []);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -407,9 +409,11 @@ function SignUpForm() {
           </p>
         </form>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
-          30 day free trial. No credit card required.
-        </p>
+        {!isNative && (
+          <p className="text-center text-gray-600 text-xs mt-6">
+            30 day free trial. No credit card required.
+          </p>
+        )}
       </div>
     </div>
   );

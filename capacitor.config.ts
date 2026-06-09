@@ -16,11 +16,16 @@ const config: CapacitorConfig = {
     contentInset: "always",
     backgroundColor: "#0a0a0a",
     webContentsDebuggingEnabled: true,
+    // Server-authoritative native detection: appended to the WebView
+    // User-Agent so middleware can identify the iOS shell on the first byte
+    // of every request and keep it student-only (App Store 3.1.1 / 2.1(b)).
+    appendUserAgent: "MatFlowNative",
   },
   android: {
     backgroundColor: "#0a0a0a",
     webContentsDebuggingEnabled: true,
     allowMixedContent: false,
+    appendUserAgent: "MatFlowNative",
   },
   plugins: {
     SplashScreen: {
