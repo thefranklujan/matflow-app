@@ -409,11 +409,6 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
           </p>
         </form>
 
-        {!isNative && (
-          <p className="text-center text-gray-600 text-xs mt-6">
-            30 day free trial. No credit card required.
-          </p>
-        )}
       </div>
     </div>
   );

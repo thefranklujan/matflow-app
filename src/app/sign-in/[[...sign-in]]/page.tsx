@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -10,17 +10,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  // Native shell is student-only: no "free trial" (owner) language. Detect via
-  // Capacitor and the appended User-Agent marker (always present in the shell).
-  const [isNative, setIsNative] = useState(false);
-  useEffect(() => {
-    const native =
-      (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
-        .Capacitor?.isNativePlatform?.() ||
-      navigator.userAgent.includes("MatFlowNative") ||
-      false;
-    setIsNative(native);
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -125,7 +114,7 @@ export default function SignInPage() {
           <p className="text-center text-gray-500 text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/sign-up" className="text-brand-accent hover:underline">
-              {isNative ? "Sign up" : "Start free trial"}
+              Create account
             </Link>
           </p>
         </form>
