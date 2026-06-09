@@ -122,7 +122,7 @@ that concern by listing the native capabilities + niche audience.
 - Phone: (your phone from GoDaddy 2FA, or your main)
 - Email: frank@mymatflow.com
 
-**Sign-in Information** (demo student account — provision before submission, see section 6a):
+**Sign-in Information** (demo student account — ✅ provisioned & verified, see section 6a):
 - Email: `reviewer.student@mymatflow.com`
 - Password: `MatFlow2026!Review`
 
@@ -162,22 +162,27 @@ Frank Lujan, MatFlow Founder
 
 ---
 
-## 6a. Reviewer Demo Account (student) — PROVISION BEFORE SUBMIT
+## 6a. Reviewer Demo Account (student) — ✅ PROVISIONED 2026-06-09
 
-Apple needs a working student login (2.1(a)). Do NOT give them owner credentials.
-The account must belong to a demo academy and show real student data:
+The student review account is **live on production** (`app.mymatflow.com`) and
+verified end-to-end. Do NOT give Apple owner credentials.
 
 - **Email:** `reviewer.student@mymatflow.com`  **Password:** `MatFlow2026!Review`
-- Member of a demo academy (e.g. "Apple Review Academy") that is `approved=true`
-- Belt rank set (e.g. blue, 2 stripes)
-- The demo academy has: a class schedule (a few `ClassSchedule` rows), at least one
-  `Announcement`, and one active `WaiverTemplate` so the reviewer can view + sign it
-- A few logged training sessions / attendance rows so the log isn't empty
+- Member of **Apple Review Academy** (`approved=true`, hidden from the public
+  student directory so it does not appear to real users)
+- **Belt:** blue, 2 stripes
+- Preloaded with: a **class schedule** (4 classes: Mon Gi, Wed No-Gi, Fri
+  Fundamentals, Sat Open Mat), **1 announcement** ("Open Mat this Saturday"),
+  **1 active waiver left unsigned** so the reviewer can demonstrate signing,
+  **3 training sessions**, and **2 check-ins**
+- Verified: login lands in the student experience; schedule, announcements,
+  waiver, profile, training log, and account deletion all work; no owner /
+  billing / payment content is reachable
 
-This is **production data**, so it is NOT created automatically by this work. Frank
-approves provisioning, then it can be seeded via the Supabase MCP (owner-level) or a
-one-time SQL insert. Account deletion review path: **Sign in → Profile → Danger Zone
-→ Delete Account.**
+**Account deletion review path:** Sign in → Profile → Danger Zone → Delete Account.
+
+All demo rows are clearly labeled (`demo-*` / `applereview-demo` ids). No real
+customer or academy data was touched.
 
 ---
 
