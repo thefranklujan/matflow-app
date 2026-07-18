@@ -44,7 +44,7 @@ export default function OnboardingPage() {
         return;
       }
 
-      router.push("/admin");
+      router.push("/app");
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -88,12 +88,12 @@ export default function OnboardingPage() {
               URL Slug
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-sm">app.mymatflow.com/join/</span>
+              <span className="text-gray-500 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
               <input
                 type="text"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
+                className="min-w-0 flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                 placeholder="ceconi-bjj"
                 required
               />

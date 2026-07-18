@@ -14,7 +14,8 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
     prisma.gym.findMany({
       where: {
         id: { notIn: HIDDEN_GYM_IDS },
-        subscriptionStatus: { not: "cancelled" },
+        // Canonical Stripe spelling is single-l "canceled" (see webhook writer).
+        subscriptionStatus: { not: "canceled" },
         approved: true,
         hidden: false,
         ...(search

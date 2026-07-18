@@ -11,11 +11,8 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const pathname = usePathname();
 
-  // Hide Member Login button inside the member portal (but show on login/register pages)
-  const inMemberPortal =
-    pathname.startsWith("/members") &&
-    pathname !== "/members/login" &&
-    pathname !== "/members/register";
+  // Hide the Member Login button once the visitor is inside the member portal.
+  const inMemberPortal = pathname.startsWith("/members");
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-black/95 backdrop-blur border-b border-brand-gray">
@@ -81,7 +78,7 @@ export default function Navbar() {
 
                 {/* Member Login */}
                 <Link
-                  href="/members/login"
+                  href="/sign-in"
                   className="bg-brand-accent text-brand-black text-xs font-bold px-3 sm:px-4 py-2 rounded uppercase tracking-wider hover:bg-brand-accent/90 transition"
                 >
                   Member Login

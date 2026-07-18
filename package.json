@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src",
     "screenshots": "node scripts/capture-app-store-screenshots.mjs"
   },
   "dependencies": {

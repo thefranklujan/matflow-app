@@ -4,8 +4,10 @@ import { getAuthContext } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { Building2, UserPlus, GraduationCap, CalendarPlus, Share2, CreditCard } from "lucide-react";
 import { formatCurrency, formatTime } from "@/lib/utils";
 import { ShareLinkCard } from "@/components/ShareLinkCard";
+import { SetupChecklist, type SetupStep } from "@/components/SetupChecklist";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -28,7 +30,7 @@ export default async function DashboardPage() {
 }
 
 async function AdminDashboard({ gymId }: { gymId: string }) {
-  const [productCount, orderCount, lowStockCount, recentOrders, memberCount, gym] =
+  const [productCount, orderCount, lowStockCount, recentOrders, memberCount, instructorCount, scheduleCount, gym] =
     await Promise.all([
       prisma.product.count({ where: { gymId, active: true } }),
       prisma.order.count({ where: { gymId } }),
@@ -40,7 +42,20 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
         include: { items: true },
       }),
       prisma.member.count({ where: { gymId, active: true } }),
-      prisma.gym.findUnique({ where: { id: gymId }, select: { slug: true } }),
+      prisma.instructor.count({ where: { gymId, active: true } }),
+      prisma.classSchedule.count({ where: { gymId, active: true } }),
+      prisma.gym.findUnique({
+        where: { id: gymId },
+        select: {
+          name: true,
+          slug: true,
+          description: true,
+          city: true,
+          state: true,
+          subscriptionStatus: true,
+          trialEndsAt: true,
+        },
+      }),
     ]);
 
   const stats = [
@@ -50,12 +65,42 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
     { label: "Low Stock Items", value: lowStockCount, href: "/app/inventory", color: lowStockCount > 0 ? "text-red-400" : "text-green-400" },
   ];
 
+  // First-run setup guide. Each step's completion is derived from real data;
+  // steps we cannot reliably derive (share link, billing review) are shown as
+  // actions, never as fabricated "incomplete" items. The guide hides itself once
+  // the four derivable core steps are done, so established gyms don't see it.
+  const profileComplete = Boolean(gym?.description && gym?.city && gym?.state);
+  const hasMembers = memberCount > 1; // the owner is the gym's first Member
+  const hasInstructor = instructorCount > 0;
+  const hasSchedule = scheduleCount > 0;
+  const coreComplete = profileComplete && hasMembers && hasInstructor && hasSchedule;
+
+  const billingHint =
+    gym?.subscriptionStatus === "active"
+      ? "Your subscription is active"
+      : gym?.trialEndsAt
+      ? `Trial ends ${new Date(gym.trialEndsAt).toLocaleDateString()}`
+      : "Review your plan and trial status";
+
+  const setupSteps: SetupStep[] = [
+    { key: "profile", label: "Complete your academy profile", description: "Add a description, city, and state so students can find you.", href: "/app/settings", icon: Building2, done: profileComplete },
+    { key: "members", label: "Add or invite your first member", description: "Share your join link or add a member by hand.", href: "/app/members", icon: UserPlus, done: hasMembers },
+    { key: "instructor", label: "Add your first instructor", description: "List who teaches so you can assign classes.", href: "/app/instructors", icon: GraduationCap, done: hasInstructor },
+    { key: "schedule", label: "Create your first class", description: "Build your weekly schedule so members can check in.", href: "/app/schedule", icon: CalendarPlus, done: hasSchedule },
+    { key: "share", label: "Share your invite link", description: "Send your join link to start bringing students in.", href: "/app/members", icon: Share2, done: null },
+    { key: "billing", label: "Review trial and billing", description: `${billingHint}.`, href: "/app/billing", icon: CreditCard, done: null },
+  ];
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
 
+      {gym && !coreComplete && (
+        <SetupChecklist steps={setupSteps} gymName={gym.name} />
+      )}
+
       {gym?.slug && (
-        <div style={{ marginBottom: "24px" }}>
+        <div className="mb-6">
           <ShareLinkCard slug={gym.slug} />
         </div>
       )}

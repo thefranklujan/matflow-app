@@ -38,7 +38,8 @@ export default async function StudentDashboardPage() {
       take: 4,
       where: {
         id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
-        subscriptionStatus: { not: "cancelled" },
+        // Stripe (and our webhook) writes the canonical single-l "canceled".
+        subscriptionStatus: { not: "canceled" },
         approved: true,
         hidden: false,
       },

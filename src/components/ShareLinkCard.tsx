@@ -14,7 +14,7 @@ export function ShareLinkCard({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-white/10 rounded-lg" style={{ padding: "20px 24px" }}>
+    <div className="bg-[#1a1a1a] border border-white/10 rounded-lg px-6 py-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-[#c4b5a0]/10 flex items-center justify-center">
@@ -37,7 +37,7 @@ export function ShareLinkCard({ slug }: { slug: string }) {
           {copied ? "Copied" : "Copy Link"}
         </button>
       </div>
-      <div className="flex items-center gap-2" style={{ marginTop: "12px" }}>
+      <div className="flex items-center gap-2 mt-3">
         <input
           readOnly
           value={joinUrl}

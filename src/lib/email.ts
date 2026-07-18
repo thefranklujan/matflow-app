@@ -178,7 +178,7 @@ export function sendTrialExpiring(email: string, name: string, daysLeft: number)
     body: `<p style="margin:0 0 12px 0;">Hey ${name},</p>
            <p style="margin:0;">Your MatFlow free trial is ending soon. Subscribe now to keep managing your gym with MatFlow.</p>`,
     ctaText: "Choose a Plan",
-    ctaHref: "https://app.mymatflow.com/admin/billing",
+    ctaHref: "https://app.mymatflow.com/app/billing",
   });
   send(email, `Your MatFlow trial ends in ${daysLeft} days`, html).catch(() => {});
 }

@@ -37,7 +37,8 @@ export async function GET() {
     prisma.gym.findMany({
       where: {
         id: { notIn: ["platform-owner-gym", "platform-admin-gym"] },
-        subscriptionStatus: { not: "cancelled" },
+        // Canonical Stripe spelling is single-l "canceled" (see webhook writer).
+        subscriptionStatus: { not: "canceled" },
       },
       select: { name: true },
       orderBy: { name: "asc" },

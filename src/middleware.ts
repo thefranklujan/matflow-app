@@ -41,6 +41,16 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // The legacy /admin dashboard has been unified into the modern /app dashboard.
+  // Every /admin/* route has a verified /app/* equivalent, so redirect web
+  // owners there. (Native /admin was already sent to /native-web-only above, so
+  // this only runs for web; /app never redirects back, so there is no loop.)
+  if (matchesPrefix(pathname, ["/admin"])) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/app" + pathname.slice("/admin".length);
+    return NextResponse.redirect(url);
+  }
+
   // Allow public paths
   if (publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();

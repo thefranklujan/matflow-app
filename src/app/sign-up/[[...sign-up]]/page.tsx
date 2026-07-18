@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Building2, Award, GraduationCap } from "lucide-react";
 
 function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
   const router = useRouter();
@@ -211,7 +212,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                         : "border-brand-gray hover:border-brand-accent/50"
                     }`}
                   >
-                    <div className="text-2xl mb-2">🥋</div>
+                    <Building2 className="h-6 w-6 text-brand-accent mb-2" />
                     <div className="text-white font-semibold mb-1">Academy Owner</div>
                     <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
                   </button>
@@ -225,7 +226,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                       : "border-brand-gray hover:border-brand-accent/50"
                   }`}
                 >
-                  <div className="text-2xl mb-2">🥇</div>
+                  <Award className="h-6 w-6 text-brand-accent mb-2" />
                   <div className="text-white font-semibold mb-1">Instructor</div>
                   <div className="text-gray-500 text-xs">Teach at one or more gyms, manage classes and students.</div>
                 </button>
@@ -238,7 +239,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                       : "border-brand-gray hover:border-brand-accent/50"
                   }`}
                 >
-                  <div className="text-2xl mb-2">🎓</div>
+                  <GraduationCap className="h-6 w-6 text-brand-accent mb-2" />
                   <div className="text-white font-semibold mb-1">Student</div>
                   <div className="text-gray-500 text-xs">Find a gym, track your training, follow your belt journey.</div>
                 </button>
@@ -356,7 +357,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                     type="text"
                     value={gymSlug}
                     onChange={(e) => setGymSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                    className="flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
+                    className="min-w-0 flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
                     placeholder="iron-lion"
                     required
                   />

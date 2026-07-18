@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { NAV_ITEMS } from "@/lib/nav-items";
+import { NAV_ITEMS, NAV_GROUP_ORDER } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useUnreadCounts } from "@/lib/useUnreadCounts";
@@ -49,6 +49,11 @@ export function Sidebar() {
   const bottomItems = NAV_ITEMS.filter(
     (item) => item.section === "bottom" && role && item.roles.includes(role)
   );
+  // Group the main items by job (Run / Grow / Content / Commerce / Manage) so
+  // the owner sees a short, scannable menu instead of one long flat list.
+  const groupedMain = NAV_GROUP_ORDER
+    .map((group) => ({ group, items: mainItems.filter((item) => item.group === group) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <aside
@@ -95,55 +100,66 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Main navigation */}
-      <nav className="flex-1 space-y-0.5 px-2 py-2 overflow-y-auto">
-        {mainItems.map((item) => {
-          const Icon = ICON_MAP[item.icon] || LayoutDashboard;
-          const href = `/app/${item.slug}`;
-          const isActive = pathname === href || pathname.startsWith(`${href}/`);
-          const badge = unread[item.slug] || 0;
+      {/* Main navigation, grouped by owner job */}
+      <nav className="flex-1 px-2 py-2 overflow-y-auto">
+        {groupedMain.map(({ group, items }, groupIndex) => (
+          <div key={group} className={cn(groupIndex > 0 && (collapsed ? "mt-2 border-t border-white/5 pt-2" : "mt-3"))}>
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-600">
+                {group}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {items.map((item) => {
+                const Icon = ICON_MAP[item.icon] || LayoutDashboard;
+                const href = `/app/${item.slug}`;
+                const isActive = pathname === href || pathname.startsWith(`${href}/`);
+                const badge = unread[item.slug] || 0;
 
-          return (
-            <Link
-              key={item.slug}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-[#c4b5a0] text-black"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white",
-                collapsed && "justify-center px-0"
-              )}
-              title={collapsed ? `${item.label}${badge > 0 ? ` (${badge})` : ""}` : undefined}
-            >
-              <div className="relative shrink-0">
-                <Icon className="h-4 w-4" />
-                {badge > 0 && collapsed && (
-                  <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
-                    {badge > 9 ? "9+" : badge}
-                  </span>
-                )}
-              </div>
-              {!collapsed && (
-                <>
-                  <span className="flex-1">{item.label}</span>
-                  {badge > 0 && (
-                    <span
-                      className={cn(
-                        "shrink-0 h-5 min-w-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center leading-none",
-                        isActive
-                          ? "bg-black text-white"
-                          : "bg-red-500 text-white"
+                return (
+                  <Link
+                    key={item.slug}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-[#c4b5a0] text-black"
+                        : "text-gray-400 hover:bg-white/5 hover:text-white",
+                      collapsed && "justify-center px-0"
+                    )}
+                    title={collapsed ? `${item.label}${badge > 0 ? ` (${badge})` : ""}` : undefined}
+                  >
+                    <div className="relative shrink-0">
+                      <Icon className="h-4 w-4" />
+                      {badge > 0 && collapsed && (
+                        <span className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                          {badge > 9 ? "9+" : badge}
+                        </span>
                       )}
-                    >
-                      {badge > 99 ? "99+" : badge}
-                    </span>
-                  )}
-                </>
-              )}
-            </Link>
-          );
-        })}
+                    </div>
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1">{item.label}</span>
+                        {badge > 0 && (
+                          <span
+                            className={cn(
+                              "shrink-0 h-5 min-w-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center leading-none",
+                              isActive
+                                ? "bg-black text-white"
+                                : "bg-red-500 text-white"
+                            )}
+                          >
+                            {badge > 99 ? "99+" : badge}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom section */}
