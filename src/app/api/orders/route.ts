@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
     for (const raw of items) {
       const productId = typeof raw?.productId === "string" ? raw.productId : null;
       const variantId = typeof raw?.variantId === "string" ? raw.variantId : null;
-      const quantity = Number(raw?.quantity);
+      // Strict: quantity must be an actual JSON number (no string coercion).
+      const quantity = typeof raw?.quantity === "number" ? raw.quantity : NaN;
       if (!productId || !variantId || !Number.isInteger(quantity) || quantity < 1) {
         return NextResponse.json({ error: "Invalid line item" }, { status: 400 });
       }
@@ -89,27 +90,43 @@ export async function POST(req: NextRequest) {
     }));
     const subtotal = lineItems.reduce((sum, li) => sum + li.unitPrice * li.quantity, 0);
 
-    // Create the order and decrement stock atomically.
-    const order = await prisma.$transaction(async (tx) => {
-      const created = await tx.order.create({
-        data: {
-          gymId,
-          customerName,
-          customerEmail,
-          customerPhone: customerPhone || null,
-          shippingAddress: shippingAddress || null,
-          notes: notes || null,
-          subtotal,
-          total: subtotal,
-          items: { create: lineItems },
-        },
-        include: { items: true },
+    // Create the order and decrement stock atomically. The decrement is
+    // CONDITIONAL (stock >= qty in the WHERE) so two concurrent orders cannot
+    // both take the last unit: the row lock serializes the updates and the
+    // loser's WHERE no longer matches, rolling its whole order back. The
+    // pre-transaction stock read above is only a fast-path courtesy check.
+    class OutOfStockError extends Error {}
+    let order;
+    try {
+      order = await prisma.$transaction(async (tx) => {
+        for (const [variantId, qty] of qtyByVariant) {
+          const res = await tx.productVariant.updateMany({
+            where: { id: variantId, stock: { gte: qty } },
+            data: { stock: { decrement: qty } },
+          });
+          if (res.count !== 1) throw new OutOfStockError();
+        }
+        return tx.order.create({
+          data: {
+            gymId,
+            customerName,
+            customerEmail,
+            customerPhone: customerPhone || null,
+            shippingAddress: shippingAddress || null,
+            notes: notes || null,
+            subtotal,
+            total: subtotal,
+            items: { create: lineItems },
+          },
+          include: { items: true },
+        });
       });
-      for (const [variantId, qty] of qtyByVariant) {
-        await tx.productVariant.update({ where: { id: variantId }, data: { stock: { decrement: qty } } });
+    } catch (err) {
+      if (err instanceof OutOfStockError) {
+        return NextResponse.json({ error: "One or more items are out of stock" }, { status: 409 });
       }
-      return created;
-    });
+      throw err;
+    }
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
     sendOrderConfirmation(customerEmail, customerName, order.id, subtotal, gym?.name || "Your Gym");
