@@ -41,3 +41,20 @@ export async function createPortalSession(customerId: string) {
     return_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/app/billing`,
   });
 }
+
+/**
+ * Belt-and-braces duplicate-subscription check against Stripe itself. The DB
+ * state can lag webhook delivery, so before creating a NEW subscription via
+ * Checkout we ask Stripe whether this customer already has a live one.
+ * "Live" = any state that represents a subscription that exists and could
+ * bill or convert (active, trialing, past_due, unpaid, incomplete, paused).
+ */
+export async function hasLiveSubscription(customerId: string): Promise<boolean> {
+  const LIVE = new Set(["active", "trialing", "past_due", "unpaid", "incomplete", "paused"]);
+  const subs = await getStripe().subscriptions.list({
+    customer: customerId,
+    status: "all",
+    limit: 10,
+  });
+  return subs.data.some((s) => LIVE.has(s.status));
+}

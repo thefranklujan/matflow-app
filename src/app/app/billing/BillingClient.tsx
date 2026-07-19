@@ -131,6 +131,7 @@ function StatusBanner({ status, trialEndsAt }: { status: string; trialEndsAt: st
 export default function BillingClient() {
   const { billing } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const status = billing?.subscriptionStatus || "trialing";
   const currentPriceId = billing?.stripePriceId;
@@ -138,6 +139,7 @@ export default function BillingClient() {
 
   async function handleCheckout(plan: "basic" | "pro") {
     setLoading(plan);
+    setError(null);
     try {
       const res = await fetch("/api/billing", {
         method: "POST",
@@ -145,18 +147,20 @@ export default function BillingClient() {
         body: JSON.stringify({ action: "checkout", plan }),
       });
       const data = await res.json();
-      if (data.url) {
+      if (res.ok && data.url) {
         window.location.href = data.url;
-      } else {
-        setLoading(null);
+        return; // keep the pending state during navigation
       }
+      setError(data.error || "Something went wrong starting checkout. Please try again.");
     } catch {
-      setLoading(null);
+      setError("Could not reach billing. Check your connection and try again.");
     }
+    setLoading(null);
   }
 
   async function handlePortal() {
     setLoading("portal");
+    setError(null);
     try {
       const res = await fetch("/api/billing", {
         method: "POST",
@@ -164,10 +168,15 @@ export default function BillingClient() {
         body: JSON.stringify({ action: "portal" }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data.error || "Something went wrong opening the billing portal. Please try again.");
     } catch {
-      setLoading(null);
+      setError("Could not reach billing. Check your connection and try again.");
     }
+    setLoading(null);
   }
 
   return (
@@ -179,6 +188,16 @@ export default function BillingClient() {
       <p className="text-gray-400 mb-6">Manage your gym&apos;s subscription and billing.</p>
 
       <StatusBanner status={status} trialEndsAt={billing?.trialEndsAt || null} />
+
+      {/* Accessible billing error region: announced to screen readers on change. */}
+      <div aria-live="assertive" role="alert">
+        {error && (
+          <div className="mt-4 flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
+            <p className="text-sm text-red-300">{error}</p>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {PLANS.map((plan) => {
@@ -221,13 +240,24 @@ export default function BillingClient() {
                 >
                   {loading === "portal" ? "Opening..." : "Manage Subscription"}
                 </button>
+              ) : isActive ? (
+                // Existing subscribers change plans through the Stripe billing
+                // portal. Creating a new Checkout here would open a SECOND
+                // subscription (double billing) — the server also rejects it.
+                <button
+                  onClick={handlePortal}
+                  disabled={!!loading}
+                  className="w-full border border-white/20 text-white font-medium py-3 rounded-lg hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  {loading === "portal" ? "Opening..." : "Change Plan in Billing Portal"}
+                </button>
               ) : (
                 <button
                   onClick={() => handleCheckout(plan.key)}
                   disabled={!!loading}
                   className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
                 >
-                  {loading === plan.key ? "Redirecting..." : isActive ? "Switch Plan" : "Subscribe"}
+                  {loading === plan.key ? "Redirecting..." : "Subscribe"}
                 </button>
               )}
             </div>
