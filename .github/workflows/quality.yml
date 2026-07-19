@@ -1,0 +1,69 @@
+name: Quality
+
+# No untrusted event data (issue titles, PR bodies, branch names) is ever
+# interpolated into run: commands in this workflow.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: matflow
+          POSTGRES_PASSWORD: matflow_ci_local_only # non-secret: CI-local service container
+          POSTGRES_DB: matflow_test
+        ports: ["5544:5432"]
+        options: >-
+          --health-cmd "pg_isready -U matflow"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Approved local test DB (hostname + db name pass src/lib/test-db-safety.ts).
+      TEST_DATABASE_URL: postgresql://matflow:matflow_ci_local_only@localhost:5544/matflow_test
+      DATABASE_URL: postgresql://matflow:matflow_ci_local_only@localhost:5544/matflow_test
+      DIRECT_URL: postgresql://matflow:matflow_ci_local_only@localhost:5544/matflow_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install (exact lockfile)
+        run: npm ci
+
+      - name: Prisma schema into the CI database
+        run: npx prisma db push --skip-generate && npx prisma generate
+
+      - name: Lint (0 errors, 0 warnings)
+        run: npm run lint -- --max-warnings 0
+
+      - name: Unit + integration tests with coverage
+        # The integration suites FAIL (never skip) if this configured local DB
+        # is unreachable — a dead service container turns the job red.
+        run: npm run test:coverage
+
+      - name: Critical-path coverage report
+        run: npm run test:coverage:critical
+
+      - name: Build (tracked tree — CI checkout has no local pollution)
+        run: npm run build
+
+      - name: Route manifest must not contain duplicate/debug routes
+        run: |
+          if grep -qE "slug\] 2|debug/auth" .next/routes-manifest.json; then
+            echo "Forbidden routes found in the manifest" && exit 1
+          fi
+          echo "route manifest clean"
+
+      # Playwright E2E job lands with the E2E packet (next loop): it will run
+      # the isolated app against this same service container with axe checks
+      # at 375/768/1440.
