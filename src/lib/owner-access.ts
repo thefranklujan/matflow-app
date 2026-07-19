@@ -67,3 +67,14 @@ export function entitlementStatus(err: unknown): number | null {
   if (err instanceof EntitlementError) return 402;
   return null;
 }
+
+/**
+ * Standard JSON body for a 402 entitlement rejection, or null if the error is
+ * something else. Keeps guarded-route catch blocks to two lines.
+ */
+export function entitlementErrorBody(err: unknown): { error: string; code: string } | null {
+  if (err instanceof EntitlementError) {
+    return { error: err.message, code: err.code };
+  }
+  return null;
+}

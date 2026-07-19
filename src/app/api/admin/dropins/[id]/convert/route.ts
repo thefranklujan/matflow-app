@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 
 /**
  * Convert a drop-in into a gym member. Creates a roster Member from the captured
@@ -15,8 +15,11 @@ export async function POST(
 ) {
   let gymId: string;
   try {
-    ({ gymId } = await requireAdmin());
-  } catch {
+    // Roster mutations require a usable (not locked-out) academy account.
+    ({ gymId } = await requireOwnerAccess());
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,16 +1,17 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendJoinRequestApprovedToStudent } from "@/lib/email";
 import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
 import { notify } from "@/lib/push";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { gymId } = await requireAdmin();
+    // Roster mutations require a usable (not locked-out) academy account.
+    const { gymId } = await requireOwnerAccess();
     const { id } = await params;
 
     const request = await prisma.joinRequest.findFirst({
@@ -69,7 +70,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    const entitlement = entitlementErrorBody(error);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     const message = error instanceof Error ? error.message : "Failed";
+    if (message.startsWith("Unauthorized") || message.startsWith("Forbidden")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -92,6 +92,28 @@ describe("deriveEntitlement", () => {
     expect(c.memberLimit).toBe(BASIC_MEMBER_LIMIT);
   });
 
+  it("legacy 'free' => PRESERVED access at Basic level (never locked by rollout)", () => {
+    const e = deriveEntitlement(gym({ subscriptionStatus: "free", trialEndsAt: null }), NOW);
+    expect(e.state).toBe("legacy_free");
+    expect(e.plan).toBe("basic");
+    expect(e.hasOwnerAccess).toBe(true);
+    expect(e.memberLimit).toBe(BASIC_MEMBER_LIMIT);
+  });
+
+  it("legacy double-l 'cancelled' behaves exactly like canonical 'canceled'", () => {
+    const e = deriveEntitlement(gym({ subscriptionStatus: "cancelled", trialEndsAt: null }), NOW);
+    expect(e.state).toBe("canceled");
+    expect(e.hasOwnerAccess).toBe(false);
+  });
+
+  it("unpaid/incomplete Stripe statuses lock like past_due", () => {
+    for (const s of ["unpaid", "incomplete"]) {
+      const e = deriveEntitlement(gym({ subscriptionStatus: s, trialEndsAt: null }), NOW);
+      expect(e.state, s).toBe("past_due");
+      expect(e.hasOwnerAccess, s).toBe(false);
+    }
+  });
+
   it("pending approval => no access even on a valid trial", () => {
     const e = deriveEntitlement(gym({ subscriptionStatus: "trialing", trialEndsAt: FUTURE, approved: false }), NOW);
     expect(e.pendingApproval).toBe(true);

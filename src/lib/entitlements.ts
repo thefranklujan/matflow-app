@@ -25,6 +25,7 @@ export type SubState =
   | "past_due" // payment failed, still recoverable
   | "canceled" // subscription ended
   | "expired" // trial ran out without subscribing
+  | "legacy_free" // pre-pricing gym on the old "free" status — access PRESERVED
   | "unknown"; // no/legacy/unrecognized status
 
 /** Active-member caps by plan. null = unlimited. */
@@ -143,11 +144,28 @@ export function deriveEntitlement(gym: GymBillingFields, now: Date = new Date())
   // Locked/unknown states never get unlimited members — cap at Basic so a dead
   // subscription can't be exploited for unlimited seats. Access is separately
   // blocked by the owner-access guard.
-  if (status === "past_due") {
+  if (status === "past_due" || status === "unpaid" || status === "incomplete") {
     return locked({ state: "past_due", plan: planForPriceId(gym.stripePriceId), memberLimit: MEMBER_LIMITS.basic, unknownPrice: false });
   }
-  if (status === "canceled") {
+  // "cancelled" (double-l) is legacy data written before the spelling was
+  // normalized (PACKET-1 backfills it). Treat identically to canonical.
+  if (status === "canceled" || status === "cancelled") {
     return locked({ state: "canceled", plan: null, memberLimit: MEMBER_LIMITS.basic, unknownPrice: false });
+  }
+
+  // Legacy "free" gyms predate the $49/$99 pricing. Their access is PRESERVED
+  // at Basic level so enforcement rollout can never lock out an existing
+  // academy. Frank decides the final policy (grandfather / fresh trial /
+  // migrate) — see MATFLOW-ROUTE-ENTITLEMENT-MATRIX.md.
+  if (status === "free") {
+    return {
+      state: "legacy_free",
+      plan: "basic",
+      hasOwnerAccess: !pendingApproval,
+      pendingApproval,
+      memberLimit: MEMBER_LIMITS.basic,
+      unknownPrice: false,
+    };
   }
 
   return locked({ state: "unknown", plan: null, memberLimit: MEMBER_LIMITS.basic, unknownPrice: false });

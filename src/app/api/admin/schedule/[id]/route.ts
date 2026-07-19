@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { gymId } = await requireAdmin();
+    // Schedule mutations require a usable (not locked-out) academy account.
+    const { gymId } = await requireOwnerAccess();
 
     const { id } = await params;
 
@@ -20,7 +21,9 @@ export async function DELETE(
     await prisma.classSchedule.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
