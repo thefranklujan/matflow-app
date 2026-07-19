@@ -3,7 +3,15 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createCheckoutSession, createPortalSession, hasLiveSubscription } from "@/lib/stripe";
+import {
+  createCheckoutSession,
+  createPortalSession,
+  ensureCustomer,
+  expireCheckoutSession,
+  findOpenSubscriptionCheckout,
+  hasLiveSubscription,
+  isIdempotencyConflict,
+} from "@/lib/stripe";
 import { isPlanKey, priceIdForPlan } from "@/lib/entitlements";
 
 /**
@@ -76,43 +84,74 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Layer 2: ask Stripe directly. Webhook delivery can lag, so the DB can
-    // say "canceled" while Stripe still has a live subscription.
-    if (gym.stripeCustomerId) {
-      try {
-        if (await hasLiveSubscription(gym.stripeCustomerId)) {
-          return NextResponse.json(
-            {
-              error: "This gym already has a subscription. Use Manage Subscription to change plans or update payment.",
-              code: "SUBSCRIPTION_EXISTS",
-            },
-            { status: 409 },
-          );
-        }
-      } catch {
-        // Stripe unreachable: fail CLOSED for subscription creation. Creating
-        // a possible duplicate is worse than asking the owner to retry.
-        return NextResponse.json(
-          { error: "Billing is temporarily unavailable. Please try again in a moment.", code: "STRIPE_UNAVAILABLE" },
-          { status: 502 },
-        );
+    // Everything below talks to Stripe and FAILS CLOSED: creating a possible
+    // duplicate subscription is worse than asking the owner to retry.
+    const stripeDown = NextResponse.json(
+      { error: "Billing is temporarily unavailable. Please try again in a moment.", code: "STRIPE_UNAVAILABLE" },
+      { status: 502 },
+    );
+
+    // Layer 2: exactly one Stripe Customer per gym (idempotent create), so all
+    // subscription/session lookups have a single authoritative anchor.
+    let customerId: string;
+    try {
+      customerId = await ensureCustomer(gymId, gym.stripeCustomerId);
+      if (customerId !== gym.stripeCustomerId) {
+        await prisma.gym.update({ where: { id: gymId }, data: { stripeCustomerId: customerId } });
       }
+    } catch {
+      return stripeDown;
     }
 
+    // Layer 3: ask Stripe directly (webhook delivery can lag behind the DB).
+    // Queried per live status, so many historical subscriptions cannot hide a
+    // live one beyond a page limit.
     try {
-      const session = await createCheckoutSession(gymId, gym.stripeCustomerId || null, priceId);
-      if (!session.url) {
+      if (await hasLiveSubscription(customerId)) {
         return NextResponse.json(
-          { error: "Billing is temporarily unavailable. Please try again in a moment.", code: "STRIPE_UNAVAILABLE" },
-          { status: 502 },
+          {
+            error: "This gym already has a subscription. Use Manage Subscription to change plans or update payment.",
+            code: "SUBSCRIPTION_EXISTS",
+          },
+          { status: 409 },
         );
       }
-      return NextResponse.json({ url: session.url });
     } catch {
-      return NextResponse.json(
-        { error: "Billing is temporarily unavailable. Please try again in a moment.", code: "STRIPE_UNAVAILABLE" },
-        { status: 502 },
-      );
+      return stripeDown;
+    }
+
+    // Layer 4: at most one OPEN Checkout Session per gym. Reuse it when it is
+    // for the same plan (duplicate click / second tab); expire it first when
+    // the owner picked a different plan.
+    try {
+      const open = await findOpenSubscriptionCheckout(customerId);
+      if (open) {
+        if (open.priceId === priceId && open.url) {
+          return NextResponse.json({ url: open.url, reused: true });
+        }
+        await expireCheckoutSession(open.id);
+      }
+    } catch {
+      return stripeDown;
+    }
+
+    // Layer 5: server-owned idempotency key, per gym and time-bucketed (30s).
+    // Two simultaneous creates either return the SAME session (same plan) or
+    // the second gets an idempotency conflict (different plan) -> 409. The
+    // client never supplies a key, customer, price, or amount.
+    const idempotencyKey = `sub-checkout:${gymId}:${Math.floor(Date.now() / 30_000)}`;
+    try {
+      const session = await createCheckoutSession(gymId, customerId, priceId, idempotencyKey);
+      if (!session.url) return stripeDown;
+      return NextResponse.json({ url: session.url });
+    } catch (err) {
+      if (isIdempotencyConflict(err)) {
+        return NextResponse.json(
+          { error: "Another checkout is already in progress for this gym. Please retry in a moment.", code: "CHECKOUT_IN_PROGRESS" },
+          { status: 409 },
+        );
+      }
+      return stripeDown;
     }
   }
 
