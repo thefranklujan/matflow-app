@@ -104,24 +104,37 @@ describe("POST /api/billing — auth and validation", () => {
 });
 
 describe("POST /api/billing — duplicate-subscription prevention (DB state)", () => {
-  it("409 when gym is active / past_due / unpaid / incomplete / Stripe-side trialing", async () => {
+  it("409 for EVERY existing-relationship state: active, unknown-price active, past_due, unpaid, incomplete, paused, Stripe-side trialing", async () => {
     const rows = [
       gymRow({ subscriptionStatus: "active", stripePriceId: "price_pro_test", stripeCustomerId: "cus_1" }),
+      gymRow({ subscriptionStatus: "active", stripePriceId: "price_rogue_unknown", stripeCustomerId: "cus_1" }),
       gymRow({ subscriptionStatus: "past_due", stripeCustomerId: "cus_1" }),
       gymRow({ subscriptionStatus: "unpaid", stripeCustomerId: "cus_1" }),
       gymRow({ subscriptionStatus: "incomplete", stripeCustomerId: "cus_1" }),
+      // paused was previously missing from the DB hard-block: a paused gym with
+      // a missing/corrupt customer id could reach a fresh customer + Checkout.
+      gymRow({ subscriptionStatus: "paused", stripeCustomerId: "cus_1" }),
+      gymRow({ subscriptionStatus: "paused", stripeCustomerId: null }),
       gymRow({ subscriptionStatus: "trialing", stripePriceId: "price_basic_test", stripeCustomerId: "cus_1" }),
     ];
     for (const row of rows) {
       mocks.findUnique.mockResolvedValue(row);
       const res = await POST(req({ action: "checkout", plan: "basic" }));
-      expect(res.status, row.subscriptionStatus).toBe(409);
+      expect(res.status, `${row.subscriptionStatus}/${row.stripePriceId}/${row.stripeCustomerId}`).toBe(409);
     }
     expect(mocks.createCheckoutSession).not.toHaveBeenCalled();
+    expect(mocks.ensureCustomer).not.toHaveBeenCalled(); // no fresh customer for blocked states
   });
 
-  it("ALLOWS the card-less app trial and canceled-resubscribe paths", async () => {
-    for (const row of [gymRow(), gymRow({ subscriptionStatus: "canceled", stripeCustomerId: "cus_1" })]) {
+  it("ALLOWS checkout for: card-less app trial, canceled, legacy cancelled, legacy free, expired trial", async () => {
+    const rows = [
+      gymRow(), // app-level trialing, no Stripe price
+      gymRow({ subscriptionStatus: "canceled", stripeCustomerId: "cus_1" }),
+      gymRow({ subscriptionStatus: "cancelled", stripeCustomerId: "cus_1" }),
+      gymRow({ subscriptionStatus: "free" }),
+      gymRow({ subscriptionStatus: "trial_expired" }),
+    ];
+    for (const row of rows) {
       mocks.findUnique.mockResolvedValue(row);
       const res = await POST(req({ action: "checkout", plan: "basic" }));
       expect(res.status, row.subscriptionStatus).toBe(200);

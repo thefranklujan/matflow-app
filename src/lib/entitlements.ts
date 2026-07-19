@@ -144,7 +144,7 @@ export function deriveEntitlement(gym: GymBillingFields, now: Date = new Date())
   // Locked/unknown states never get unlimited members — cap at Basic so a dead
   // subscription can't be exploited for unlimited seats. Access is separately
   // blocked by the owner-access guard.
-  if (status === "past_due" || status === "unpaid" || status === "incomplete") {
+  if (status === "past_due" || status === "unpaid" || status === "incomplete" || status === "paused") {
     return locked({ state: "past_due", plan: planForPriceId(gym.stripePriceId), memberLimit: MEMBER_LIMITS.basic, unknownPrice: false });
   }
   // "cancelled" (double-l) is legacy data written before the spelling was

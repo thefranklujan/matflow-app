@@ -23,7 +23,7 @@ import { isPlanKey, priceIdForPlan } from "@/lib/entitlements";
  * subscription (stripePriceId is null) — that state MUST be allowed through to
  * Checkout, otherwise trials could never subscribe.
  */
-const HAS_SUBSCRIPTION_STATUSES = new Set(["active", "past_due", "unpaid", "incomplete"]);
+const HAS_SUBSCRIPTION_STATUSES = new Set(["active", "past_due", "unpaid", "incomplete", "paused"]);
 
 export async function POST(request: NextRequest) {
   // 1. Authentication/authorization — the ONLY thing that may produce a 401.

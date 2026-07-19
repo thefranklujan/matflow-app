@@ -50,20 +50,27 @@ export function BillingGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Members see a message instead of being redirected
+  // Members see a message instead of being redirected. Copy is grouped by
+  // entitlement STATE, phrased for members, and never exposes internal billing
+  // detail (price ids, amounts, portal mechanics) — that is the admin's view.
   if (isLockedOut && !isAdmin && !isBillingPage) {
+    const status = billing?.subscriptionStatus || "";
+    const message =
+      status === "past_due" || status === "unpaid" || status === "incomplete"
+        ? "Your gym's subscription has a payment issue. Please ask your gym admin to update it."
+        : status === "paused"
+        ? "Your gym's subscription is paused. Please ask your gym admin to resume it."
+        : status === "canceled" || status === "cancelled"
+        ? "Your gym's subscription has ended. Please contact your gym admin."
+        : status === "trialing"
+        ? "Your gym's free trial has ended. Please contact your gym admin to subscribe."
+        : "Your gym's account is not active right now. Please contact your gym admin.";
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="bg-[#1a1a1a] border border-white/10 rounded-lg p-8 max-w-md text-center">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Subscription Required</h2>
-          <p className="text-gray-400">
-            {billing?.subscriptionStatus === "past_due"
-              ? "Your gym's payment is past due. Please ask your gym admin to update their payment method."
-              : billing?.subscriptionStatus === "canceled"
-              ? "Your gym's subscription has been canceled. Please contact your gym admin."
-              : "Your gym's free trial has ended. Please contact your gym admin to subscribe."}
-          </p>
+          <h2 className="text-xl font-bold text-white mb-2">Gym Account Unavailable</h2>
+          <p className="text-gray-400">{message}</p>
         </div>
       </div>
     );

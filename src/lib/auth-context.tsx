@@ -80,13 +80,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/session");
       if (res.ok) {
         const data = await res.json();
-        if (data.user) {
-          setUser(data.user);
-          if (data.gym) setGym(data.gym);
-          if (data.billing) setBilling(data.billing);
-          if (data.entitlement) setEntitlement(data.entitlement);
-          if (data.isPlatformAdmin) setIsPlatformAdmin(true);
-        }
+        // REPLACE every piece of state from this response. A refresh after
+        // sign-out, gym switch, or billing change must never retain stale
+        // truth (e.g. an old entitlement or platform-admin flag) from an
+        // earlier response.
+        setUser(data.user ?? null);
+        setGym(data.user ? (data.gym ?? null) : null);
+        setBilling(data.user ? (data.billing ?? null) : null);
+        setEntitlement(data.user ? (data.entitlement ?? null) : null);
+        setIsPlatformAdmin(data.user ? !!data.isPlatformAdmin : false);
       }
     } catch {
       // Session fetch failed silently
@@ -104,6 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setGym(null);
+    setBilling(null);
+    setEntitlement(null);
+    setIsPlatformAdmin(false);
     window.location.href = "/sign-in";
   }, []);
 
@@ -113,10 +118,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isPendingApproval = billing ? !billing.approved : false;
 
-  const isLockedOut = isPendingApproval
-    || isTrialExpired
-    || billing?.subscriptionStatus === "canceled"
-    || billing?.subscriptionStatus === "past_due";
+  // Lockout PRESENTATION derives from the server entitlement — the same
+  // domain the API guards enforce — so the client can never disagree with the
+  // server about cancelled/unpaid/incomplete/paused/unknown states. The
+  // legacy billing-string computation remains only as a fallback while an
+  // older cached session response (without entitlement) is in flight.
+  const isLockedOut = entitlement
+    ? !entitlement.hasOwnerAccess
+    : isPendingApproval
+      || isTrialExpired
+      || billing?.subscriptionStatus === "canceled"
+      || billing?.subscriptionStatus === "past_due";
 
   return (
     <AuthContext.Provider

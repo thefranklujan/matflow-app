@@ -106,8 +106,8 @@ describe("deriveEntitlement", () => {
     expect(e.hasOwnerAccess).toBe(false);
   });
 
-  it("unpaid/incomplete Stripe statuses lock like past_due", () => {
-    for (const s of ["unpaid", "incomplete"]) {
+  it("unpaid/incomplete/paused Stripe statuses lock like past_due", () => {
+    for (const s of ["unpaid", "incomplete", "paused"]) {
       const e = deriveEntitlement(gym({ subscriptionStatus: s, trialEndsAt: null }), NOW);
       expect(e.state, s).toBe("past_due");
       expect(e.hasOwnerAccess, s).toBe(false);

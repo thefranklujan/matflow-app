@@ -56,17 +56,26 @@ export async function PUT(
     if (typeof body.stripes === "number") data.stripes = body.stripes;
     if (typeof body.isAmbassador === "boolean") data.isAmbassador = body.isAmbassador;
 
-    // Reactivating an inactive member consumes a seat — capacity is decided
-    // inside the transaction under the gym's advisory lock, like every other
-    // member-activation path.
-    const reactivating = data.active === true && !existing.active;
-    const member = reactivating
+    // Reactivating an inactive member consumes a seat. The pre-transaction
+    // `existing` row can be stale under concurrency, so when activation is
+    // requested we re-read THIS member inside the locked transaction and only
+    // charge a seat if it is still inactive at that moment. A concurrent
+    // duplicate reactivation therefore becomes an idempotent no-op update.
+    const member = data.active === true
       ? await prisma.$transaction(async (tx) => {
           await lockMemberCapacity(tx, gymId);
-          await assertSeatAvailable(tx, gymId);
+          const current = await tx.member.findFirst({ where: { id, gymId } });
+          if (!current) return null; // deleted meanwhile -> 404 below
+          if (!current.active) {
+            await assertSeatAvailable(tx, gymId);
+          }
           return tx.member.update({ where: { id }, data });
         })
       : await prisma.member.update({ where: { id }, data });
+
+    if (!member) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
     return NextResponse.json(member);
   } catch (error) {
