@@ -1,20 +1,22 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/push";
 
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
     const templates = await prisma.waiverTemplate.findMany({
       where: { gymId },
       include: { signatures: { select: { id: true, memberId: true, dropInId: true, signedName: true, signedAt: true } } },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(templates);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
@@ -22,8 +24,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   let gymId: string;
   try {
-    ({ gymId } = await requireAdmin());
-  } catch {
+    ({ gymId } = await requireOwnerAccess());
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -81,8 +85,10 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   let gymId: string;
   try {
-    ({ gymId } = await requireAdmin());
-  } catch {
+    ({ gymId } = await requireOwnerAccess());
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -124,8 +130,10 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   let gymId: string;
   try {
-    ({ gymId } = await requireAdmin());
-  } catch {
+    ({ gymId } = await requireOwnerAccess());
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

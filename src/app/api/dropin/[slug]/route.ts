@@ -3,6 +3,11 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
+import { gymHasPlanFeature } from "@/lib/owner-access";
+
+// Drop-ins are a Pro feature. The academy is derived server-side from its
+// public slug; non-Pro academies decline generically (no billing details).
+const NOT_ACCEPTING = { error: "This academy is not accepting drop-ins right now." };
 
 // GET: public gym + active waiver for the drop-in form.
 export async function GET(
@@ -16,6 +21,9 @@ export async function GET(
   });
   if (!gym) {
     return NextResponse.json({ error: "Gym not found" }, { status: 404 });
+  }
+  if (!(await gymHasPlanFeature(gym.id, "pro"))) {
+    return NextResponse.json(NOT_ACCEPTING, { status: 403 });
   }
 
   const waiver = await prisma.waiverTemplate.findFirst({
@@ -39,6 +47,9 @@ export async function POST(
     const gym = await prisma.gym.findUnique({ where: { slug }, select: { id: true, name: true } });
     if (!gym) {
       return NextResponse.json({ error: "Gym not found" }, { status: 404 });
+    }
+    if (!(await gymHasPlanFeature(gym.id, "pro"))) {
+      return NextResponse.json(NOT_ACCEPTING, { status: 403 });
     }
 
     const body = await req.json();

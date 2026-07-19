@@ -78,3 +78,14 @@ export function entitlementErrorBody(err: unknown): { error: string; code: strin
   }
   return null;
 }
+
+/**
+ * PUBLIC-endpoint feature check: whether the academy identified server-side
+ * (never by client-supplied ids beyond its public slug) currently has a
+ * plan-gated feature. Returns a plain boolean so public responses can decline
+ * generically without leaking any billing state.
+ */
+export async function gymHasPlanFeature(gymId: string, required: PlanKey): Promise<boolean> {
+  const entitlement = await getGymEntitlement(gymId);
+  return planSatisfies(entitlement, required);
+}

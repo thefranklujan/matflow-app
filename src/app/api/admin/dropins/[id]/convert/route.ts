@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
-import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
+import { requirePlan, entitlementErrorBody } from "@/lib/owner-access";
 import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "@/lib/member-capacity";
 
 /**
@@ -16,8 +16,8 @@ export async function POST(
 ) {
   let gymId: string;
   try {
-    // Roster mutations require a usable (not locked-out) academy account.
-    ({ gymId } = await requireOwnerAccess());
+    // Drop-ins are a Pro feature; conversion requires a Pro plan.
+    ({ gymId } = await requirePlan("pro"));
   } catch (err) {
     const entitlement = entitlementErrorBody(err);
     if (entitlement) return NextResponse.json(entitlement, { status: 402 });

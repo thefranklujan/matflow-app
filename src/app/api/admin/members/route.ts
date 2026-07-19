@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
 
     const members = await prisma.member.findMany({
       where: { gymId },
@@ -12,7 +12,9 @@ export async function GET() {
     });
 
     return NextResponse.json(members);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requirePlan, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/push";
 
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
 
     const results = await prisma.competitionResult.findMany({
       where: { gymId },
@@ -14,14 +14,16 @@ export async function GET() {
     });
 
     return NextResponse.json(results);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
 
     const body = await req.json();
     const { memberId, competitionName, date, placement, division, notes } = body;
@@ -63,7 +65,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(result, { status: 201 });
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

@@ -1,19 +1,21 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requirePlan, entitlementErrorBody, gymHasPlanFeature } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 
 // GET: Admin fetches all leads
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
     const leads = await prisma.lead.findMany({
       where: { gymId },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(leads);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
@@ -39,6 +41,15 @@ export async function POST(request: NextRequest) {
       const gym = await prisma.gym.findFirst();
       if (!gym) return NextResponse.json({ error: "No gym available" }, { status: 400 });
       gymId = gym.id;
+    }
+
+    // The lead pipeline is a Pro feature. The academy is derived server-side
+    // above; decline generically — no billing details leak to the public.
+    if (!(await gymHasPlanFeature(gymId, "pro"))) {
+      return NextResponse.json(
+        { error: "This academy is not accepting inquiries right now." },
+        { status: 403 },
+      );
     }
 
     const lead = await prisma.lead.create({

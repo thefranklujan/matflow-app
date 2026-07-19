@@ -23,7 +23,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
   const pathname = usePathname();
-  const { role } = useAuth();
+  const { role, entitlement } = useAuth();
+  const isPro = entitlement?.plan === "pro";
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -124,7 +125,12 @@ export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {item.pro && !isPro && (
+                    <span className="shrink-0 rounded bg-[#c4b5a0]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#c4b5a0]">
+                      Pro
+                    </span>
+                  )}
                 </Link>
               );
             })}

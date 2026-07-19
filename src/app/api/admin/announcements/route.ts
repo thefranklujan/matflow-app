@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
 import { notify } from "@/lib/push";
@@ -12,7 +12,7 @@ const TEST_EMAIL = "franklujan@gmail.com";
 
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
 
     const announcements = await prisma.announcement.findMany({
       where: { gymId },
@@ -20,7 +20,9 @@ export async function GET() {
     });
 
     return NextResponse.json(announcements);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
@@ -33,8 +35,10 @@ function unsubUrl(email: string) {
 export async function POST(req: NextRequest) {
   let gymId: string;
   try {
-    ({ gymId } = await requireAdmin());
-  } catch {
+    ({ gymId } = await requireOwnerAccess());
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

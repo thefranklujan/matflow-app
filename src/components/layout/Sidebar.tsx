@@ -26,7 +26,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { role, gym } = useAuth();
+  const { role, gym, entitlement } = useAuth();
+  const isPro = entitlement?.plan === "pro";
   const [collapsed, setCollapsed] = useState(false);
   const unread = useUnreadCounts();
 
@@ -140,6 +141,11 @@ export function Sidebar() {
                     {!collapsed && (
                       <>
                         <span className="flex-1">{item.label}</span>
+                        {item.pro && !isPro && (
+                          <span className="shrink-0 rounded bg-[#c4b5a0]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#c4b5a0]">
+                            Pro
+                          </span>
+                        )}
                         {badge > 0 && (
                           <span
                             className={cn(

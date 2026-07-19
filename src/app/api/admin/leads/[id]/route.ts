@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requirePlan, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
     const { id } = await params;
     const body = await request.json();
 
@@ -22,14 +22,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     return NextResponse.json(updated);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
     const { id } = await params;
 
     const lead = await prisma.lead.findFirst({ where: { id, gymId } });
@@ -37,7 +39,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     await prisma.lead.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

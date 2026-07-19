@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requirePlan, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requirePlan("pro");
     const dropIns = await prisma.dropIn.findMany({
       where: { gymId },
       orderBy: { visitDate: "desc" },
@@ -14,7 +14,9 @@ export async function GET() {
       },
     });
     return NextResponse.json(dropIns);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

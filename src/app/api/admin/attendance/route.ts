@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
 import { notifyStreakMilestonesForMembers } from "@/lib/attendance-streak";
 
 export async function GET(req: NextRequest) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
 
     const { searchParams } = new URL(req.url);
     const classDate = searchParams.get("classDate");
@@ -35,14 +35,16 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(records);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
 
     const body = await req.json();
     const { classDate, classType, memberIds } = body;
@@ -79,7 +81,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ count: result.count }, { status: 201 });
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

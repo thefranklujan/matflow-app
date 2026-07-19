@@ -7,6 +7,8 @@ export interface NavItem {
   roles: ("admin" | "member")[];
   group: NavGroup;
   section?: "main" | "bottom";
+  /** Pro-plan feature: nav shows a "Pro" badge for non-Pro gyms; the page renders an upgrade screen. */
+  pro?: boolean;
 }
 
 // Order the owner navigation is grouped in:
@@ -28,8 +30,8 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "leaderboard", label: "Leaderboard", icon: "Award", roles: ["member"], group: "Run", section: "main" },
   // Grow
   { slug: "notifications", label: "Notifications", icon: "Bell", roles: ["admin", "member"], group: "Grow", section: "main" },
-  { slug: "leads", label: "Leads", icon: "Target", roles: ["admin"], group: "Grow", section: "main" },
-  { slug: "dropins", label: "Drop-ins", icon: "UserCheck", roles: ["admin"], group: "Grow", section: "main" },
+  { slug: "leads", pro: true, label: "Leads", icon: "Target", roles: ["admin"], group: "Grow", section: "main" },
+  { slug: "dropins", pro: true, label: "Drop-ins", icon: "UserCheck", roles: ["admin"], group: "Grow", section: "main" },
   { slug: "announcements", label: "Announcements", icon: "Megaphone", roles: ["admin", "member"], group: "Grow", section: "main" },
   { slug: "activity", label: "Activity", icon: "Activity", roles: ["admin"], group: "Grow", section: "main" },
   { slug: "community", label: "Community", icon: "Users", roles: ["member"], group: "Grow", section: "main" },
@@ -43,8 +45,8 @@ export const NAV_ITEMS: NavItem[] = [
   // Manage
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"], group: "Manage", section: "main" },
   { slug: "waivers", label: "Waivers", icon: "FileText", roles: ["admin"], group: "Manage", section: "main" },
-  { slug: "events", label: "Events", icon: "CalendarDays", roles: ["admin"], group: "Manage", section: "main" },
-  { slug: "competitions", label: "Competitions", icon: "Trophy", roles: ["admin"], group: "Manage", section: "main" },
+  { slug: "events", pro: true, label: "Events", icon: "CalendarDays", roles: ["admin"], group: "Manage", section: "main" },
+  { slug: "competitions", pro: true, label: "Competitions", icon: "Trophy", roles: ["admin"], group: "Manage", section: "main" },
   { slug: "waiver", label: "Waiver", icon: "FileSignature", roles: ["member"], group: "Manage", section: "main" },
   { slug: "profile", label: "Profile", icon: "UserCircle", roles: ["member"], group: "Manage", section: "main" },
   // Manage — pinned to the bottom of the desktop sidebar for quick reach

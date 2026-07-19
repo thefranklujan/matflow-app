@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -15,20 +15,22 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
     const gym = await prisma.gym.findUnique({
       where: { id: gymId },
       select: { lat: true, lng: true, address: true, geofenceRadiusM: true, city: true, state: true, name: true },
     });
     return NextResponse.json(gym);
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
 
 export async function PUT(req: NextRequest) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
     const body = await req.json();
     const { address, lat, lng, geofenceRadiusM } = body as {
       address?: string;

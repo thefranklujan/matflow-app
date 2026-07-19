@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { sendBeltPromotion } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
@@ -10,7 +10,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId } = await requireOwnerAccess();
 
     const { id } = await params;
     const body = await req.json();
@@ -63,7 +63,9 @@ export async function POST(
     logActivity({ gymId, action: "belt_promotion", actorName: "Admin", targetId: id, targetName: `${existing.firstName} ${existing.lastName}`, meta: { beltRank, stripes } });
 
     return NextResponse.json(beltProgress, { status: 201 });
-  } catch {
+  } catch (err) {
+    const entitlement = entitlementErrorBody(err);
+    if (entitlement) return NextResponse.json(entitlement, { status: 402 });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
