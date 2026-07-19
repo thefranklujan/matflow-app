@@ -75,6 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const clearAuthState = useCallback(() => {
+    setUser(null);
+    setGym(null);
+    setBilling(null);
+    setEntitlement(null);
+    setIsPlatformAdmin(false);
+  }, []);
+
   const fetchSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/session");
@@ -89,13 +97,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setBilling(data.user ? (data.billing ?? null) : null);
         setEntitlement(data.user ? (data.entitlement ?? null) : null);
         setIsPlatformAdmin(data.user ? !!data.isPlatformAdmin : false);
+      } else if (res.status === 401 || res.status === 403) {
+        // Authoritative rejection: the session is gone or forbidden — never
+        // keep the previous user/entitlement/platform-admin truth in memory.
+        clearAuthState();
       }
+      // Other statuses (5xx) are transient server trouble: keep current state.
     } catch {
-      // Session fetch failed silently
+      // Network failure is not logout evidence — keep current state.
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [clearAuthState]);
 
   useEffect(() => {
     fetchSession();
@@ -104,13 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     try { await (window as unknown as { __matflowClearNativeAuth?: () => Promise<void> }).__matflowClearNativeAuth?.(); } catch {}
     await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    setGym(null);
-    setBilling(null);
-    setEntitlement(null);
-    setIsPlatformAdmin(false);
+    clearAuthState();
     window.location.href = "/sign-in";
-  }, []);
+  }, [clearAuthState]);
 
   const isTrialExpired = billing?.subscriptionStatus === "trialing"
     && !!billing.trialEndsAt

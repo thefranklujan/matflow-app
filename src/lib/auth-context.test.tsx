@@ -76,6 +76,48 @@ describe("AuthProvider — lockout derives from server entitlement", () => {
   });
 });
 
+describe("AuthProvider — refresh response classes", () => {
+  async function renderSignedIn() {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce(sessionResponse({ isPlatformAdmin: true }));
+    render(<AuthProvider><Probe /></AuthProvider>);
+    await waitFor(() => expect(screen.getByTestId("platform").textContent).toBe("true"));
+  }
+
+  it("OK with no user clears everything", async () => {
+    await renderSignedIn();
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true, json: async () => ({ user: null }) });
+    await act(async () => { screen.getByRole("button", { name: "refresh" }).click(); });
+    await waitFor(() => expect(screen.getByTestId("platform").textContent).toBe("false"));
+    expect(screen.getByTestId("state").textContent).toBe("none");
+  });
+
+  it("401 and 403 clear ALL authentication state", async () => {
+    for (const status of [401, 403]) {
+      cleanup();
+      await renderSignedIn();
+      (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false, status, json: async () => ({}) });
+      await act(async () => { screen.getByRole("button", { name: "refresh" }).click(); });
+      await waitFor(() => expect(screen.getByTestId("platform").textContent, String(status)).toBe("false"));
+      expect(screen.getByTestId("state").textContent, String(status)).toBe("none");
+    }
+  });
+
+  it("500 preserves current state (transient server trouble)", async () => {
+    await renderSignedIn();
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({}) });
+    await act(async () => { screen.getByRole("button", { name: "refresh" }).click(); });
+    expect(screen.getByTestId("platform").textContent).toBe("true"); // kept
+    expect(screen.getByTestId("state").textContent).toBe("trialing");
+  });
+
+  it("network failure preserves current state (not logout evidence)", async () => {
+    await renderSignedIn();
+    (fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("offline"));
+    await act(async () => { screen.getByRole("button", { name: "refresh" }).click(); });
+    expect(screen.getByTestId("platform").textContent).toBe("true"); // kept
+  });
+});
+
 describe("AuthProvider — refresh replaces ALL state (no stale truth)", () => {
   it("clears entitlement and platform-admin when a later response omits them", async () => {
     (fetch as ReturnType<typeof vi.fn>)

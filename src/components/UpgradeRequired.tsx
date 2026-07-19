@@ -15,7 +15,7 @@ export function UpgradeRequired({ feature }: { feature: string }) {
       <h1 className="text-xl font-bold text-white">{feature} is a Pro feature</h1>
       <p className="mx-auto mt-2 max-w-md text-sm text-gray-400 leading-relaxed">
         Upgrade to Pro ($99/mo) for unlimited members, the lead pipeline, drop-ins,
-        events, competition tracking, advanced analytics, and priority support.
+        events, competition tracking, and advanced analytics.
       </p>
       <div className="mt-6 flex items-center justify-center gap-3">
         <Link

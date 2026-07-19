@@ -4,25 +4,15 @@
  * skips cleanly when it is not running (e.g. CI without Postgres).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { readFileSync } from "fs";
 import { join } from "path";
+import { safeTestDbFromEnvFile } from "./test-db-safety";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "./member-capacity";
 
-function localDbUrl(): string | null {
-  try {
-    const env = readFileSync(join(__dirname, "../../.env.local"), "utf8");
-    const m = env.match(/^DATABASE_URL=("?)(.+?)\1$/m);
-    const url = m?.[2] ?? null;
-    // Safety: integration tests may only ever touch the local throwaway DB.
-    if (url && /localhost|127\.0\.0\.1/.test(url)) return url;
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-const url = localDbUrl();
+// Central URL-parsing safety gate (no regex): throws on a configured-but-
+// unapproved URL, returns null only when nothing is configured.
+const safeDb = safeTestDbFromEnvFile(join(__dirname, "../.."));
+const url = safeDb?.url ?? null;
 let prisma: PrismaClient | null = null;
 let dbUp = false;
 let savedProPriceId: string | undefined;

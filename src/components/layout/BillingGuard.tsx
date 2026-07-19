@@ -29,20 +29,20 @@ export function BillingGuard({ children }: { children: React.ReactNode }) {
   if (isPendingApproval) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#111]">
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl max-w-md text-center" style={{ padding: "48px 40px" }}>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl max-w-md text-center px-10 py-12">
           <div className="flex items-center justify-center mb-6">
             <div className="h-16 w-16 rounded-full bg-[#c4b5a0]/10 flex items-center justify-center">
               <Clock className="h-8 w-8 text-[#c4b5a0]" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-white" style={{ marginBottom: "12px" }}>Pending Approval</h2>
-          <p className="text-gray-400" style={{ marginBottom: "24px", lineHeight: "1.6" }}>
+          <h2 className="text-2xl font-bold text-white mb-3">Pending Approval</h2>
+          <p className="text-gray-400 mb-6 leading-relaxed">
             Your gym account has been created and is waiting for approval.
             You will receive access once your account has been reviewed and approved by the MatFlow team.
           </p>
-          <div className="bg-[#c4b5a0]/5 border border-[#c4b5a0]/20 rounded-lg" style={{ padding: "16px" }}>
+          <div className="bg-[#c4b5a0]/5 border border-[#c4b5a0]/20 rounded-lg p-4">
             <p className="text-[#c4b5a0] text-sm font-medium">
-              This usually takes less than 24 hours
+              You will be notified by email as soon as your gym is approved
             </p>
           </div>
         </div>

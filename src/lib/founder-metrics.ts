@@ -14,9 +14,14 @@ import { deriveEntitlement, priceIdForPlan } from "@/lib/entitlements";
 
 export const SYNTHETIC_GYM_IDS = ["platform-owner-gym", "platform-admin-gym"];
 
-/** Documented rule: a gym "needs onboarding help" when it still has at most
- *  the owner as a member 3+ days after signup. */
+/** Documented rule: an APPROVED gym whose owner currently has access "needs
+ *  onboarding help" when it still has at most one ACTIVE member 3+ days after
+ *  signup. Canceled/expired/locked/unapproved gyms are a billing or approval
+ *  problem, not an onboarding one — they never appear in this list. */
 export const STUCK_DAYS = 3;
+
+/** Classes whose owners currently have working access to the product. */
+const ACCESS_CLASSES: FounderGymClass[] = ["basic", "pro", "trialing_valid", "legacy_free"];
 
 export interface FounderGymRow {
   id: string;
@@ -26,7 +31,8 @@ export interface FounderGymRow {
   trialEndsAt: Date | null;
   approved: boolean;
   createdAt: Date;
-  memberCount: number;
+  /** ACTIVE members only — callers must pass a filtered count. */
+  activeMemberCount: number;
 }
 
 export type FounderGymClass =
@@ -49,7 +55,9 @@ export interface FounderBreakdown {
   reconciliation: { gymId: string; name: string; reason: FounderGymClass }[];
   trialsEnding7d: { gymId: string; name: string; trialEndsAt: Date; daysLeft: number }[];
   needsOnboardingHelp: { gymId: string; name: string; createdAt: Date }[];
-  activatedGyms: number; // >= 1 non-owner member
+  /** Directly measurable: academies with 2+ ACTIVE members. (The schema cannot
+   *  prove which member is "the owner", so no owner-based claim is made.) */
+  activatedGyms: number;
 }
 
 export const PLAN_PRICES_USD = { basic: 49, pro: 99 } as const;
@@ -109,10 +117,11 @@ export function buildFounderBreakdown(rows: FounderGymRow[], now: Date): Founder
         daysLeft: Math.max(0, Math.ceil((row.trialEndsAt.getTime() - now.getTime()) / (24 * 3600 * 1000))),
       });
     }
-    if (row.memberCount <= 1 && row.createdAt < stuckCutoff) {
+    const hasAccess = row.approved && ACCESS_CLASSES.includes(cls);
+    if (hasAccess && row.activeMemberCount <= 1 && row.createdAt < stuckCutoff) {
       needsOnboardingHelp.push({ gymId: row.id, name: row.name, createdAt: row.createdAt });
     }
-    if (row.memberCount > 1) activatedGyms++;
+    if (row.activeMemberCount >= 2) activatedGyms++;
   }
 
   trialsEnding7d.sort((a, b) => a.trialEndsAt.getTime() - b.trialEndsAt.getTime());

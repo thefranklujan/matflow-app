@@ -16,10 +16,15 @@ export type Db = PrismaClient | Prisma.TransactionClient;
 
 export interface BasicAnalytics {
   totalMembers: number;
+  /** Member RECORDS created this month (any current status). */
   newThisMonth: number;
   newLastMonth: number;
   attendanceThisMonth: number;
   attendanceLastMonth: number;
+  /** Distinct (date, class type) pairs with at least one check-in this month. */
+  classSessionsThisMonth: number;
+  /** attendanceThisMonth / classSessionsThisMonth — the plainly-labeled calculation. */
+  avgCheckinsPerSession: number;
   beltDistribution: { belt: string; count: number }[];
   topClasses: { classType: string; count: number }[];
 }
@@ -38,23 +43,32 @@ const BELT_ORDER = ["white", "blue", "purple", "brown", "black"];
 export async function getBasicAnalytics(db: Db, gymId: string, now: Date): Promise<BasicAnalytics> {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  // "This month" always means start-of-month up to NOW — future-dated records
+  // (scheduled classes, clock skew) never inflate current-period numbers.
+  const thisMonth = { gte: startOfMonth, lte: now };
 
-  const [totalMembers, newThisMonth, newLastMonth, attendanceThisMonth, attendanceLastMonth, beltGroups, classGroups] =
+  const [totalMembers, newThisMonth, newLastMonth, attendanceThisMonth, attendanceLastMonth, sessionGroups, beltGroups, classGroups] =
     await Promise.all([
       db.member.count({ where: { gymId, active: true } }),
-      db.member.count({ where: { gymId, createdAt: { gte: startOfMonth } } }),
+      db.member.count({ where: { gymId, createdAt: thisMonth } }),
       db.member.count({ where: { gymId, createdAt: { gte: startOfLastMonth, lt: startOfMonth } } }),
-      db.attendance.count({ where: { gymId, classDate: { gte: startOfMonth } } }),
+      db.attendance.count({ where: { gymId, classDate: thisMonth } }),
       db.attendance.count({ where: { gymId, classDate: { gte: startOfLastMonth, lt: startOfMonth } } }),
+      db.attendance.groupBy({
+        by: ["classDate", "classType"],
+        where: { gymId, classDate: thisMonth },
+      }),
       db.member.groupBy({ by: ["beltRank"], where: { gymId, active: true }, _count: true }),
       db.attendance.groupBy({
         by: ["classType"],
-        where: { gymId, classDate: { gte: startOfMonth } },
+        where: { gymId, classDate: thisMonth },
         _count: true,
         orderBy: { _count: { classType: "desc" } },
         take: 5,
       }),
     ]);
+
+  const classSessionsThisMonth = sessionGroups.length;
 
   return {
     totalMembers,
@@ -62,6 +76,10 @@ export async function getBasicAnalytics(db: Db, gymId: string, now: Date): Promi
     newLastMonth,
     attendanceThisMonth,
     attendanceLastMonth,
+    classSessionsThisMonth,
+    avgCheckinsPerSession: classSessionsThisMonth > 0
+      ? Math.round((attendanceThisMonth / classSessionsThisMonth) * 10) / 10
+      : 0,
     beltDistribution: BELT_ORDER.map((belt) => ({
       belt,
       count: beltGroups.find((g) => g.beltRank === belt)?._count ?? 0,
@@ -91,20 +109,21 @@ export async function getProAnalytics(
 
   const [attendanceRows, memberRows, activeMembers, lastCheckIns] = await Promise.all([
     db.attendance.findMany({
-      where: { gymId, classDate: { gte: firstWeekStart } },
+      // lte now: a future-dated check-in never appears in trend history.
+      where: { gymId, classDate: { gte: firstWeekStart, lte: now } },
       select: { classDate: true },
     }),
     db.member.findMany({
-      where: { gymId, createdAt: { gte: firstMonthStart } },
+      where: { gymId, createdAt: { gte: firstMonthStart, lte: now } },
       select: { createdAt: true },
     }),
     db.member.findMany({
       where: { gymId, active: true },
-      select: { id: true, firstName: true, lastName: true },
+      select: { id: true, firstName: true, lastName: true, createdAt: true },
     }),
     db.attendance.groupBy({
       by: ["memberId"],
-      where: { gymId },
+      where: { gymId, classDate: { lte: now } },
       _max: { classDate: true },
     }),
   ]);
@@ -133,12 +152,18 @@ export async function getProAnalytics(
     });
   }
 
-  // Inactivity risk: active members whose latest check-in is older than 30
-  // days, or who never checked in.
+  // Inactivity risk (NOT retention/churn — a simple 30-day check-in signal):
+  // - attended before: at risk when the latest check-in is STRICTLY older
+  //   than the cutoff (a check-in exactly at the cutoff is NOT at risk);
+  // - never attended: at risk only once the member is 30+ days old
+  //   (createdAt <= cutoff) — a member added days ago is simply new, not
+  //   at risk. Both boundary rules are deterministic by definition here.
   const lastByMember = new Map(lastCheckIns.map((g) => [g.memberId, g._max.classDate]));
   const inactivityRisk = activeMembers
     .map((m) => ({ member: m, last: lastByMember.get(m.id) ?? null }))
-    .filter(({ last }) => !last || last < inactivityCutoff)
+    .filter(({ member, last }) =>
+      last ? last < inactivityCutoff : member.createdAt <= inactivityCutoff,
+    )
     .map(({ member, last }) => ({
       memberId: member.id,
       name: `${member.firstName} ${member.lastName}`,

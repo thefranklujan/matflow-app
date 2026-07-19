@@ -23,7 +23,7 @@ export default async function PlatformDashboard() {
   const [gyms, totalMembers, newMembersThisMonth, attendanceLast7, attendanceLast30] = await Promise.all([
     prisma.gym.findMany({
       where: realGymFilter,
-      include: { _count: { select: { members: true } } },
+      include: { _count: { select: { members: { where: { active: true } } } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.member.count({ where: { active: true, gymId: { notIn: SYNTHETIC_GYM_IDS } } }),
@@ -63,7 +63,7 @@ export default async function PlatformDashboard() {
     trialEndsAt: g.trialEndsAt,
     approved: g.approved,
     createdAt: g.createdAt,
-    memberCount: g._count.members,
+    activeMemberCount: g._count.members,
   }));
   const b = buildFounderBreakdown(rows, now);
   const allowListReady = priceAllowListConfigured();
@@ -91,11 +91,11 @@ export default async function PlatformDashboard() {
           color="text-green-400"
         />
         <KPI
-          label="Gross MRR (estimate)"
+          label="List-price gross MRR (estimate)"
           value={allowListReady ? `$${b.grossMrrEstimateUsd}` : "—"}
           sub={
             allowListReady
-              ? `Basic×$49 + Pro×$99 · excludes ${b.reconciliation.length} unreconciled`
+              ? `List prices only (Basic×$49 + Pro×$99), not Stripe cash · excludes ${b.reconciliation.length} unreconciled`
               : "Price allow-list not configured (Access Needed)"
           }
           color="text-orange-400"
@@ -108,8 +108,8 @@ export default async function PlatformDashboard() {
         />
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <KPI label="Active Members" value={totalMembers} sub={`+${newMembersThisMonth} this month`} />
-        <KPI label="Activated Academies" value={b.activatedGyms} sub="have a non-owner member" />
+        <KPI label="Active Members" value={totalMembers} sub={`${newMembersThisMonth} member records created this month`} />
+        <KPI label="Activated Academies" value={b.activatedGyms} sub="2+ active members" />
         <KPI label="Check-ins (7d)" value={attendanceLast7} sub={`${attendanceLast30} in 30d`} color="text-purple-400" />
         <KPI label="Students" value={totalStudents} sub={`${nominationCount} nominations · ${totalGroupMembers} in communities`} color="text-cyan-400" />
       </div>
@@ -163,13 +163,13 @@ export default async function PlatformDashboard() {
           <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-white font-semibold"><AlertTriangle className="h-4 w-4 text-red-400" /> Needs Onboarding Help</h2>
-              <p className="text-gray-500 text-xs">Rule: still only the owner {STUCK_DAYS}+ days after signup</p>
+              <p className="text-gray-500 text-xs">Approved, access-holding academies with ≤1 active member {STUCK_DAYS}+ days after signup</p>
             </div>
             <span className="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">{b.needsOnboardingHelp.length}</span>
           </div>
           <div className="divide-y divide-white/5">
             {b.needsOnboardingHelp.length === 0 ? (
-              <p className="px-6 py-8 text-gray-500 text-sm text-center">All academies have members beyond the owner</p>
+              <p className="px-6 py-8 text-gray-500 text-sm text-center">No access-holding academy is stuck at one active member</p>
             ) : (
               b.needsOnboardingHelp.slice(0, 5).map((g) => (
                 <Link key={g.gymId} href={`/platform/gyms/${g.gymId}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition">
@@ -231,7 +231,7 @@ export default async function PlatformDashboard() {
             <Link key={gym.id} href={`/platform/gyms/${gym.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium truncate">{gym.name}</p>
-                <p className="text-gray-500 text-xs">{gym.memberCount} member{gym.memberCount !== 1 ? "s" : ""}</p>
+                <p className="text-gray-500 text-xs">{gym.activeMemberCount} active member{gym.activeMemberCount !== 1 ? "s" : ""}</p>
               </div>
               <div className="text-right shrink-0 ml-3">
                 <p className="text-gray-400 text-xs">{new Date(gym.createdAt).toLocaleDateString()}</p>

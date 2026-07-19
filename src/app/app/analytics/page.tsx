@@ -1,22 +1,32 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getGymEntitlement } from "@/lib/owner-access";
+import { requireOwnerAccess, EntitlementError } from "@/lib/owner-access";
 import { planSatisfies } from "@/lib/entitlements";
 import { getBasicAnalytics, getProAnalytics, type ProAnalytics } from "@/lib/analytics-metrics";
 import { Sparkles, TrendingUp, Users, AlertTriangle } from "lucide-react";
 
 export default async function AnalyticsPage() {
-  const { gymId } = await requireAdmin();
+  // Server-side owner-access gate: a canceled/expired/past-due/paused/unknown
+  // or pending owner never renders academy data here — they are sent to
+  // billing BEFORE any analytics query runs (the client BillingGuard is only
+  // presentation). The same call returns the entitlement for the Pro decision.
+  let gymId: string;
+  let isPro: boolean;
+  try {
+    const ctx = await requireOwnerAccess();
+    gymId = ctx.gymId;
+    isPro = planSatisfies(ctx.entitlement, "pro");
+  } catch (err) {
+    if (err instanceof EntitlementError) redirect("/app/billing");
+    redirect("/sign-in");
+  }
   const now = new Date();
 
-  // Pro data is fetched ONLY for Pro-entitled gyms — the boundary is enforced
-  // here on the server, not by hiding sections in the browser.
-  const entitlement = await getGymEntitlement(gymId);
-  const isPro = planSatisfies(entitlement, "pro");
-
+  // Pro data is fetched ONLY for Pro-entitled gyms — enforced on the server,
+  // never by hiding sections in the browser.
   const [basic, pro] = await Promise.all([
     getBasicAnalytics(prisma, gymId, now),
     isPro ? getProAnalytics(prisma, gymId, now) : Promise.resolve(null),
@@ -40,15 +50,11 @@ export default async function AnalyticsPage() {
           value={basic.attendanceThisMonth}
           sub={basic.attendanceLastMonth > 0 ? `${basic.attendanceLastMonth} last month` : "First month"}
         />
-        <StatCard label="New This Month" value={basic.newThisMonth} sub={`${basic.newLastMonth} last month`} />
+        <StatCard label="Member Records Created" value={basic.newThisMonth} sub={`this month · ${basic.newLastMonth} last month`} />
         <StatCard
-          label="Avg Check-ins / Class Type"
-          value={
-            basic.topClasses.length > 0
-              ? (basic.topClasses.reduce((s, c) => s + c.count, 0) / basic.topClasses.length).toFixed(1)
-              : "0"
-          }
-          sub="This month"
+          label="Avg Check-ins / Session"
+          value={basic.avgCheckinsPerSession}
+          sub={`${basic.classSessionsThisMonth} class session${basic.classSessionsThisMonth !== 1 ? "s" : ""} this month`}
         />
       </div>
 

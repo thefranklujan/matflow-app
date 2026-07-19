@@ -19,7 +19,7 @@ function gym(over: Partial<FounderGymRow>): FounderGymRow {
     trialEndsAt: FUTURE,
     approved: true,
     createdAt: OLD,
-    memberCount: 5,
+    activeMemberCount: 5,
     ...over,
   };
 }
@@ -83,13 +83,39 @@ describe("buildFounderBreakdown", () => {
     expect(b.trialsEnding7d[0].daysLeft).toBe(3);
   });
 
-  it("needs-onboarding rule: <=1 member AND older than 3 days; activation = >1 member", () => {
-    const stuck = gym({ memberCount: 1, createdAt: OLD });
-    const newSolo = gym({ memberCount: 1, createdAt: RECENT }); // too new to be stuck
-    const activated = gym({ memberCount: 4 });
-    const b = buildFounderBreakdown([stuck, newSolo, activated], NOW);
+  it("needs-onboarding: only APPROVED, access-holding gyms with <=1 ACTIVE member after 3 days", () => {
+    const stuck = gym({ activeMemberCount: 1, createdAt: OLD });
+    const newSolo = gym({ activeMemberCount: 1, createdAt: RECENT }); // too new to be stuck
+    const activated = gym({ activeMemberCount: 4 });
+    // Excluded despite being old + solo: canceled, expired, unknown, unapproved, payment-locked.
+    const canceled = gym({ activeMemberCount: 1, createdAt: OLD, subscriptionStatus: "canceled", trialEndsAt: null });
+    const expired = gym({ activeMemberCount: 1, createdAt: OLD, trialEndsAt: PAST });
+    const unknown = gym({ activeMemberCount: 1, createdAt: OLD, subscriptionStatus: "gibberish", trialEndsAt: null });
+    const unapproved = gym({ activeMemberCount: 1, createdAt: OLD, approved: false });
+    const locked = gym({ activeMemberCount: 1, createdAt: OLD, subscriptionStatus: "past_due", trialEndsAt: null });
+    const b = buildFounderBreakdown([stuck, newSolo, activated, canceled, expired, unknown, unapproved, locked], NOW);
     expect(b.needsOnboardingHelp.map((g) => g.gymId)).toEqual([stuck.id]);
-    expect(b.activatedGyms).toBe(1);
+    expect(b.activatedGyms).toBe(1); // 2+ ACTIVE members, directly measurable
+  });
+
+  it("activation counts ACTIVE members only — a gym full of inactive records is not activated", () => {
+    // activeMemberCount is the filtered count the page passes; a gym whose
+    // 10 members are all inactive arrives here as activeMemberCount 0.
+    const ghost = gym({ activeMemberCount: 0, createdAt: OLD });
+    const b = buildFounderBreakdown([ghost], NOW);
+    expect(b.activatedGyms).toBe(0);
+    expect(b.needsOnboardingHelp.map((g) => g.gymId)).toEqual([ghost.id]);
+  });
+
+  it("partially configured allow-list: unmatched plan falls to reconciliation, matched plan still counts", () => {
+    delete process.env.STRIPE_PRO_PRICE_ID;
+    delete process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID;
+    const basic = gym({ subscriptionStatus: "active", stripePriceId: "price_basic_x", trialEndsAt: null });
+    const pro = gym({ subscriptionStatus: "active", stripePriceId: "price_pro_x", trialEndsAt: null });
+    const b = buildFounderBreakdown([basic, pro], NOW);
+    expect(b.counts.basic).toBe(1);
+    expect(b.counts.active_unknown_price).toBe(1); // pro price no longer recognized
+    expect(b.grossMrrEstimateUsd).toBe(49); // never guesses the unmatched one
   });
 
   it("with NO allow-list configured, active gyms fall to reconciliation and MRR is $0", () => {

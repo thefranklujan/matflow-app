@@ -32,7 +32,6 @@ const PLANS = [
       "Lead pipeline & drop-ins",
       "Events & competitions",
       "Advanced analytics",
-      "Priority support",
     ],
     popular: true,
   },
@@ -342,7 +341,7 @@ export default function BillingClient() {
       )}
 
       <p className="text-gray-600 text-xs mt-6">
-        30 day free trial for new gyms. Cancel anytime. Prices in USD.
+        30 day free trial for new gyms. Prices in USD.
       </p>
     </div>
   );
