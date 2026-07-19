@@ -9,6 +9,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint src",
+    "test": "vitest run",
     "screenshots": "node scripts/capture-app-store-screenshots.mjs"
   },
   "dependencies": {
@@ -56,6 +57,7 @@
     "eslint-config-next": "15.3.3",
     "puppeteer": "^24.41.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

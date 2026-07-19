@@ -1,22 +1,36 @@
 import { prisma } from "@/lib/prisma";
+import { deriveEntitlement } from "@/lib/entitlements";
 
-const BASIC_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID || "price_basic";
-const BASIC_MEMBER_LIMIT = 100;
-
-export async function checkMemberLimit(gymId: string): Promise<{ allowed: boolean; current: number; limit: number | null }> {
+/**
+ * Server-side active-member limit check. Derives the cap from the gym's
+ * entitlement (Basic/trial = 100, Pro = unlimited) rather than a bare price
+ * comparison, so the limit is enforced during the trial and for unknown-price
+ * subscriptions too. Callers must run this on EVERY member-creation path.
+ */
+export async function checkMemberLimit(
+  gymId: string,
+): Promise<{ allowed: boolean; current: number; limit: number | null }> {
   const gym = await prisma.gym.findUnique({
     where: { id: gymId },
-    select: { stripePriceId: true, subscriptionStatus: true },
+    select: { subscriptionStatus: true, trialEndsAt: true, stripePriceId: true, approved: true },
   });
 
-  if (gym?.stripePriceId !== BASIC_PRICE_ID || gym.subscriptionStatus !== "active") {
+  const entitlement = deriveEntitlement({
+    subscriptionStatus: gym?.subscriptionStatus ?? null,
+    trialEndsAt: gym?.trialEndsAt ?? null,
+    stripePriceId: gym?.stripePriceId ?? null,
+    // Approval gates access elsewhere; for the seat cap we only care about plan.
+    approved: gym?.approved ?? true,
+  });
+
+  if (entitlement.memberLimit == null) {
     return { allowed: true, current: 0, limit: null };
   }
 
   const count = await prisma.member.count({ where: { gymId, active: true } });
   return {
-    allowed: count < BASIC_MEMBER_LIMIT,
+    allowed: count < entitlement.memberLimit,
     current: count,
-    limit: BASIC_MEMBER_LIMIT,
+    limit: entitlement.memberLimit,
   };
 }

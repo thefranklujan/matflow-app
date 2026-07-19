@@ -6,31 +6,35 @@ import { CreditCard, CheckCircle, AlertTriangle, Clock, XCircle } from "lucide-r
 
 const PLANS = [
   {
+    key: "basic" as const,
     name: "Basic",
     price: "$49",
     period: "/mo",
-    description: "Up to 100 members",
+    description: "Up to 100 active members",
     features: [
       "Member management",
-      "Attendance tracking",
+      "Instructors",
+      "Class scheduling & attendance",
       "Belt progression",
-      "Class schedule",
-      "Announcements",
-      "Video library",
+      "Announcements & waivers",
+      "Video library & invite links",
     ],
+    // NEXT_PUBLIC price id is used ONLY to highlight the current plan in the UI;
+    // checkout is driven by the plan key and mapped to a price server-side.
     priceId: process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID || "price_basic",
   },
   {
+    key: "pro" as const,
     name: "Pro",
     price: "$99",
     period: "/mo",
     description: "Unlimited members",
     features: [
       "Everything in Basic",
-      "Pro shop / e-commerce",
+      "Unlimited members",
+      "Lead pipeline & drop-ins",
       "Events & competitions",
-      "Leaderboard & goals",
-      "Custom branding",
+      "Advanced analytics",
       "Priority support",
     ],
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "price_pro",
@@ -132,16 +136,20 @@ export default function BillingClient() {
   const currentPriceId = billing?.stripePriceId;
   const isActive = status === "active";
 
-  async function handleCheckout(priceId: string) {
-    setLoading(priceId);
+  async function handleCheckout(plan: "basic" | "pro") {
+    setLoading(plan);
     try {
       const res = await fetch("/api/billing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "checkout", priceId }),
+        body: JSON.stringify({ action: "checkout", plan }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setLoading(null);
+      }
     } catch {
       setLoading(null);
     }
@@ -215,11 +223,11 @@ export default function BillingClient() {
                 </button>
               ) : (
                 <button
-                  onClick={() => handleCheckout(plan.priceId)}
+                  onClick={() => handleCheckout(plan.key)}
                   disabled={!!loading}
                   className="w-full bg-brand-accent text-brand-black font-bold py-3 rounded-lg hover:bg-brand-accent/90 transition disabled:opacity-50"
                 >
-                  {loading === plan.priceId ? "Redirecting..." : isActive ? "Switch Plan" : "Subscribe"}
+                  {loading === plan.key ? "Redirecting..." : isActive ? "Switch Plan" : "Subscribe"}
                 </button>
               )}
             </div>

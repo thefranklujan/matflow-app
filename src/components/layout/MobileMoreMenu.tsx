@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { NAV_ITEMS, NAV_GROUP_ORDER } from "@/lib/nav-items";
@@ -23,22 +24,73 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
   const pathname = usePathname();
   const { role } = useAuth();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   const items = NAV_ITEMS.filter((item) => role && item.roles.includes(role));
   const groupedItems = NAV_GROUP_ORDER
     .map((group) => ({ group, items: items.filter((item) => item.group === group) }))
     .filter((g) => g.items.length > 0);
 
+  // Modal a11y: trap focus, close on Escape, lock body scroll, and restore
+  // focus to whatever opened the menu (the "More" tab) when it closes.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeBtnRef.current?.focus();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-[100] bg-[#0a0a0a]">
-      <div className="flex h-12 items-center justify-between border-b border-white/10 px-4">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu"
+      className="fixed inset-0 z-[100] flex flex-col bg-[#0a0a0a] pb-[env(safe-area-inset-bottom)]"
+    >
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 px-4">
         <span className="text-sm font-semibold text-white">Menu</span>
-        <button onClick={onClose} className="p-1 rounded-md text-gray-400 hover:text-white">
+        <button
+          ref={closeBtnRef}
+          onClick={onClose}
+          aria-label="Close menu"
+          className="p-1 rounded-md text-gray-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#c4b5a0]"
+        >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      <div className="overflow-y-auto p-4 space-y-1" style={{ maxHeight: "calc(100vh - 48px)" }}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-1">
         <Link
           href="/app"
           onClick={onClose}
