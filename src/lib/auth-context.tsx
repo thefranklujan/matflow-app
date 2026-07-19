@@ -24,10 +24,20 @@ interface BillingInfo {
   stripePriceId: string | null;
 }
 
+/** Server-derived entitlement summary (presentation only; server enforces). */
+export interface EntitlementInfo {
+  state: string;
+  plan: "basic" | "pro" | null;
+  hasOwnerAccess: boolean;
+  memberLimit: number | null;
+  unknownPrice: boolean;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   gym: GymInfo | null;
   billing: BillingInfo | null;
+  entitlement: EntitlementInfo | null;
   isLoading: boolean;
   isAdmin: boolean;
   isMember: boolean;
@@ -44,6 +54,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   gym: null,
   billing: null,
+  entitlement: null,
   isLoading: true,
   isAdmin: false,
   isMember: false,
@@ -60,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [gym, setGym] = useState<GymInfo | null>(null);
   const [billing, setBilling] = useState<BillingInfo | null>(null);
+  const [entitlement, setEntitlement] = useState<EntitlementInfo | null>(null);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(data.user);
           if (data.gym) setGym(data.gym);
           if (data.billing) setBilling(data.billing);
+          if (data.entitlement) setEntitlement(data.entitlement);
           if (data.isPlatformAdmin) setIsPlatformAdmin(true);
         }
       }
@@ -111,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         gym,
         billing,
+        entitlement,
         isLoading,
         isAdmin: user?.role === "admin",
         isMember: user?.role === "member",

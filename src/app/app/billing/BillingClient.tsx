@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/lib/auth-context";
-import { CreditCard, CheckCircle, AlertTriangle, Clock, XCircle } from "lucide-react";
+import { useAuth, type EntitlementInfo } from "@/lib/auth-context";
+import { CreditCard, CheckCircle, AlertTriangle, Clock, XCircle, HelpCircle } from "lucide-react";
 
 const PLANS = [
   {
@@ -19,9 +19,6 @@ const PLANS = [
       "Announcements & waivers",
       "Video library & invite links",
     ],
-    // NEXT_PUBLIC price id is used ONLY to highlight the current plan in the UI;
-    // checkout is driven by the plan key and mapped to a price server-side.
-    priceId: process.env.NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID || "price_basic",
   },
   {
     key: "pro" as const,
@@ -37,10 +34,17 @@ const PLANS = [
       "Advanced analytics",
       "Priority support",
     ],
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "price_pro",
     popular: true,
   },
 ];
+
+/**
+ * Every Stripe-backed subscription state is an EXISTING billing relationship:
+ * plan changes and payment recovery happen in the Stripe billing portal, never
+ * through a new Checkout (which would create a second subscription — the
+ * server rejects it with 409 anyway; we never show a button that 409s).
+ */
+const STRIPE_BACKED_STATUSES = ["active", "past_due", "unpaid", "incomplete", "paused"];
 
 function getTrialDaysLeft(trialEndsAt: string | null): number {
   if (!trialEndsAt) return 0;
@@ -48,8 +52,31 @@ function getTrialDaysLeft(trialEndsAt: string | null): number {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-function StatusBanner({ status, trialEndsAt }: { status: string; trialEndsAt: string | null }) {
+function StatusBanner({
+  status,
+  trialEndsAt,
+  entitlement,
+}: {
+  status: string;
+  trialEndsAt: string | null;
+  entitlement: EntitlementInfo | null;
+}) {
   const daysLeft = getTrialDaysLeft(trialEndsAt);
+
+  if (entitlement?.unknownPrice) {
+    return (
+      <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+        <HelpCircle className="h-5 w-5 text-yellow-400 shrink-0" />
+        <div>
+          <p className="text-white font-semibold">Subscription Active — Plan Unrecognized</p>
+          <p className="text-gray-400 text-sm">
+            Your subscription is active but we could not match it to a current plan. Your gym keeps working at the
+            Basic level. Please contact support so we can reconcile your plan.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (status === "active") {
     return (
@@ -101,19 +128,43 @@ function StatusBanner({ status, trialEndsAt }: { status: string; trialEndsAt: st
     );
   }
 
-  if (status === "past_due") {
+  if (status === "past_due" || status === "unpaid") {
     return (
       <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
         <AlertTriangle className="h-5 w-5 text-yellow-400 shrink-0" />
         <div>
           <p className="text-white font-semibold">Payment Failed</p>
-          <p className="text-gray-400 text-sm">Your last payment failed. Update your payment method to restore access.</p>
+          <p className="text-gray-400 text-sm">Your last payment did not go through. Update your payment method in the billing portal to restore access.</p>
         </div>
       </div>
     );
   }
 
-  if (status === "canceled") {
+  if (status === "incomplete") {
+    return (
+      <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+        <AlertTriangle className="h-5 w-5 text-yellow-400 shrink-0" />
+        <div>
+          <p className="text-white font-semibold">Payment Incomplete</p>
+          <p className="text-gray-400 text-sm">Your subscription started but the first payment needs to be finished. Complete it in the billing portal.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "paused") {
+    return (
+      <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+        <Clock className="h-5 w-5 text-blue-400 shrink-0" />
+        <div>
+          <p className="text-white font-semibold">Subscription Paused</p>
+          <p className="text-gray-400 text-sm">Your subscription is paused. Resume it in the billing portal.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "canceled" || status === "cancelled") {
     return (
       <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
         <XCircle className="h-5 w-5 text-red-400 shrink-0" />
@@ -125,17 +176,34 @@ function StatusBanner({ status, trialEndsAt }: { status: string; trialEndsAt: st
     );
   }
 
+  if (status === "free") {
+    return (
+      <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+        <CheckCircle className="h-5 w-5 text-blue-400 shrink-0" />
+        <div>
+          <p className="text-white font-semibold">Legacy Free Plan</p>
+          <p className="text-gray-400 text-sm">Your gym is on an early free plan with Basic features. Subscribe below whenever you are ready.</p>
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
 export default function BillingClient() {
-  const { billing } = useAuth();
+  const { billing, entitlement } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const status = billing?.subscriptionStatus || "trialing";
-  const currentPriceId = billing?.stripePriceId;
-  const isActive = status === "active";
+  // An existing billing relationship = any Stripe-backed status, or a
+  // Stripe-side trial (has a price). The card-less app trial has no price.
+  const hasBillingRelationship =
+    STRIPE_BACKED_STATUSES.includes(status) || (status === "trialing" && !!billing?.stripePriceId);
+  // Current plan comes from the SERVER-derived entitlement, never from
+  // comparing public env price ids in the client.
+  const currentPlan = entitlement?.plan ?? null;
 
   async function handleCheckout(plan: "basic" | "pro") {
     setLoading(plan);
@@ -187,7 +255,7 @@ export default function BillingClient() {
       </div>
       <p className="text-gray-400 mb-6">Manage your gym&apos;s subscription and billing.</p>
 
-      <StatusBanner status={status} trialEndsAt={billing?.trialEndsAt || null} />
+      <StatusBanner status={status} trialEndsAt={billing?.trialEndsAt || null} entitlement={entitlement} />
 
       {/* Accessible billing error region: announced to screen readers on change. */}
       <div aria-live="assertive" role="alert">
@@ -201,7 +269,7 @@ export default function BillingClient() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {PLANS.map((plan) => {
-          const isCurrent = isActive && currentPriceId === plan.priceId;
+          const isCurrent = hasBillingRelationship && currentPlan === plan.key;
           return (
             <div
               key={plan.name}
@@ -232,24 +300,20 @@ export default function BillingClient() {
                   </li>
                 ))}
               </ul>
-              {isCurrent ? (
+              {hasBillingRelationship ? (
+                // Existing subscribers manage or change plans through the
+                // Stripe billing portal — a new Checkout would open a SECOND
+                // subscription, so it is never offered here.
                 <button
                   onClick={handlePortal}
                   disabled={!!loading}
-                  className="w-full border border-white/20 text-white font-medium py-3 rounded-lg hover:bg-white/5 transition disabled:opacity-50"
+                  className={`w-full font-medium py-3 rounded-lg transition disabled:opacity-50 ${
+                    isCurrent
+                      ? "border border-white/20 text-white hover:bg-white/5"
+                      : "border border-brand-accent/50 text-brand-accent hover:bg-brand-accent/10"
+                  }`}
                 >
-                  {loading === "portal" ? "Opening..." : "Manage Subscription"}
-                </button>
-              ) : isActive ? (
-                // Existing subscribers change plans through the Stripe billing
-                // portal. Creating a new Checkout here would open a SECOND
-                // subscription (double billing) — the server also rejects it.
-                <button
-                  onClick={handlePortal}
-                  disabled={!!loading}
-                  className="w-full border border-white/20 text-white font-medium py-3 rounded-lg hover:bg-white/5 transition disabled:opacity-50"
-                >
-                  {loading === "portal" ? "Opening..." : "Change Plan in Billing Portal"}
+                  {loading === "portal" ? "Opening..." : isCurrent ? "Manage Subscription" : "Change Plan in Billing Portal"}
                 </button>
               ) : (
                 <button
@@ -265,7 +329,7 @@ export default function BillingClient() {
         })}
       </div>
 
-      {isActive && (
+      {hasBillingRelationship && (
         <div className="border-t border-white/10 pt-6 mt-8">
           <button
             onClick={handlePortal}
