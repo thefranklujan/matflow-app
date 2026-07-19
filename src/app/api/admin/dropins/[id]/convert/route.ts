@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
+import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "@/lib/member-capacity";
 
 /**
  * Convert a drop-in into a gym member. Creates a roster Member from the captured
@@ -58,21 +59,28 @@ export async function POST(
       );
     }
 
-    const member = await prisma.member.create({
-      data: {
-        gymId,
-        clerkUserId: `dropin-${Date.now()}`,
-        email,
-        phone: dropIn.phone,
-        firstName: dropIn.firstName,
-        lastName: dropIn.lastName,
-        approved: true,
-        active: true,
-        beltRank: "white",
-      },
+    // Authoritative capacity gate: re-checked inside the transaction under the
+    // gym's advisory lock, together with the member creation and the drop-in
+    // link, so concurrent conversions cannot exceed the plan limit.
+    const member = await prisma.$transaction(async (tx) => {
+      await lockMemberCapacity(tx, gymId);
+      await assertSeatAvailable(tx, gymId);
+      const created = await tx.member.create({
+        data: {
+          gymId,
+          clerkUserId: `dropin-${Date.now()}`,
+          email,
+          phone: dropIn.phone,
+          firstName: dropIn.firstName,
+          lastName: dropIn.lastName,
+          approved: true,
+          active: true,
+          beltRank: "white",
+        },
+      });
+      await tx.dropIn.update({ where: { id }, data: { convertedMemberId: created.id } });
+      return created;
     });
-
-    await prisma.dropIn.update({ where: { id }, data: { convertedMemberId: member.id } });
 
     logActivity({
       gymId,
@@ -82,7 +90,10 @@ export async function POST(
     });
 
     return NextResponse.json({ success: true, memberId: member.id });
-  } catch {
+  } catch (error) {
+    if (error instanceof MemberLimitError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     return NextResponse.json({ error: "Could not convert drop-in" }, { status: 500 });
   }
 }

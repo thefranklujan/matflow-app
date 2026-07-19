@@ -7,6 +7,7 @@ import { checkMemberLimit } from "@/lib/billing";
 import { logActivity } from "@/lib/activity-log";
 import { notify } from "@/lib/push";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
+import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "@/lib/member-capacity";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -29,8 +30,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       );
     }
 
-    // Create a Member record linked to the Student
+    // Create a Member record linked to the Student. Capacity is re-checked
+    // INSIDE the transaction under the gym's advisory lock — the fast-path
+    // checkMemberLimit above is a courtesy; this is the authoritative gate.
     await prisma.$transaction(async (tx) => {
+      await lockMemberCapacity(tx, gymId);
+      await assertSeatAvailable(tx, gymId);
       await tx.member.create({
         data: {
           gymId,
@@ -72,6 +77,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   } catch (error) {
     const entitlement = entitlementErrorBody(error);
     if (entitlement) return NextResponse.json(entitlement, { status: 402 });
+    if (error instanceof MemberLimitError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     const message = error instanceof Error ? error.message : "Failed";
     if (message.startsWith("Unauthorized") || message.startsWith("Forbidden")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

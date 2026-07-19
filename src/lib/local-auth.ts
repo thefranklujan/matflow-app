@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
+import { lockMemberCapacity, assertSeatAvailable } from "@/lib/member-capacity";
 
 const COOKIE_NAME = "matflow-session";
 
@@ -227,32 +228,39 @@ export async function registerMember(data: {
     });
   }
 
-  // Upsert Member for this gym (self-heal if a stale inactive record blocks re-signup)
-  const existing = await prisma.member.findFirst({
-    where: { email: emailLower, gymId: gym.id },
-  });
+  // Upsert Member for this gym (self-heal if a stale inactive record blocks
+  // re-signup). Both branches occupy an ACTIVE seat, so the whole decision runs
+  // under the gym's capacity lock — the count is re-read inside the lock and
+  // two concurrent joins at the limit cannot both succeed.
+  const member = await prisma.$transaction(async (tx) => {
+    await lockMemberCapacity(tx, gym.id);
 
-  let member;
-  if (existing) {
-    if (existing.active && existing.approved) {
+    const existing = await tx.member.findFirst({
+      where: { email: emailLower, gymId: gym.id },
+    });
+    if (existing && existing.active && existing.approved) {
       throw new Error(
         "You already have an active account at this gym. Sign in instead."
       );
     }
-    member = await prisma.member.update({
-      where: { id: existing.id },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone || null,
-        passwordHash,
-        approved: true,
-        active: true,
-        studentId: student.id,
-      },
-    });
-  } else {
-    member = await prisma.member.create({
+
+    await assertSeatAvailable(tx, gym.id);
+
+    if (existing) {
+      return tx.member.update({
+        where: { id: existing.id },
+        data: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone || null,
+          passwordHash,
+          approved: true,
+          active: true,
+          studentId: student.id,
+        },
+      });
+    }
+    return tx.member.create({
       data: {
         gymId: gym.id,
         clerkUserId: `member-${Date.now()}`,
@@ -268,7 +276,7 @@ export async function registerMember(data: {
         studentId: student.id,
       },
     });
-  }
+  });
 
   return { member: { id: member.id, gymId: gym.id }, studentId: student.id };
 }
@@ -297,21 +305,28 @@ export async function joinGymAsStudent(
     );
   }
 
-  const existing = await prisma.member.findFirst({
-    where: { gymId: gym.id, studentId },
-  });
+  // Activation/creation consumes a seat, so it happens under the gym's
+  // capacity lock with the count re-read inside the transaction. An
+  // already-active membership returns without touching capacity.
+  const member = await prisma.$transaction(async (tx) => {
+    await lockMemberCapacity(tx, gym.id);
 
-  let member;
-  if (existing) {
-    if (existing.active && existing.approved) {
-      return { member: { id: existing.id, gymId: gym.id }, gymName: gym.name };
-    }
-    member = await prisma.member.update({
-      where: { id: existing.id },
-      data: { approved: true, active: true },
+    const existing = await tx.member.findFirst({
+      where: { gymId: gym.id, studentId },
     });
-  } else {
-    member = await prisma.member.create({
+    if (existing && existing.active && existing.approved) {
+      return existing;
+    }
+
+    await assertSeatAvailable(tx, gym.id);
+
+    if (existing) {
+      return tx.member.update({
+        where: { id: existing.id },
+        data: { approved: true, active: true },
+      });
+    }
+    return tx.member.create({
       data: {
         gymId: gym.id,
         clerkUserId: `member-${Date.now()}`,
@@ -326,7 +341,7 @@ export async function joinGymAsStudent(
         studentId: student.id,
       },
     });
-  }
+  });
 
   return { member: { id: member.id, gymId: gym.id }, gymName: gym.name };
 }

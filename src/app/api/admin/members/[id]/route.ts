@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "@/lib/member-capacity";
 
 export async function GET(
   _req: NextRequest,
@@ -55,13 +56,23 @@ export async function PUT(
     if (typeof body.stripes === "number") data.stripes = body.stripes;
     if (typeof body.isAmbassador === "boolean") data.isAmbassador = body.isAmbassador;
 
-    const member = await prisma.member.update({
-      where: { id },
-      data,
-    });
+    // Reactivating an inactive member consumes a seat — capacity is decided
+    // inside the transaction under the gym's advisory lock, like every other
+    // member-activation path.
+    const reactivating = data.active === true && !existing.active;
+    const member = reactivating
+      ? await prisma.$transaction(async (tx) => {
+          await lockMemberCapacity(tx, gymId);
+          await assertSeatAvailable(tx, gymId);
+          return tx.member.update({ where: { id }, data });
+        })
+      : await prisma.member.update({ where: { id }, data });
 
     return NextResponse.json(member);
-  } catch {
+  } catch (error) {
+    if (error instanceof MemberLimitError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }
