@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { CLASS_TYPES } from "@/lib/constants";
 
@@ -12,6 +12,8 @@ interface MemberItem {
   firstName: string;
   lastName: string;
   beltRank: string;
+  approved: boolean;
+  active: boolean;
 }
 
 export default function AdminAttendanceClient() {
@@ -28,11 +30,7 @@ export default function AdminAttendanceClient() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, [classDate, classType, locationSlug]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setMessage("");
 
@@ -40,7 +38,7 @@ export default function AdminAttendanceClient() {
     const membersRes = await fetch("/api/admin/members");
     if (membersRes.ok) {
       const allMembers: MemberItem[] = await membersRes.json();
-      setMembers(allMembers.filter((m: any) => m.approved && m.active));
+      setMembers(allMembers.filter((m) => m.approved && m.active));
     }
 
     // Load existing attendance for this date/class
@@ -48,16 +46,23 @@ export default function AdminAttendanceClient() {
       `/api/admin/attendance?classDate=${classDate}&classType=${classType}`
     );
     if (attendanceRes.ok) {
-      const records = await attendanceRes.json();
-      const checkedInIds = new Set<string>(
-        records.map((r: any) => r.memberId)
-      );
-      setAlreadyCheckedIn(checkedInIds);
+      const records: { memberId: string }[] = await attendanceRes.json();
+      setAlreadyCheckedIn(new Set(records.map((r) => r.memberId)));
     }
 
     setSelected(new Set());
     setLoading(false);
-  }
+  }, [classDate, classType]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Changing location does not refetch, but it starts a fresh selection —
+  // preserves the previous reload-on-location behavior the owner sees.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [locationSlug]);
 
   function toggleMember(id: string) {
     setSelected((prev) => {

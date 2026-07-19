@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+type VariantInput = { size: string; color?: string | null; stock?: number | string | null; sku?: string | null };
+type ImageInput = { url: string; alt?: string | null };
 import { slugify } from "@/lib/utils";
 
 export async function GET(
@@ -63,15 +66,15 @@ export async function PUT(
         featured: featured || false,
         active: active !== false,
         variants: {
-          create: (variants || []).map((v: any) => ({
+          create: (variants || []).map((v: VariantInput) => ({
             size: v.size,
             color: v.color || null,
-            stock: parseInt(v.stock) || 0,
+            stock: parseInt(String(v.stock ?? 0)) || 0,
             sku: v.sku || null,
           })),
         },
         images: {
-          create: (images || []).map((img: any, i: number) => ({
+          create: (images || []).map((img: ImageInput, i: number) => ({
             url: img.url,
             alt: img.alt || null,
             sortOrder: i,

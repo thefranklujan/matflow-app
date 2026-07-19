@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
@@ -20,11 +20,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// themeColor belongs in the viewport export in Next 15 — keeping it in
+// metadata emits a build warning on every prerendered page.
+export const viewport: Viewport = {
+  themeColor: "#c4b5a0",
+};
+
 export const metadata: Metadata = {
   title: "MatFlow",
   description: "The Jiu Jitsu training companion for students and academies",
   manifest: "/manifest.json",
-  themeColor: "#c4b5a0",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

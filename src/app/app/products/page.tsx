@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import Link from "next/link";
+import Image from "next/image";
+import { Package } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 
@@ -58,11 +60,11 @@ export default async function AdminProductsPage() {
                 <tr key={product.id} className="border-b border-brand-gray/50 hover:bg-brand-gray/20 transition">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-brand-gray rounded flex-shrink-0 overflow-hidden">
+                      <div className="relative w-10 h-10 bg-brand-gray rounded flex-shrink-0 overflow-hidden">
                         {product.images[0] ? (
-                          <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
+                          <Image src={product.images[0].url} alt="" fill sizes="40px" className="object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-sm">🥋</div>
+                          <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-600" /></div>
                         )}
                       </div>
                       <span className="text-white text-sm font-medium">{product.name}</span>

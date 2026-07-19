@@ -2,6 +2,8 @@
 
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import Image from "next/image";
+import { Package } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 
@@ -42,12 +44,12 @@ export default function CartPage() {
             className="flex items-center gap-4 bg-brand-dark border border-brand-gray rounded-lg p-4"
           >
             {/* Image */}
-            <div className="w-20 h-20 bg-brand-gray rounded-lg flex-shrink-0 overflow-hidden">
+            <div className="relative w-20 h-20 bg-brand-gray rounded-lg flex-shrink-0 overflow-hidden">
               {item.image ? (
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-gray-600 text-2xl">🥋</span>
+                  <Package className="h-8 w-8 text-gray-600" />
                 </div>
               )}
             </div>

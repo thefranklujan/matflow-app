@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CATEGORY_SIZE_MAP, PRODUCT_COLORS } from "@/lib/constants";
 
 interface Variant {
@@ -38,10 +40,9 @@ interface ProductFormProps {
 
 export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
-  // Return to whichever shell the form was opened from (/app or legacy /admin)
-  // instead of always dumping the owner into the /admin twin.
-  const pathname = usePathname();
-  const productsListPath = pathname?.startsWith("/app") ? "/app/products" : "/admin/products";
+  // /app is the canonical owner shell; middleware 307s all /admin URLs there,
+  // so the form always returns to the canonical products list.
+  const productsListPath = "/app/products";
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -346,7 +347,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           <div className="grid grid-cols-4 gap-3">
             {images.map((img, i) => (
               <div key={i} className="relative aspect-square bg-brand-gray rounded-lg overflow-hidden">
-                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <Image src={img.url} alt="" fill sizes="(max-width: 768px) 25vw, 150px" className="object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}

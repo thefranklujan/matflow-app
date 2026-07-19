@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Package } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -25,13 +27,15 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       <div className="aspect-square bg-brand-gray flex items-center justify-center relative">
         {firstImage ? (
-          <img
+          <Image
             src={firstImage.url}
             alt={firstImage.alt || product.name}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover"
           />
         ) : (
-          <span className="text-gray-600 text-4xl">🥋</span>
+          <Package className="h-10 w-10 text-gray-600" />
         )}
         {product.compareAt && product.compareAt > product.price && (
           <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
