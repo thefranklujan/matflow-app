@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStudentMembership, StaleMembershipError } from "@/lib/student-membership";
@@ -22,6 +23,15 @@ import { signArrivalToken } from "@/lib/arrival-token";
 
 // >500m accuracy circles are too unreliable for a trustworthy geofence call.
 const MAX_ACCURACY_M = 500;
+
+/**
+ * Opaque, stable partition key for client-side cooldown storage. It lets a
+ * shared device keep per-membership cooldowns without exposing any raw id,
+ * credential, or coordinate. It is NOT an auth artifact — nothing verifies it.
+ */
+function membershipContextFor(studentId: string, memberId: string, gymId: string): string {
+  return createHash("sha256").update(`${studentId}:${memberId}:${gymId}`).digest("hex").slice(0, 16);
+}
 
 function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000;
@@ -51,7 +61,7 @@ function membershipErrorResponse(err: unknown): NextResponse | null {
  */
 export async function GET() {
   try {
-    const { gym } = await requireStudentMembership();
+    const { studentId, member, gym } = await requireStudentMembership();
     // NULL checks only — (0, 0) is a valid coordinate pair.
     if (gym.lat === null || gym.lng === null) {
       return NextResponse.json({ eligible: false, reason: "no_gym_coordinates" });
@@ -60,6 +70,7 @@ export async function GET() {
       eligible: true,
       gymName: gym.name,
       radiusM: gym.geofenceRadiusM,
+      membershipContext: membershipContextFor(studentId, member.id, gym.id),
     });
   } catch (err) {
     const res = membershipErrorResponse(err);
@@ -135,13 +146,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ result: "inside_no_class", gymName: gym.name });
   }
 
+  // Exclude occurrences this member already has an Attendance row for (same
+  // unique tuple the check-in endpoint uses). A cleared device then can't
+  // re-prompt for a check-in that could never create a new row anyway. This
+  // deliberately matches the tuple WITHOUT locationSlug: confirming the same
+  // occurrence at another location would be a location_conflict, not a new row.
+  const recordedRows = await prisma.attendance.findMany({
+    where: {
+      gymId: gym.id,
+      memberId: member.id,
+      OR: candidates.map((c) => ({ classDate: c.classDate, classType: c.classType })),
+    },
+    select: { classDate: true, classType: true },
+  });
+  const recorded = new Set(recordedRows.map((r) => `${r.classDate.toISOString()}|${r.classType}`));
+  const open = candidates.filter((c) => !recorded.has(`${c.classDate.toISOString()}|${c.classType}`));
+
+  if (open.length === 0) {
+    return NextResponse.json({ result: "inside_no_class", gymName: gym.name });
+  }
+
   const arrivalToken = await signArrivalToken({ studentId, memberId: member.id, gymId: gym.id });
 
   return NextResponse.json({
     result: "inside_with_classes",
     gymName: gym.name,
     arrivalToken,
-    classes: candidates.map((c) => ({
+    classes: open.map((c) => ({
       scheduleId: c.scheduleId,
       classType: c.classType,
       instructor: c.instructor,

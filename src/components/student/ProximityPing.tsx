@@ -20,10 +20,31 @@ import ArrivalCheckInSheet, { type ArrivalClass } from "./ArrivalCheckInSheet";
  *    only a confirmed check-in creates any record.
  */
 
-const EXPLAINER_COOLDOWN_KEY = "matflow-arrival-explainer-dismissed-at";
-const ARRIVAL_DEBOUNCE_KEY = "matflow-arrival-sheet-dismissed-at";
+// Cooldown keys are scoped by an opaque membership context from the server so
+// one student's dismissal on a shared device never suppresses another
+// student's prompt (and switching accounts never inherits a cooldown).
+const EXPLAINER_COOLDOWN_PREFIX = "matflow-arrival-explainer-dismissed-at";
+const ARRIVAL_DEBOUNCE_PREFIX = "matflow-arrival-sheet-dismissed-at";
 const EXPLAINER_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
 const ARRIVAL_DEBOUNCE_MS = 45 * 60 * 1000; // 45 min — one prompt per visit
+
+function explainerKey(membershipContext: string): string {
+  return `${EXPLAINER_COOLDOWN_PREFIX}:${membershipContext}`;
+}
+
+function arrivalKey(membershipContext: string): string {
+  return `${ARRIVAL_DEBOUNCE_PREFIX}:${membershipContext}`;
+}
+
+/** Pre-scoping keys were device-global; drop them so they can't linger. */
+function clearLegacyGlobalKeys() {
+  try {
+    localStorage.removeItem(EXPLAINER_COOLDOWN_PREFIX);
+    localStorage.removeItem(ARRIVAL_DEBOUNCE_PREFIX);
+  } catch {
+    /* storage unavailable — fine */
+  }
+}
 
 declare global {
   interface Window {
@@ -81,6 +102,8 @@ export default function ProximityPing() {
   const [arrival, setArrival] = useState<ArrivalState | null>(null);
   // One prompt per foreground session, even if appStateChange fires repeatedly.
   const promptedThisSession = useRef(false);
+  // Opaque per-membership partition for the localStorage cooldowns.
+  const membershipContext = useRef<string | null>(null);
 
   const runProximityCheck = useCallback(async () => {
     try {
@@ -113,13 +136,18 @@ export default function ProximityPing() {
   const evaluate = useCallback(async () => {
     try {
       if (promptedThisSession.current) return;
-      if (withinCooldown(ARRIVAL_DEBOUNCE_KEY, ARRIVAL_DEBOUNCE_MS)) return;
 
       // Eligibility first: no permission machinery for ineligible accounts.
+      // This also supplies the opaque membership context that scopes the
+      // cooldown keys to the signed-in membership.
       const ctxRes = await fetch("/api/student/proximity-ping");
       if (!ctxRes.ok) return;
       const ctx = await ctxRes.json();
-      if (!ctx.eligible) return;
+      if (!ctx.eligible || typeof ctx.membershipContext !== "string") return;
+      membershipContext.current = ctx.membershipContext;
+      clearLegacyGlobalKeys();
+
+      if (withinCooldown(arrivalKey(ctx.membershipContext), ARRIVAL_DEBOUNCE_MS)) return;
 
       const { Geolocation } = (await import("@capacitor/geolocation")) as unknown as GeoModule;
       const perm = await Geolocation.checkPermissions();
@@ -132,7 +160,7 @@ export default function ProximityPing() {
       if (state === "denied") return; // never re-prompt a denial
       // Not determined: explain in-context first; the OS prompt fires only
       // from the explicit Enable tap.
-      if (!withinCooldown(EXPLAINER_COOLDOWN_KEY, EXPLAINER_COOLDOWN_MS)) {
+      if (!withinCooldown(explainerKey(ctx.membershipContext), EXPLAINER_COOLDOWN_MS)) {
         setExplainer({ gymName: ctx.gymName });
       }
     } catch {
@@ -191,12 +219,15 @@ export default function ProximityPing() {
   }
 
   function dismissExplainer() {
-    stampCooldown(EXPLAINER_COOLDOWN_KEY);
+    if (membershipContext.current) stampCooldown(explainerKey(membershipContext.current));
     setExplainer(null);
   }
 
   function closeArrival(reason: "dismissed" | "completed") {
-    if (reason === "dismissed") stampCooldown(ARRIVAL_DEBOUNCE_KEY);
+    // Both outcomes end the visit prompt: a completed check-in must not
+    // re-prompt on the next foreground any more than a dismissal does.
+    void reason;
+    if (membershipContext.current) stampCooldown(arrivalKey(membershipContext.current));
     setArrival(null);
   }
 
@@ -215,7 +246,7 @@ export default function ProximityPing() {
               <MapPin className="h-4 w-4 text-brand-accent" />
             </div>
             <p className="min-w-0 flex-1 text-xs leading-relaxed text-gray-300">
-              Turn on location to check in automatically when you arrive at {explainer.gymName}.
+              Turn on location to confirm your check-in when you open MatFlow at {explainer.gymName}.
             </p>
             <button
               onClick={enableLocation}

@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   scheduleFindMany: vi.fn(),
   notificationCreate: vi.fn(),
   attendanceCreate: vi.fn(),
+  attendanceFindMany: vi.fn(),
   notify: vi.fn(),
 }));
 
@@ -17,7 +18,7 @@ vi.mock("@/lib/prisma", () => ({
     classSchedule: { findMany: mocks.scheduleFindMany },
     // Wired so ANY unexpected write is visible to the assertions below.
     notification: { create: mocks.notificationCreate },
-    attendance: { create: mocks.attendanceCreate },
+    attendance: { create: mocks.attendanceCreate, findMany: mocks.attendanceFindMany },
   },
 }));
 vi.mock("@/lib/push", () => ({ notify: mocks.notify }));
@@ -44,14 +45,38 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.requireStudentMembership.mockResolvedValue(ZERO_GYM);
   mocks.scheduleFindMany.mockResolvedValue([]);
+  mocks.attendanceFindMany.mockResolvedValue([]);
 });
 
 describe("proximity GET — pre-location context", () => {
-  it("eligible with gym name and radius, never coordinates", async () => {
+  it("eligible with gym name, radius, and an opaque membership context — never coordinates", async () => {
     const res = await GET();
     const body = await res.json();
-    expect(body).toEqual({ eligible: true, gymName: "Null Island BJJ", radiusM: 200 });
+    expect(body).toEqual({
+      eligible: true,
+      gymName: "Null Island BJJ",
+      radiusM: 200,
+      membershipContext: expect.stringMatching(/^[0-9a-f]{16}$/),
+    });
     expect(JSON.stringify(body)).not.toMatch(/lat|lng/);
+  });
+
+  it("membershipContext is stable per membership, opaque, and differs across members", async () => {
+    const first = (await (await GET()).json()).membershipContext;
+    const second = (await (await GET()).json()).membershipContext;
+    expect(second).toBe(first); // stable partition key
+    // Opaque: no raw id leaks through it.
+    expect(first).not.toContain("stu_1");
+    expect(first).not.toContain("mem_1");
+    expect(first).not.toContain("gym_1");
+    // A different membership on the same device gets a different partition.
+    mocks.requireStudentMembership.mockResolvedValue({
+      ...ZERO_GYM,
+      studentId: "stu_2",
+      member: { ...ZERO_GYM.member, id: "mem_2" },
+    });
+    const other = (await (await GET()).json()).membershipContext;
+    expect(other).not.toBe(first);
   });
 
   it("ineligible without gym coordinates (null, not zero)", async () => {
@@ -146,6 +171,40 @@ describe("proximity POST — decision states and read-only guarantees", () => {
     await expect(
       verifyArrivalToken(res.arrivalToken, { studentId: "stu_1", memberId: "mem_1", gymId: "gym_1" }),
     ).resolves.toBeUndefined();
+  });
+
+  it("excludes an occurrence the member already has an Attendance row for", async () => {
+    const now = new Date();
+    const { gymLocalNow } = await import("@/lib/class-window");
+    const local = gymLocalNow(now, ZERO_GYM.gym.timezone);
+    const startTime = `${String(Math.floor(local.minutes / 60)).padStart(2, "0")}:${String(local.minutes % 60).padStart(2, "0")}`;
+    mocks.scheduleFindMany.mockResolvedValue([
+      { id: "sched_1", dayOfWeek: local.dayOfWeek, startTime, endTime: "23:59", classType: "gi", instructor: "Coach", instructorId: null, locationSlug: "main" },
+      { id: "sched_2", dayOfWeek: local.dayOfWeek, startTime, endTime: "23:59", classType: "nogi", instructor: "Coach", instructorId: null, locationSlug: "main" },
+    ]);
+    // The DB already holds a row for the "gi" occurrence (exact tuple).
+    mocks.attendanceFindMany.mockImplementation(async (args: { where: { OR: { classDate: Date; classType: string }[] } }) =>
+      args.where.OR.filter((o) => o.classType === "gi").map((o) => ({ classDate: o.classDate, classType: o.classType })),
+    );
+    const res = await (await POST(post({ lat: 0, lng: 0, accuracy: 10 }))).json();
+    expect(res.result).toBe("inside_with_classes");
+    expect(res.classes.map((c: { classType: string }) => c.classType)).toEqual(["nogi"]);
+  });
+
+  it("inside_no_class when EVERY eligible occurrence is already recorded (cleared device can't re-prompt)", async () => {
+    const now = new Date();
+    const { gymLocalNow } = await import("@/lib/class-window");
+    const local = gymLocalNow(now, ZERO_GYM.gym.timezone);
+    const startTime = `${String(Math.floor(local.minutes / 60)).padStart(2, "0")}:${String(local.minutes % 60).padStart(2, "0")}`;
+    mocks.scheduleFindMany.mockResolvedValue([
+      { id: "sched_1", dayOfWeek: local.dayOfWeek, startTime, endTime: "23:59", classType: "gi", instructor: "Coach", instructorId: null, locationSlug: "main" },
+    ]);
+    mocks.attendanceFindMany.mockImplementation(async (args: { where: { OR: { classDate: Date; classType: string }[] } }) =>
+      args.where.OR.map((o) => ({ classDate: o.classDate, classType: o.classType })),
+    );
+    const res = await (await POST(post({ lat: 0, lng: 0, accuracy: 10 }))).json();
+    expect(res.result).toBe("inside_no_class");
+    expect(res.arrivalToken).toBeUndefined();
   });
 
   it("NEVER notifies the owner, writes Notification rows, creates attendance, or persists coordinates", async () => {

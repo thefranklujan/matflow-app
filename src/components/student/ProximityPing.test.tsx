@@ -23,7 +23,11 @@ vi.mock("@capacitor/app", () => ({
 import ProximityPing from "./ProximityPing";
 import ArrivalCheckInSheet from "./ArrivalCheckInSheet";
 
-const CONTEXT_OK = { eligible: true, gymName: "Test BJJ", radiusM: 200 };
+const CONTEXT_OK = { eligible: true, gymName: "Test BJJ", radiusM: 200, membershipContext: "ctx-member-a" };
+const CONTEXT_OTHER_MEMBER = { eligible: true, gymName: "Test BJJ", radiusM: 200, membershipContext: "ctx-member-b" };
+const ARRIVAL_KEY_A = "matflow-arrival-sheet-dismissed-at:ctx-member-a";
+const ARRIVAL_KEY_B = "matflow-arrival-sheet-dismissed-at:ctx-member-b";
+const EXPLAINER_KEY_A = "matflow-arrival-explainer-dismissed-at:ctx-member-a";
 const INSIDE = {
   result: "inside_with_classes",
   gymName: "Test BJJ",
@@ -122,14 +126,17 @@ describe("ProximityPing — platform and permission behavior", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("explainer 'Not now' persists a cooldown that suppresses the next launch", async () => {
+  it("explainer 'Not now' persists a membership-scoped cooldown that suppresses the next launch", async () => {
     setNative(true);
+    localStorage.setItem("matflow-arrival-explainer-dismissed-at", "123"); // legacy global key
     mockFetchQueue([CONTEXT_OK]);
     render(<ProximityPing />);
     await triggerEvaluate();
     await waitFor(() => expect(screen.getByRole("button", { name: "Not now" })).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: "Not now" }));
-    expect(localStorage.getItem("matflow-arrival-explainer-dismissed-at")).toBeTruthy();
+    expect(localStorage.getItem(EXPLAINER_KEY_A)).toBeTruthy();
+    // Legacy device-global keys are cleaned up, never consulted.
+    expect(localStorage.getItem("matflow-arrival-explainer-dismissed-at")).toBeNull();
     cleanup();
     // Relaunch inside the cooldown: no explainer.
     mockFetchQueue([CONTEXT_OK]);
@@ -138,12 +145,81 @@ describe("ProximityPing — platform and permission behavior", () => {
     expect(screen.queryByRole("button", { name: "Enable" })).toBeNull();
   });
 
+  it("permission copy is truthful about foreground-only behavior", async () => {
+    setNative(true);
+    mockFetchQueue([CONTEXT_OK]);
+    render(<ProximityPing />);
+    await triggerEvaluate();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enable" })).toBeTruthy());
+    expect(
+      screen.getByText("Turn on location to confirm your check-in when you open MatFlow at Test BJJ."),
+    ).toBeTruthy();
+    // Never promise background behavior Phase 1 does not have.
+    expect(screen.queryByText(/automatically/i)).toBeNull();
+    expect(screen.queryByText(/when you arrive/i)).toBeNull();
+  });
+
   it("ineligible context (no coordinates) never touches permissions", async () => {
     setNative(true);
     mockFetchQueue([{ eligible: false, reason: "no_gym_coordinates" }]);
     render(<ProximityPing />);
     await triggerEvaluate();
     expect(mocks.checkPermissions).not.toHaveBeenCalled();
+  });
+});
+
+describe("ProximityPing — visit cooldown stamping and scoping", () => {
+  const CHECKED_IN = { result: "checked_in", classType: "gi", startTime: "18:00", endTime: "19:00" };
+
+  async function arriveWithSheet(context: Record<string, unknown>, extraResponses: Record<string, unknown>[] = []) {
+    setNative(true);
+    mocks.checkPermissions.mockResolvedValue({ location: "granted" });
+    mockFetchQueue([context, INSIDE, ...extraResponses]);
+    render(<ProximityPing />);
+    await triggerEvaluate();
+    await waitFor(() => expect(screen.getByRole("dialog")).toBeTruthy());
+  }
+
+  it("a COMPLETED check-in stamps the visit cooldown and suppresses re-prompting", async () => {
+    await arriveWithSheet(CONTEXT_OK, [CHECKED_IN]);
+    fireEvent.click(screen.getByRole("button", { name: "Check in" }));
+    fireEvent.click(screen.getByText("gi"));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm check-in" }));
+    await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(localStorage.getItem(ARRIVAL_KEY_A)).toBeTruthy();
+
+    // Re-foreground shortly after: the eligibility GET runs, but no location
+    // check and no new prompt happen inside the cooldown.
+    const positionCallsBefore = mocks.getCurrentPosition.mock.calls.length;
+    mockFetchQueue([CONTEXT_OK]);
+    await act(async () => { fireForeground!(); });
+    await act(async () => { await new Promise((r) => setTimeout(r, 30)); });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(mocks.getCurrentPosition.mock.calls.length).toBe(positionCallsBefore);
+  });
+
+  it("a DISMISSED arrival sheet stamps the same visit cooldown", async () => {
+    await arriveWithSheet(CONTEXT_OK);
+    fireEvent.click(screen.getByRole("button", { name: "Not now" }));
+    expect(localStorage.getItem(ARRIVAL_KEY_A)).toBeTruthy();
+  });
+
+  it("cooldown is membership-scoped: another signed-in membership is NOT suppressed", async () => {
+    // Membership A completes a visit (cooldown stamped for A only).
+    await arriveWithSheet(CONTEXT_OK, [CHECKED_IN]);
+    fireEvent.click(screen.getByRole("button", { name: "Check in" }));
+    fireEvent.click(screen.getByText("gi"));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm check-in" }));
+    await waitFor(() => expect(screen.getByRole("status")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(localStorage.getItem(ARRIVAL_KEY_A)).toBeTruthy();
+    cleanup();
+
+    // Membership B signs in on the same device: fresh prompt, untouched key.
+    await arriveWithSheet(CONTEXT_OTHER_MEMBER);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(localStorage.getItem(ARRIVAL_KEY_B)).toBeNull(); // B never dismissed anything
   });
 });
 
