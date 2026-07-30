@@ -60,3 +60,8 @@ android/local.properties
 
 # App Store marketing screenshots (generated)
 app-store-screenshots/
+
+# Playwright E2E artifacts (baselines under e2e/**/ ARE committed)
+/playwright-report/
+/test-results/
+/e2e/.auth/

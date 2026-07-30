@@ -12,7 +12,11 @@
     "test": "ALLOW_TEST_DB_MUTATION=1 vitest run",
     "test:coverage": "ALLOW_TEST_DB_MUTATION=1 vitest run --coverage",
     "test:coverage:critical": "ALLOW_TEST_DB_MUTATION=1 vitest run --coverage --coverage.thresholds.lines=0 --coverage.include=src/lib/entitlements.ts --coverage.include=src/lib/owner-access.ts --coverage.include=src/lib/stripe.ts --coverage.include=src/lib/member-capacity.ts --coverage.include=src/lib/analytics-metrics.ts --coverage.include=src/lib/founder-metrics.ts --coverage.include=src/lib/auth-context.tsx --coverage.include=src/lib/test-db-safety.ts --coverage.include='src/app/api/billing/**' --coverage.include='src/app/api/webhooks/**' --coverage.include='src/app/api/orders/**' --coverage.include='src/app/api/leads/**'",
-    "screenshots": "node scripts/capture-app-store-screenshots.mjs"
+    "screenshots": "node scripts/capture-app-store-screenshots.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@awesome-cordova-plugins/onesignal": "^9.1.4",
@@ -45,8 +49,10 @@
     "stripe": "^17.7.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
     "@capacitor/cli": "^7.6.8",
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
