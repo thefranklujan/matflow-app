@@ -30,7 +30,7 @@ export default function PlatformUserMenu({ name, email }: { name: string; email:
         className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition"
       >
         <span className="text-sm text-gray-400 hidden sm:block">{name}</span>
-        <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+        <div className="h-8 w-8 rounded-full bg-orange-700 flex items-center justify-center text-white text-xs font-bold">
           {initials}
         </div>
       </button>
@@ -39,7 +39,7 @@ export default function PlatformUserMenu({ name, email }: { name: string; email:
         <div className="absolute right-0 top-full mt-1 w-56 bg-[#141414] border border-white/10 rounded-lg shadow-xl z-50 py-1">
           <div className="px-4 py-3 border-b border-white/5">
             <p className="text-white text-sm font-medium truncate">{name}</p>
-            <p className="text-gray-500 text-xs truncate">{email}</p>
+            <p className="text-gray-400 text-xs truncate">{email}</p>
             <span className="inline-block mt-1.5 bg-orange-500/20 text-orange-400 text-[10px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider">
               Platform Admin
             </span>

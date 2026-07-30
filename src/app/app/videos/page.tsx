@@ -46,7 +46,7 @@ export default async function VideosPage() {
       </div>
 
       {videos.length === 0 ? (
-        <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center text-gray-500">
+        <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center text-gray-400">
           No videos yet.{isAdmin ? " Click \"Add Video\" to get started." : ""}
         </div>
       ) : (
@@ -90,10 +90,10 @@ export default async function VideosPage() {
                 <div className="p-4">
                   <h3 className="text-white font-semibold text-sm leading-snug line-clamp-2">{video.title}</h3>
                   {video.description && (
-                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">{video.description}</p>
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">{video.description}</p>
                   )}
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-gray-600 text-xs">
+                    <span className="text-gray-400 text-xs">
                       {new Date(video.classDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </span>
                     {isAdmin && (

@@ -214,7 +214,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                   >
                     <Building2 className="h-6 w-6 text-brand-accent mb-2" />
                     <div className="text-white font-semibold mb-1">Academy Owner</div>
-                    <div className="text-gray-500 text-xs">Run your gym, manage members, track classes and revenue.</div>
+                    <div className="text-gray-400 text-xs">Run your gym, manage members, track classes and revenue.</div>
                   </button>
                 )}
                 <button
@@ -228,7 +228,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                 >
                   <Award className="h-6 w-6 text-brand-accent mb-2" />
                   <div className="text-white font-semibold mb-1">Instructor</div>
-                  <div className="text-gray-500 text-xs">Teach at one or more gyms, manage classes and students.</div>
+                  <div className="text-gray-400 text-xs">Teach at one or more gyms, manage classes and students.</div>
                 </button>
                 <button
                   type="button"
@@ -241,7 +241,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                 >
                   <GraduationCap className="h-6 w-6 text-brand-accent mb-2" />
                   <div className="text-white font-semibold mb-1">Student</div>
-                  <div className="text-gray-500 text-xs">Find a gym, track your training, follow your belt journey.</div>
+                  <div className="text-gray-400 text-xs">Find a gym, track your training, follow your belt journey.</div>
                 </button>
               </div>
               <div className="flex gap-3">
@@ -302,7 +302,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                  Phone <span className="text-gray-500 font-normal">(optional)</span>
+                  Phone <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <input
                   type="tel"
@@ -352,7 +352,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">Gym URL</label>
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-500 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
+                  <span className="text-gray-400 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
                   <input
                     type="text"
                     value={gymSlug}
@@ -362,7 +362,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                     required
                   />
                 </div>
-                <p className="text-gray-600 text-xs mt-1">
+                <p className="text-gray-400 text-xs mt-1">
                   Members will use this link to join your gym
                 </p>
               </div>
@@ -402,7 +402,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
             </>
           )}
 
-          <p className="text-center text-gray-500 text-sm pt-2">
+          <p className="text-center text-gray-400 text-sm pt-2">
             Already have an account?{" "}
             <Link href="/sign-in" className="text-brand-accent hover:underline">
               Sign in

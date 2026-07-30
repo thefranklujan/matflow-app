@@ -22,7 +22,7 @@ export function ShareLinkCard({ slug }: { slug: string }) {
           </div>
           <div>
             <p className="text-sm font-semibold text-white">Share with your students</p>
-            <p className="text-xs text-gray-500">Students who join through this link are automatically added to your gym</p>
+            <p className="text-xs text-gray-400">Students who join through this link are automatically added to your gym</p>
           </div>
         </div>
         <button
@@ -40,6 +40,7 @@ export function ShareLinkCard({ slug }: { slug: string }) {
       <div className="flex items-center gap-2 mt-3">
         <input
           readOnly
+          aria-label="Academy join link"
           value={joinUrl}
           className="flex-1 bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none"
           onClick={(e) => (e.target as HTMLInputElement).select()}

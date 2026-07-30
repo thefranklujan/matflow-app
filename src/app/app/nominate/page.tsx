@@ -28,7 +28,7 @@ export default async function MemberNominatePage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Nominate Your Gym</h1>
-      <p className="text-gray-500 mb-6 text-sm max-w-xl">
+      <p className="text-gray-400 mb-6 text-sm max-w-xl">
         Know another gym that should be on MatFlow? Drop the academy here. When enough students from
         the same gym nominate, we&apos;ll reach out and activate it free for the owner.
       </p>
@@ -44,7 +44,7 @@ export default async function MemberNominatePage() {
                 <div>
                   <p className="text-white font-semibold">{n.gymName}</p>
                   {(n.city || n.state) && (
-                    <p className="text-gray-500 text-xs">{[n.city, n.state].filter(Boolean).join(", ")}</p>
+                    <p className="text-gray-400 text-xs">{[n.city, n.state].filter(Boolean).join(", ")}</p>
                   )}
                 </div>
                 <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded ${

@@ -48,7 +48,7 @@ export default function WhosTrainingToday({ friends }: { friends: FriendToday[] 
           {friends.slice(0, 4).map((f, i) => (
             <div key={i} className="flex items-center gap-3 text-sm">
               <span className="text-white font-medium">{f.name}</span>
-              <span className="text-gray-500 text-xs">
+              <span className="text-gray-400 text-xs">
                 {f.block}{f.gym ? ` · ${f.gym}` : ""}
               </span>
             </div>

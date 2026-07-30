@@ -48,11 +48,11 @@ export default function ForgotPasswordPage() {
               If an account exists for <span className="text-white">{email}</span>, we just sent a
               reset link. It expires in 1 hour.
             </p>
-            <p className="text-gray-500 text-xs">
+            <p className="text-gray-400 text-xs">
               Didn&apos;t get it? Check spam, or&nbsp;
               <button
                 onClick={() => setSent(false)}
-                className="text-[#dc2626] hover:underline"
+                className="text-[#ef4444] hover:underline"
               >
                 try a different email
               </button>
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/sign-in"
-              className="inline-block mt-4 text-[#dc2626] hover:underline text-sm"
+              className="inline-block mt-4 text-[#ef4444] hover:underline text-sm"
             >
               Back to sign in
             </Link>
@@ -102,9 +102,9 @@ export default function ForgotPasswordPage() {
               {loading ? "Sending..." : "Send reset link"}
             </button>
 
-            <p className="text-center text-gray-500 text-sm">
+            <p className="text-center text-gray-400 text-sm">
               Remembered it?{" "}
-              <Link href="/sign-in" className="text-[#dc2626] hover:underline">
+              <Link href="/sign-in" className="text-[#ef4444] hover:underline">
                 Sign in
               </Link>
             </p>

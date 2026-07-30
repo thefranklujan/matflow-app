@@ -112,7 +112,7 @@ export default function NewCampaignPage() {
         {/* Editor */}
         <div className="space-y-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Subject</label>
+            <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Subject</label>
             <input
               type="text"
               value={subject}
@@ -124,7 +124,7 @@ export default function NewCampaignPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Audience</label>
+              <label className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Audience</label>
               {recipientCount !== null && (
                 <span className="text-xs text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
               )}
@@ -160,7 +160,7 @@ export default function NewCampaignPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">HTML</label>
+            <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">HTML</label>
             <textarea
               value={html}
               onChange={(e) => setHtml(e.target.value)}
@@ -168,7 +168,7 @@ export default function NewCampaignPage() {
               className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-lg text-white font-mono text-xs"
               spellCheck={false}
             />
-            <p className="text-gray-600 text-xs mt-1">Tell Claude what you want and paste the HTML it generates here.</p>
+            <p className="text-gray-400 text-xs mt-1">Tell Claude what you want and paste the HTML it generates here.</p>
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
@@ -187,7 +187,7 @@ export default function NewCampaignPage() {
 
         {/* Preview */}
         <div>
-          <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Preview</label>
+          <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Preview</label>
           <div className="border border-white/10 rounded-lg overflow-hidden bg-[#0a0a0a] h-[640px]">
             <iframe srcDoc={html} className="w-full h-full" title="Email preview" />
           </div>

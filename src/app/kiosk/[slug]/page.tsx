@@ -132,11 +132,11 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
           )}
           <div>
             <h1 className="text-xl font-bold text-white">{gym.name}</h1>
-            <p className="text-sm text-gray-500">{dateStr}</p>
+            <p className="text-sm text-gray-400">{dateStr}</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-600 uppercase tracking-wider">Check In</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Check In</p>
         </div>
       </div>
 
@@ -175,7 +175,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
                 <span className="text-lg text-gray-300 capitalize">{memberInfo.belt} Belt</span>
               </div>
               {memberInfo.stripes > 0 && (
-                <span className="text-lg text-gray-500">
+                <span className="text-lg text-gray-400">
                   {memberInfo.stripes} stripe{memberInfo.stripes > 1 ? "s" : ""}
                 </span>
               )}
@@ -208,7 +208,7 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
           <div style={{ width: "100%", maxWidth: "360px" }}>
             {/* Code display */}
             <div className="text-center" style={{ marginBottom: "40px" }}>
-              <p className="text-sm text-gray-500 uppercase tracking-widest font-medium" style={{ marginBottom: "16px" }}>
+              <p className="text-sm text-gray-400 uppercase tracking-widest font-medium" style={{ marginBottom: "16px" }}>
                 Enter your check-in code
               </p>
               <div className="flex items-center justify-center gap-3">

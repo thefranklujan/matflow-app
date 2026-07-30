@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                 <div key={item.variantId} className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-gray-400 text-xs">
                       {item.size}{item.color ? ` / ${item.color}` : ""} &times; {item.quantity}
                     </p>
                   </div>

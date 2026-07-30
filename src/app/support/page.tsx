@@ -25,7 +25,7 @@ export default async function SupportPage() {
 
         <section className="space-y-6 mb-16">
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 flex items-start gap-4">
-            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#dc2626] flex items-center justify-center shrink-0">
+            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#ef4444] flex items-center justify-center shrink-0">
               <Mail className="h-5 w-5" />
             </div>
             <div>
@@ -35,15 +35,15 @@ export default async function SupportPage() {
                   ? "Questions about training log, belt tracking, schedule, waivers, or anything else."
                   : "Questions about training log, belt tracking, gym management, billing, or anything else."}
               </p>
-              <a href="mailto:frank@mymatflow.com" className="text-[#dc2626] hover:underline">
+              <a href="mailto:frank@mymatflow.com" className="text-[#ef4444] underline">
                 frank@mymatflow.com
               </a>
-              <p className="text-gray-600 text-xs mt-2">Typical response: within one business day.</p>
+              <p className="text-gray-400 text-xs mt-2">Typical response: within one business day.</p>
             </div>
           </div>
 
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 flex items-start gap-4">
-            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#dc2626] flex items-center justify-center shrink-0">
+            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#ef4444] flex items-center justify-center shrink-0">
               <Trash2 className="h-5 w-5" />
             </div>
             <div>
@@ -52,14 +52,14 @@ export default async function SupportPage() {
                 Sign in, open Settings, and scroll to the Danger zone section. Your account and
                 training data will be permanently removed.
               </p>
-              <Link href="/sign-in" className="text-[#dc2626] hover:underline text-sm">
+              <Link href="/sign-in" className="text-[#ef4444] underline text-sm">
                 Sign in to delete account
               </Link>
             </div>
           </div>
 
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-6 flex items-start gap-4">
-            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#dc2626] flex items-center justify-center shrink-0">
+            <div className="h-11 w-11 rounded-lg bg-[#dc2626]/10 text-[#ef4444] flex items-center justify-center shrink-0">
               <Shield className="h-5 w-5" />
             </div>
             <div>
@@ -67,7 +67,7 @@ export default async function SupportPage() {
               <p className="text-gray-400 text-sm mb-2">
                 How we collect, store, and use your training and gym data.
               </p>
-              <Link href="/privacy" className="text-[#dc2626] hover:underline text-sm">
+              <Link href="/privacy" className="text-[#ef4444] underline text-sm">
                 Read the privacy policy
               </Link>
             </div>
@@ -76,7 +76,7 @@ export default async function SupportPage() {
 
         <section>
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <HelpCircle className="h-6 w-6 text-[#dc2626]" /> Common questions
+            <HelpCircle className="h-6 w-6 text-[#ef4444]" /> Common questions
           </h2>
           <div className="space-y-4">
             <details className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
@@ -126,7 +126,7 @@ export default async function SupportPage() {
               <p className="text-gray-400 text-sm mt-3">
                 Training sessions you log, belt progression, attendance, gym membership, and
                 optionally your location for arrival check-ins. We never sell your data. See the{" "}
-                <Link href="/privacy" className="text-[#dc2626] hover:underline">
+                <Link href="/privacy" className="text-[#ef4444] hover:underline">
                   privacy policy
                 </Link>{" "}
                 for the full breakdown.
@@ -136,7 +136,7 @@ export default async function SupportPage() {
         </section>
 
         <div className="mt-16 pt-8 border-t border-white/10 text-center">
-          <Link href="/" className="text-gray-500 hover:text-gray-300 text-sm">
+          <Link href="/" className="text-gray-400 hover:text-gray-300 text-sm">
             ← Back to MatFlow
           </Link>
         </div>

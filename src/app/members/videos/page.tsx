@@ -108,7 +108,7 @@ export default async function MemberVideosPage({
                     <span className="text-xs bg-brand-accent/20 text-brand-accent px-2 py-0.5 rounded-full">
                       {video.classType}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-400">
                       {new Date(video.classDate).toLocaleDateString()}
                     </span>
                   </div>
@@ -121,7 +121,7 @@ export default async function MemberVideosPage({
           </div>
         ) : (
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center">
-            <p className="text-gray-500">No videos found.</p>
+            <p className="text-gray-400">No videos found.</p>
           </div>
         )}
       </div>

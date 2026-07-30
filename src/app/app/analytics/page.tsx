@@ -84,13 +84,13 @@ export default async function AnalyticsPage() {
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
           <h2 className="text-white font-semibold mb-4">Top Classes (This Month)</h2>
           {basic.topClasses.length === 0 ? (
-            <p className="text-gray-500">No attendance data yet this month.</p>
+            <p className="text-gray-400">No attendance data yet this month.</p>
           ) : (
             <div className="space-y-3">
               {basic.topClasses.map((c, i) => (
                 <div key={c.classType} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-gray-500 w-6 text-right">#{i + 1}</span>
+                    <span className="text-gray-400 w-6 text-right">#{i + 1}</span>
                     <span className="text-white">{c.classType}</span>
                   </div>
                   <span className="text-brand-accent font-bold">{c.count} check-ins</span>
@@ -137,7 +137,7 @@ function AdvancedSection({ pro }: { pro: ProAnalytics }) {
         <div className="flex items-end gap-1.5 h-32" role="img" aria-label={`Weekly check-ins, oldest to newest: ${pro.weeklyAttendance.map((w) => w.count).join(", ")}`}>
           {pro.weeklyAttendance.map((w) => (
             <div key={w.weekStart} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-              <span className="text-[10px] text-gray-500">{w.count}</span>
+              <span className="text-[10px] text-gray-400">{w.count}</span>
               <div
                 className="w-full rounded-t bg-brand-accent/40"
                 style={{ height: `${Math.max((w.count / maxWeek) * 100, 3)}%` }}
@@ -145,7 +145,7 @@ function AdvancedSection({ pro }: { pro: ProAnalytics }) {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-gray-600">Check-ins per week, oldest on the left.</p>
+        <p className="mt-2 text-xs text-gray-400">Check-ins per week, oldest on the left.</p>
       </div>
 
       <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
@@ -163,7 +163,7 @@ function AdvancedSection({ pro }: { pro: ProAnalytics }) {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-gray-600">New members per month.</p>
+        <p className="mt-2 text-xs text-gray-400">New members per month.</p>
       </div>
 
       <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 lg:col-span-2">
@@ -171,12 +171,12 @@ function AdvancedSection({ pro }: { pro: ProAnalytics }) {
           <AlertTriangle className="h-4 w-4 text-yellow-400" /> Inactivity Risk (no check-in in 30 days)
         </h2>
         {pro.inactivityRisk.length === 0 ? (
-          <p className="text-gray-500">Every active member has trained in the last 30 days.</p>
+          <p className="text-gray-400">Every active member has trained in the last 30 days.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-gray-500 border-b border-white/10">
+                <tr className="text-left text-gray-400 border-b border-white/10">
                   <th className="py-2 pr-4 font-medium">Member</th>
                   <th className="py-2 font-medium">Last check-in</th>
                 </tr>
@@ -202,7 +202,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
     <div className="bg-brand-dark border border-brand-gray rounded-lg p-5">
       <p className="text-gray-400 text-sm mb-1">{label}</p>
       <p className="text-2xl font-bold text-white">{value}</p>
-      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-gray-400 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

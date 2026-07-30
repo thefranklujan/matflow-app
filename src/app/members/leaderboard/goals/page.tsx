@@ -85,7 +85,7 @@ export default async function GoalsPage() {
                         {goal.title}
                       </h3>
                       {goal.endDate && (
-                        <p className="text-gray-500 text-xs mt-1">
+                        <p className="text-gray-400 text-xs mt-1">
                           Due{" "}
                           {new Date(goal.endDate).toLocaleDateString("en-US", {
                             month: "short",
@@ -125,7 +125,7 @@ export default async function GoalsPage() {
           </div>
         ) : (
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center mb-10">
-            <p className="text-gray-500 mb-4">No active goals yet.</p>
+            <p className="text-gray-400 mb-4">No active goals yet.</p>
             <Link
               href="/members/leaderboard/goals/new"
               className="text-brand-accent hover:text-brand-accent/80 transition text-sm font-medium"

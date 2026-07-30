@@ -215,9 +215,9 @@ export default function AdminSchedulePage() {
         )}
 
         {loading ? (
-          <p className="text-gray-500">Loading schedule...</p>
+          <p className="text-gray-400">Loading schedule...</p>
         ) : entries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-400">
             No schedule entries yet. Click &quot;Add Class&quot; to get started.
           </div>
         ) : (

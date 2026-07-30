@@ -83,7 +83,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
 
   return (
     <div>
-      <Link href="/platform/campaigns" className="inline-flex items-center gap-1 text-gray-500 hover:text-white text-sm mb-4">
+      <Link href="/platform/campaigns" className="inline-flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-4">
         <ArrowLeft className="h-4 w-4" /> All Campaigns
       </Link>
 
@@ -98,7 +98,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
           ) : (
             <h1 className="text-3xl font-bold text-white">{campaign.subject}</h1>
           )}
-          <div className="text-gray-500 text-sm mt-1 flex items-center gap-3">
+          <div className="text-gray-400 text-sm mt-1 flex items-center gap-3">
             <span className="capitalize">{campaign.audience.replace(/_/g, " ")}</span>
             {recipientCount !== null && (
               <span className="text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
@@ -108,7 +108,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
             {campaign.sentCount > 0 && <><span>·</span><span>{campaign.sentCount} sent</span></>}
           </div>
         </div>
-        <button onClick={remove} className="text-gray-600 hover:text-red-400 transition" title="Delete">
+        <button onClick={remove} className="text-gray-400 hover:text-red-400 transition" title="Delete">
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
@@ -118,7 +118,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
           {editing && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Audience</label>
+                <label className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Audience</label>
                 {recipientCount !== null && (
                   <span className="text-xs text-orange-400 font-semibold">{recipientCount.toLocaleString()} recipients</span>
                 )}
@@ -154,7 +154,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
             </div>
           )}
           <div>
-            <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">HTML</label>
+            <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">HTML</label>
             <textarea
               value={campaign.html}
               onChange={(e) => setCampaign({ ...campaign, html: e.target.value })}
@@ -193,7 +193,7 @@ export default function CampaignDetailClient({ campaign: initial }: { campaign: 
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">Preview</label>
+          <label className="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Preview</label>
           <div className="border border-white/10 rounded-lg overflow-hidden bg-[#0a0a0a] h-[640px]">
             <iframe srcDoc={campaign.html} className="w-full h-full" title="Email preview" />
           </div>

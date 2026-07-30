@@ -20,7 +20,7 @@ export default function DeleteProductButton({ productId }: { productId: string }
         <button onClick={handleDelete} className="text-xs text-red-400 hover:text-red-300">
           Confirm
         </button>
-        <button onClick={() => setConfirming(false)} className="text-xs text-gray-500 hover:text-gray-300">
+        <button onClick={() => setConfirming(false)} className="text-xs text-gray-400 hover:text-gray-300">
           Cancel
         </button>
       </div>
@@ -30,7 +30,7 @@ export default function DeleteProductButton({ productId }: { productId: string }
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-sm text-gray-500 hover:text-red-400 transition"
+      className="text-sm text-gray-400 hover:text-red-400 transition"
     >
       Delete
     </button>

@@ -48,7 +48,7 @@ export default async function AdminOrderDetailPage({
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Status</h2>
           <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
-          <p className="text-gray-500 text-xs mt-3">
+          <p className="text-gray-400 text-xs mt-3">
             Created: {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
@@ -62,7 +62,7 @@ export default async function AdminOrderDetailPage({
             <div key={item.id} className="flex items-center justify-between py-2 border-b border-brand-gray/50 last:border-0">
               <div>
                 <p className="text-white text-sm">{item.product.name}</p>
-                <p className="text-gray-500 text-xs">
+                <p className="text-gray-400 text-xs">
                   {item.variant.size}
                   {item.variant.color ? ` / ${item.variant.color}` : ""} &middot; Qty: {item.quantity}
                 </p>

@@ -62,7 +62,7 @@ export default function TrainingHeatmap({
     <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-white font-semibold text-sm">Last 90 Days</p>
-        <p className="text-gray-500 text-xs">
+        <p className="text-gray-400 text-xs">
           {total} session{total === 1 ? "" : "s"}
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function TrainingHeatmap({
         )}
       </div>
 
-      <div className="flex items-center gap-2 mt-4 text-[11px] text-gray-500">
+      <div className="flex items-center gap-2 mt-4 text-[11px] text-gray-400">
         <span>Less</span>
         <span className="h-[12px] w-[12px] rounded-[3px]" style={{ background: "rgba(255,255,255,0.05)" }} />
         <span className="h-[12px] w-[12px] rounded-[3px]" style={{ background: "rgba(220,38,38,0.35)" }} />

@@ -130,7 +130,7 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">All Students</h1>
-        <span className="text-gray-500 text-sm">{rows.length} total</span>
+        <span className="text-gray-400 text-sm">{rows.length} total</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -138,10 +138,10 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search name, email, gym..."
-          className="bg-[#111] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder:text-gray-600 w-64 focus:outline-none focus:border-orange-500/50"
+          className="bg-[#111] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder:text-gray-400 w-64 focus:outline-none focus:border-orange-500/50"
         />
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-500">Group by:</span>
+          <span className="text-gray-400">Group by:</span>
           <select
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value as GroupKey)}
@@ -153,7 +153,7 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
           </select>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-500">Sort by:</span>
+          <span className="text-gray-400">Sort by:</span>
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
@@ -180,12 +180,12 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
           <div key={g.key} className="bg-[#111] border border-white/10 rounded-lg overflow-hidden">
             {groupBy !== "none" && (
               <div className="px-6 py-3 bg-white/[0.03] border-b border-white/10 text-sm text-orange-400 font-semibold uppercase tracking-wider">
-                {g.key} <span className="text-gray-500 ml-2">({g.rows.length})</span>
+                {g.key} <span className="text-gray-400 ml-2">({g.rows.length})</span>
               </div>
             )}
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5 text-xs text-gray-500 uppercase tracking-wider">
+                <tr className="border-b border-white/5 text-xs text-gray-400 uppercase tracking-wider">
                   <Th label="Name" onClick={() => toggleSort("name")} />
                   <Th label="Email" onClick={() => toggleSort("email")} />
                   <th className="text-left px-6 py-3">Phone</th>
@@ -216,7 +216,7 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
                           {r.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-500 text-xs">
+                      <td className="px-6 py-4 text-gray-400 text-xs">
                         {new Date(r.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right whitespace-nowrap">
@@ -242,7 +242,7 @@ export default function StudentsClient({ rows: initialRows }: { rows: Row[] }) {
                 })}
                 {g.rows.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-6 py-8 text-center text-gray-600 text-sm">
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-400 text-sm">
                       No students.
                     </td>
                   </tr>

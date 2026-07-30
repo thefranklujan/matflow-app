@@ -143,20 +143,20 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
               {record.rating} ({record.reviewCount || 0})
             </span>
           )}
-          <span className="text-xs text-gray-600">{record.source}</span>
+          <span className="text-xs text-gray-400">{record.source}</span>
         </div>
 
         {!editing ? (
           <div className="space-y-0" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {record.ownerName && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Owner</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Owner</label>
                 <p className="text-sm text-white" style={{ marginTop: "4px" }}>{record.ownerName}</p>
               </div>
             )}
             {record.email && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Email</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Email</label>
                 <a href={`mailto:${record.email}`} className="flex items-center gap-2 text-sm text-brand-accent hover:underline" style={{ marginTop: "4px" }}>
                   <Mail className="h-3.5 w-3.5" />{record.email}
                 </a>
@@ -164,7 +164,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
             )}
             {record.phone && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Phone</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Phone</label>
                 <a href={`tel:${record.phone}`} className="flex items-center gap-2 text-sm text-brand-accent hover:underline" style={{ marginTop: "4px" }}>
                   <Phone className="h-3.5 w-3.5" />{record.phone}
                 </a>
@@ -172,7 +172,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
             )}
             {record.website && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Website</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Website</label>
                 <a href={record.website.startsWith("http") ? record.website : `https://${record.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-brand-accent hover:underline" style={{ marginTop: "4px" }}>
                   <Globe className="h-3.5 w-3.5" />{record.website}
                 </a>
@@ -180,7 +180,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
             )}
             {(record.address || record.city) && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Location</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Location</label>
                 <p className="flex items-center gap-2 text-sm text-gray-300" style={{ marginTop: "4px" }}>
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   {[record.address, record.city, record.state, record.zip].filter(Boolean).join(", ")}
@@ -189,19 +189,19 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
             )}
             {record.categories && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Categories</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Categories</label>
                 <p className="text-sm text-gray-300" style={{ marginTop: "4px" }}>{record.categories}</p>
               </div>
             )}
             {record.socialMedia && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Social Media</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Social Media</label>
                 <p className="text-sm text-gray-300 break-all" style={{ marginTop: "4px" }}>{record.socialMedia}</p>
               </div>
             )}
             {record.notes && (
               <div>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Notes</label>
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Notes</label>
                 <p className="text-sm text-gray-300" style={{ marginTop: "4px" }}>{record.notes}</p>
               </div>
             )}
@@ -238,7 +238,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {(["name", "ownerName", "email", "phone", "website", "address", "city", "state", "zip"] as const).map((field) => (
               <div key={field}>
-                <label className="text-xs text-gray-500 uppercase tracking-wider font-medium capitalize">
+                <label className="text-xs text-gray-400 uppercase tracking-wider font-medium capitalize">
                   {field === "ownerName" ? "Owner Name" : field}
                 </label>
                 <input
@@ -250,7 +250,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
               </div>
             ))}
             <div>
-              <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Status</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Status</label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -263,7 +263,7 @@ function DetailPanel({ record, onClose, onUpdate, onDelete }: {
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Notes</label>
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Notes</label>
               <textarea
                 value={form.notes || ""}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -435,7 +435,7 @@ export default function DatabaseClient() {
     const active = sortField === field;
     return (
       <th
-        className={`text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none hover:text-white transition ${active ? "text-brand-accent" : "text-gray-500"} ${className || ""}`}
+        className={`text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none hover:text-white transition ${active ? "text-brand-accent" : "text-gray-400"} ${className || ""}`}
         style={{ padding: "12px 16px" }}
         onClick={() => toggleSort(field)}
       >
@@ -455,7 +455,7 @@ export default function DatabaseClient() {
         <td style={{ padding: "14px 16px" }}>
           <div className="text-sm font-medium text-white">{rec.name}</div>
           {rec.website && (
-            <div className="text-xs text-gray-500 truncate max-w-[200px]">{rec.website}</div>
+            <div className="text-xs text-gray-400 truncate max-w-[200px]">{rec.website}</div>
           )}
         </td>
         <td style={{ padding: "14px 16px" }}>
@@ -465,14 +465,14 @@ export default function DatabaseClient() {
           {rec.email ? (
             <div className="text-sm text-gray-300 truncate max-w-[200px]">{rec.email}</div>
           ) : (
-            <span className="text-sm text-gray-600">{"\u2014"}</span>
+            <span className="text-sm text-gray-400">{"\u2014"}</span>
           )}
         </td>
         <td style={{ padding: "14px 16px" }}>
           {rec.phone ? (
             <div className="text-sm text-gray-300">{rec.phone}</div>
           ) : (
-            <span className="text-sm text-gray-600">{"\u2014"}</span>
+            <span className="text-sm text-gray-400">{"\u2014"}</span>
           )}
         </td>
         <td style={{ padding: "14px 16px" }}>
@@ -486,11 +486,11 @@ export default function DatabaseClient() {
               <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
               <span className="text-sm text-gray-300">{rec.rating}</span>
               {rec.reviewCount != null && (
-                <span className="text-xs text-gray-600">({rec.reviewCount})</span>
+                <span className="text-xs text-gray-400">({rec.reviewCount})</span>
               )}
             </div>
           ) : (
-            <span className="text-sm text-gray-600">{"\u2014"}</span>
+            <span className="text-sm text-gray-400">{"\u2014"}</span>
           )}
         </td>
         <td style={{ padding: "14px 16px" }}>
@@ -514,7 +514,7 @@ export default function DatabaseClient() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
+                className="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition"
                 title="View on Google Maps"
               >
                 <Map className="h-4 w-4" />
@@ -522,7 +522,7 @@ export default function DatabaseClient() {
             )}
             <button
               onClick={(e) => { e.stopPropagation(); setSelected(rec); }}
-              className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition"
+              className="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition"
             >
               <Eye className="h-4 w-4" />
             </button>
@@ -540,7 +540,7 @@ export default function DatabaseClient() {
           <Database className="h-6 w-6 text-brand-accent" />
           <h1 className="text-2xl font-bold text-white">Database</h1>
           {!loading && (
-            <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">
+            <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">
               {total.toLocaleString()} gyms
             </span>
           )}
@@ -564,7 +564,7 @@ export default function DatabaseClient() {
       {/* Search + Filters */}
       <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: "24px" }}>
         <form onSubmit={handleSearch} className="flex-1 min-w-[200px] max-w-md relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -575,7 +575,7 @@ export default function DatabaseClient() {
             <button
               type="button"
               onClick={() => { setSearch(""); setSearchInput(""); setPage(1); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -638,7 +638,7 @@ export default function DatabaseClient() {
         {(statusFilter !== "all" || stateFilter !== "all" || search || groupBy !== "none") && (
           <button
             onClick={() => { setStatusFilter("all"); setStateFilter("all"); setSearch(""); setSearchInput(""); setGroupBy("none"); setPage(1); }}
-            className="flex items-center gap-1 px-2 py-2 text-xs text-gray-500 hover:text-white transition"
+            className="flex items-center gap-1 px-2 py-2 text-xs text-gray-400 hover:text-white transition"
           >
             <X className="h-3 w-3" /> Reset
           </button>
@@ -647,9 +647,9 @@ export default function DatabaseClient() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-gray-500 text-sm py-12 text-center">Loading database...</div>
+        <div className="text-gray-400 text-sm py-12 text-center">Loading database...</div>
       ) : records.length === 0 ? (
-        <div className="text-gray-500 text-sm py-12 text-center">
+        <div className="text-gray-400 text-sm py-12 text-center">
           {search || statusFilter !== "all" || stateFilter !== "all"
             ? "No gyms match your filters."
             : "No gyms in the database yet. Add manually or import from a scrape."}
@@ -662,12 +662,12 @@ export default function DatabaseClient() {
               <thead>
                 <tr className="border-b border-white/10 bg-[#0a0a0a]">
                   <SortHeader label="Gym" field="name" />
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
+                  <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
                   <SortHeader label="Email" field="email" />
                   <SortHeader label="Phone" field="phone" />
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>City</th>
+                  <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>City</th>
                   <SortHeader label="Rating" field="rating" />
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
+                  <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
                   <th style={{ padding: "12px 16px" }}></th>
                 </tr>
               </thead>
@@ -689,9 +689,9 @@ export default function DatabaseClient() {
                       >
                         <td colSpan={8} style={{ padding: "10px 16px" }}>
                           <div className="flex items-center gap-3">
-                            <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isExpanded ? "" : "-rotate-90"}`} />
+                            <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isExpanded ? "" : "-rotate-90"}`} />
                             <span className="text-sm font-semibold text-white uppercase tracking-wider">{state}</span>
-                            <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full font-medium">
+                            <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-full font-medium">
                               {gyms.length} gym{gyms.length !== 1 ? "s" : ""}
                             </span>
                           </div>
@@ -716,12 +716,12 @@ export default function DatabaseClient() {
               <thead>
                 <tr className="border-b border-white/10 bg-[#0a0a0a]">
                   <SortHeader label="Gym" field="name" />
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
+                  <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Owner</th>
                   <SortHeader label="Email" field="email" />
                   <SortHeader label="Phone" field="phone" />
                   <SortHeader label="Location" field="state" />
                   <SortHeader label="Rating" field="rating" />
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
+                  <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
                   <th style={{ padding: "12px 16px" }}></th>
                 </tr>
               </thead>
@@ -738,7 +738,7 @@ export default function DatabaseClient() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between" style={{ marginTop: "20px" }}>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-400">
             Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, total)} of {total.toLocaleString()}
           </span>
           <div className="flex items-center gap-2">
@@ -796,7 +796,7 @@ function AddGymModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: Pa
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {(["name", "ownerName", "email", "phone", "website", "address", "city", "state", "zip"] as const).map((field) => (
             <div key={field}>
-              <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">
                 {field === "ownerName" ? "Owner Name" : field}
                 {field === "name" && <span className="text-red-400"> *</span>}
               </label>
@@ -809,7 +809,7 @@ function AddGymModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: Pa
             </div>
           ))}
           <div>
-            <label className="text-xs text-gray-500 uppercase tracking-wider font-medium">Notes</label>
+            <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">Notes</label>
             <textarea
               value={form.notes || ""}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}

@@ -149,7 +149,7 @@ export default function ArrivalCheckInSheet({ gymName, classes, arrivalToken, on
           <button
             onClick={() => onClose(step.kind === "done" ? "completed" : "dismissed")}
             aria-label="Close"
-            className="shrink-0 rounded-md p-1.5 text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
+            className="shrink-0 rounded-md p-1.5 text-gray-400 transition hover:bg-white/5 hover:text-gray-300"
           >
             <X className="h-5 w-5" />
           </button>
@@ -185,13 +185,13 @@ export default function ArrivalCheckInSheet({ gymName, classes, arrivalToken, on
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold capitalize text-white">{cls.classType}</span>
-                      <span className="block truncate text-xs text-gray-500">
+                      <span className="block truncate text-xs text-gray-400">
                         {formatTime(cls.startTime)}–{formatTime(cls.endTime)}
                         {cls.instructor ? ` · ${cls.instructor}` : ""}
                         {cls.locationSlug && cls.locationSlug !== "main" ? ` · ${cls.locationSlug}` : ""}
                       </span>
                     </span>
-                    <Clock className="h-4 w-4 shrink-0 text-gray-600" />
+                    <Clock className="h-4 w-4 shrink-0 text-gray-400" />
                   </button>
                 </li>
               ))}
@@ -205,7 +205,7 @@ export default function ArrivalCheckInSheet({ gymName, classes, arrivalToken, on
               <GraduationCap className="h-5 w-5 shrink-0 text-brand-accent" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold capitalize text-white">{step.cls.classType}</p>
-                <p className="truncate text-xs text-gray-500">
+                <p className="truncate text-xs text-gray-400">
                   {formatTime(step.cls.startTime)}–{formatTime(step.cls.endTime)}
                   {step.cls.instructor ? ` · ${step.cls.instructor}` : ""}
                 </p>

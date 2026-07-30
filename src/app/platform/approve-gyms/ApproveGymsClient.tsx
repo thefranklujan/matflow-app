@@ -132,7 +132,7 @@ export default function ApproveGymsClient() {
           <span className={`text-xs px-2 py-1 rounded-full ${
             gyms.length > 0
               ? "bg-orange-500/15 text-orange-400"
-              : "bg-white/5 text-gray-500"
+              : "bg-white/5 text-gray-400"
           }`}>
             {gyms.length} pending
           </span>
@@ -140,7 +140,7 @@ export default function ApproveGymsClient() {
       </div>
 
       {loading ? (
-        <div className="text-gray-500 text-sm py-12 text-center">Loading pending gyms...</div>
+        <div className="text-gray-400 text-sm py-12 text-center">Loading pending gyms...</div>
       ) : gyms.length === 0 ? (
         <div className="text-center" style={{ paddingTop: "64px", paddingBottom: "64px" }}>
           <div className="flex items-center justify-center" style={{ marginBottom: "16px" }}>
@@ -149,7 +149,7 @@ export default function ApproveGymsClient() {
             </div>
           </div>
           <h3 className="text-lg font-semibold text-white" style={{ marginBottom: "4px" }}>All caught up</h3>
-          <p className="text-gray-500 text-sm">No gyms waiting for approval.</p>
+          <p className="text-gray-400 text-sm">No gyms waiting for approval.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -173,12 +173,12 @@ export default function ApproveGymsClient() {
                       <div>
                         <h3 className="text-white font-semibold">{gym.name}</h3>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500 bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded font-medium">
+                          <span className="text-xs text-gray-400 bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded font-medium">
                             <Clock className="h-3 w-3 inline mr-1" />
                             {timeAgo(gym.createdAt)}
                           </span>
                           {(gym.city || gym.state) && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-400">
                               {gym.city}{gym.city && gym.state ? ", " : ""}{gym.state}
                             </span>
                           )}
@@ -189,18 +189,18 @@ export default function ApproveGymsClient() {
                     {owner && (
                       <div className="flex items-center gap-4" style={{ marginTop: "12px" }}>
                         <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Users className="h-3.5 w-3.5 text-gray-500" />
+                          <Users className="h-3.5 w-3.5 text-gray-400" />
                           {owner.firstName} {owner.lastName}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Mail className="h-3.5 w-3.5 text-gray-500" />
+                          <Mail className="h-3.5 w-3.5 text-gray-400" />
                           {owner.email}
                         </div>
                       </div>
                     )}
 
                     {gym.website && (
-                      <p className="text-xs text-gray-500" style={{ marginTop: "6px" }}>{gym.website}</p>
+                      <p className="text-xs text-gray-400" style={{ marginTop: "6px" }}>{gym.website}</p>
                     )}
                   </div>
 

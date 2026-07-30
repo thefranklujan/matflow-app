@@ -81,7 +81,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
           <button type="submit" disabled={loading} className="bg-brand-accent text-brand-black font-bold px-6 py-2 rounded-lg disabled:opacity-50">
             {loading ? "Creating..." : "Create Waiver"}
           </button>
-          <p className="text-gray-500 text-xs">Creating a new waiver will deactivate any existing active waiver.</p>
+          <p className="text-gray-400 text-xs">Creating a new waiver will deactivate any existing active waiver.</p>
         </form>
       )}
 
@@ -94,7 +94,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
           <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
-            <span className="text-gray-600">Version {activeTemplate.version}</span>
+            <span className="text-gray-400">Version {activeTemplate.version}</span>
           </div>
 
           {activeTemplate.signatures.length > 0 && (
@@ -104,7 +104,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
                 {activeTemplate.signatures.slice(0, 10).map((sig) => (
                   <div key={sig.id} className="flex items-center justify-between text-sm">
                     <span className="text-white">{sig.member ? `${sig.member.firstName} ${sig.member.lastName}` : sig.signedName}</span>
-                    <span className="text-gray-500">{new Date(sig.signedAt).toLocaleDateString()}</span>
+                    <span className="text-gray-400">{new Date(sig.signedAt).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>
@@ -120,7 +120,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
             <div key={t.id} className="bg-brand-dark border border-brand-gray rounded-lg p-4 mb-2">
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">{t.title} (v{t.version})</span>
-                <span className="text-gray-500 text-sm">{t.signatures.length} signatures</span>
+                <span className="text-gray-400 text-sm">{t.signatures.length} signatures</span>
               </div>
             </div>
           ))}

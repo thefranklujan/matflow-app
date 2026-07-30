@@ -88,7 +88,7 @@ export default function OnboardingPage() {
               URL Slug
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
+              <span className="text-gray-400 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
               <input
                 type="text"
                 value={slug}
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
                 required
               />
             </div>
-            <p className="text-gray-600 text-xs mt-1">
+            <p className="text-gray-400 text-xs mt-1">
               This is how members will find your gym. Use lowercase letters, numbers, and hyphens.
             </p>
           </div>

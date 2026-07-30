@@ -149,7 +149,7 @@ export default async function MemberAttendancePage({
                       <p className="text-white font-medium">
                         {record.classType}
                       </p>
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-gray-400 text-sm">
                         {new Date(record.classDate).toLocaleDateString(
                           "en-US",
                           {
@@ -178,7 +178,7 @@ export default async function MemberAttendancePage({
             </div>
           ) : (
             <div className="p-12 text-center">
-              <p className="text-gray-500">No attendance records yet.</p>
+              <p className="text-gray-400">No attendance records yet.</p>
             </div>
           )}
         </div>

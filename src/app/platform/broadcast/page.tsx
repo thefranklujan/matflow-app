@@ -35,7 +35,7 @@ export default function BroadcastPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-3xl font-bold text-white mb-2">Broadcast Announcement</h1>
-      <p className="text-gray-500 mb-8">Send a message to every gym on the platform. It will appear on their dashboards as a pinned announcement.</p>
+      <p className="text-gray-400 mb-8">Send a message to every gym on the platform. It will appear on their dashboards as a pinned announcement.</p>
 
       <form onSubmit={handleSubmit} className="bg-[#111] border border-white/10 rounded-lg p-6 space-y-5">
         <div>
@@ -48,7 +48,7 @@ export default function BroadcastPage() {
             className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-orange-500"
             required
           />
-          <p className="text-gray-600 text-xs mt-1">Will be prefixed with [MatFlow] when shown to gym admins</p>
+          <p className="text-gray-400 text-xs mt-1">Will be prefixed with [MatFlow] when shown to gym admins</p>
         </div>
 
         <div>

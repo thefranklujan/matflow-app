@@ -27,13 +27,13 @@ export default async function AttendancePage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">My Attendance</h1>
-        <span className="text-gray-500 text-sm">{records.length} classes</span>
+        <span className="text-gray-400 text-sm">{records.length} classes</span>
       </div>
 
       {records.length === 0 ? (
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-10 text-center">
           <p className="text-white font-semibold mb-1">No classes attended yet</p>
-          <p className="text-gray-500 text-sm">Your check-ins will show up here.</p>
+          <p className="text-gray-400 text-sm">Your check-ins will show up here.</p>
         </div>
       ) : (
         <div className="bg-brand-dark border border-brand-gray rounded-lg overflow-hidden">

@@ -36,7 +36,7 @@ export function SetupChecklist({ steps, gymName }: { steps: SetupStep[]; gymName
           <h2 className="text-sm font-bold uppercase tracking-wider text-white">
             Finish setting up {gymName}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-400">
             A few steps to get your academy ready for members.
           </p>
         </div>
@@ -44,7 +44,7 @@ export function SetupChecklist({ steps, gymName }: { steps: SetupStep[]; gymName
           <p className="text-sm font-semibold text-[#c4b5a0]">
             {completed} of {total}
           </p>
-          <p className="text-xs text-gray-500">complete</p>
+          <p className="text-xs text-gray-400">complete</p>
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export function SetupChecklist({ steps, gymName }: { steps: SetupStep[]; gymName
                   {isDone ? (
                     <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                   ) : step.done === false ? (
-                    <Circle className="h-5 w-5 text-gray-600" />
+                    <Circle className="h-5 w-5 text-gray-400" />
                   ) : (
                     <Icon className="h-5 w-5 text-[#c4b5a0]" />
                   )}
@@ -81,15 +81,15 @@ export function SetupChecklist({ steps, gymName }: { steps: SetupStep[]; gymName
                 <span className="min-w-0 flex-1">
                   <span
                     className={`block text-sm font-medium ${
-                      isDone ? "text-gray-500 line-through" : "text-white"
+                      isDone ? "text-gray-400 line-through" : "text-white"
                     }`}
                   >
                     {step.label}
                   </span>
-                  <span className="block text-xs text-gray-500">{step.description}</span>
+                  <span className="block text-xs text-gray-400">{step.description}</span>
                 </span>
                 {!isDone && (
-                  <ArrowUpRight className="h-4 w-4 shrink-0 text-gray-600 transition group-hover:text-[#c4b5a0]" />
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-gray-400 transition group-hover:text-[#c4b5a0]" />
                 )}
               </Link>
             </li>

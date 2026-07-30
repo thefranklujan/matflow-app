@@ -49,7 +49,7 @@ export default function MapClient() {
           <MapPin className="h-5 w-5 text-brand-accent" />
           <h1 className="text-xl font-bold text-white">Gym Map</h1>
           {!loading && (
-            <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">
+            <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">
               {pins.length.toLocaleString()} pinned
             </span>
           )}
@@ -58,7 +58,7 @@ export default function MapClient() {
 
       {loading ? (
         <div className="flex items-center justify-center" style={{ height: "calc(100vh - 200px)" }}>
-          <div className="text-gray-500 text-sm">Loading map...</div>
+          <div className="text-gray-400 text-sm">Loading map...</div>
         </div>
       ) : (
         <div className="border border-white/10 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 200px)" }}>

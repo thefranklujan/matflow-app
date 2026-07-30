@@ -132,7 +132,7 @@ export default function ReportsClient() {
   function SortHeader({ label, field }: { label: string; field: typeof sortField }) {
     const active = sortField === field;
     return (
-      <th className={`text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none hover:text-white transition ${active ? "text-brand-accent" : "text-gray-500"}`} style={{ padding: "12px 16px" }} onClick={() => toggleSort(field)}>
+      <th className={`text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none hover:text-white transition ${active ? "text-brand-accent" : "text-gray-400"}`} style={{ padding: "12px 16px" }} onClick={() => toggleSort(field)}>
         {label} {active && (sortDir === "asc" ? "\u2191" : "\u2193")}
       </th>
     );
@@ -156,13 +156,13 @@ export default function ReportsClient() {
           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded capitalize ${style.bg} ${style.text}`}>{engagementStatus}</span>
         </td>
         <td style={{ padding: "12px 16px" }}>
-          <div className="text-xs text-gray-500">{r.sent}</div>
+          <div className="text-xs text-gray-400">{r.sent}</div>
         </td>
         <td style={{ padding: "12px 16px" }}>
-          <div className="text-xs text-gray-500">{timeAgo(r.lastEventTime)}</div>
+          <div className="text-xs text-gray-400">{timeAgo(r.lastEventTime)}</div>
         </td>
         <td style={{ padding: "12px 16px" }} className="text-right">
-          <a href={`mailto:${r.email}`} className="p-1.5 rounded hover:bg-white/10 text-gray-500 hover:text-white transition inline-block">
+          <a href={`mailto:${r.email}`} className="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white transition inline-block">
             <Mail className="h-4 w-4" />
           </a>
         </td>
@@ -170,34 +170,34 @@ export default function ReportsClient() {
     );
   }
 
-  if (loading) return <div className="text-gray-500 text-sm py-12 text-center">Loading reports...</div>;
-  if (!data) return <div className="text-gray-500 text-sm py-12 text-center">Failed to load.</div>;
+  if (loading) return <div className="text-gray-400 text-sm py-12 text-center">Loading reports...</div>;
+  if (!data) return <div className="text-gray-400 text-sm py-12 text-center">Failed to load.</div>;
 
   const { stats } = data;
 
   return (
     <div>
-      <Link href="/platform/campaigns" className="inline-flex items-center gap-1 text-gray-500 hover:text-white text-sm mb-4"><ArrowLeft className="h-4 w-4" /> All Campaigns</Link>
+      <Link href="/platform/campaigns" className="inline-flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-4"><ArrowLeft className="h-4 w-4" /> All Campaigns</Link>
       <h1 className="text-2xl font-bold text-white" style={{ marginBottom: "24px" }}>Campaign Reports</h1>
 
       {/* KPIs - clickable to filter */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: "24px" }}>
         <div onClick={() => setStatusFilter(statusFilter === "all" ? "all" : "all")} className={`bg-blue-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "all" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Total Sent</span><Send className="h-4 w-4 text-blue-400" /></div>
+          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-400 uppercase tracking-wider">Total Sent</span><Send className="h-4 w-4 text-blue-400" /></div>
           <div className="text-2xl font-bold text-blue-400">{stats.totalSent.toLocaleString()}</div>
         </div>
         <div onClick={() => setStatusFilter(statusFilter === "opened" ? "all" : "opened")} className={`bg-emerald-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "opened" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Opened</span><Eye className="h-4 w-4 text-emerald-400" /></div>
+          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-400 uppercase tracking-wider">Opened</span><Eye className="h-4 w-4 text-emerald-400" /></div>
           <div className="text-2xl font-bold text-emerald-400">{stats.totalOpened}</div>
-          <div className="text-xs text-gray-500">{stats.openRate}% open rate</div>
+          <div className="text-xs text-gray-400">{stats.openRate}% open rate</div>
         </div>
         <div onClick={() => setStatusFilter(statusFilter === "clicked" ? "all" : "clicked")} className={`bg-purple-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "clicked" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Clicked</span><MousePointerClick className="h-4 w-4 text-purple-400" /></div>
+          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-400 uppercase tracking-wider">Clicked</span><MousePointerClick className="h-4 w-4 text-purple-400" /></div>
           <div className="text-2xl font-bold text-purple-400">{stats.totalClicked}</div>
-          <div className="text-xs text-gray-500">{stats.clickRate}% click rate</div>
+          <div className="text-xs text-gray-400">{stats.clickRate}% click rate</div>
         </div>
         <div onClick={() => setStatusFilter(statusFilter === "unsubscribed" ? "all" : "unsubscribed")} className={`bg-red-500/10 rounded-xl cursor-pointer transition hover:border-white/20 ${statusFilter === "unsubscribed" ? "border border-white/30 ring-1 ring-white/10" : "border border-white/5"}`} style={{ padding: "20px" }}>
-          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-500 uppercase tracking-wider">Unsubscribed</span><UserX className="h-4 w-4 text-red-400" /></div>
+          <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}><span className="text-xs text-gray-400 uppercase tracking-wider">Unsubscribed</span><UserX className="h-4 w-4 text-red-400" /></div>
           <div className="text-2xl font-bold text-red-400">{stats.totalUnsubscribed}</div>
         </div>
       </div>
@@ -205,9 +205,9 @@ export default function ReportsClient() {
       {/* Toolbar */}
       <div className="flex items-center gap-3 flex-wrap" style={{ marginBottom: "24px" }}>
         <form onSubmit={handleSearch} className="flex-1 min-w-[200px] max-w-md relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search emails, gyms, states..." className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:border-brand-accent/50 focus:outline-none transition" />
-          {search && <button type="button" onClick={() => { setSearch(""); setSearchInput(""); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"><X className="h-3.5 w-3.5" /></button>}
+          {search && <button type="button" onClick={() => { setSearch(""); setSearchInput(""); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"><X className="h-3.5 w-3.5" /></button>}
         </form>
 
         <DropdownMenu label={statusFilter === "all" ? "Engagement" : statusFilter.replace("_", " ")} icon={Filter} active={statusFilter !== "all"}>
@@ -226,10 +226,10 @@ export default function ReportsClient() {
           <MenuItem label="By Status" active={groupBy === "status"} onClick={() => setGroupBy("status")} />
         </DropdownMenu>
 
-        <span className="text-xs text-gray-500">{filtered.length.toLocaleString()} recipients</span>
+        <span className="text-xs text-gray-400">{filtered.length.toLocaleString()} recipients</span>
 
         {(statusFilter !== "all" || groupBy !== "none" || search) && (
-          <button onClick={() => { setStatusFilter("all"); setGroupBy("none"); setSearch(""); setSearchInput(""); }} className="flex items-center gap-1 px-2 py-2 text-xs text-gray-500 hover:text-white transition"><X className="h-3 w-3" /> Reset</button>
+          <button onClick={() => { setStatusFilter("all"); setGroupBy("none"); setSearch(""); setSearchInput(""); }} className="flex items-center gap-1 px-2 py-2 text-xs text-gray-400 hover:text-white transition"><X className="h-3 w-3" /> Reset</button>
         )}
       </div>
 
@@ -242,8 +242,8 @@ export default function ReportsClient() {
                 <SortHeader label="Gym" field="gymName" />
                 <SortHeader label="Email" field="email" />
                 <SortHeader label="State" field="state" />
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Sends</th>
+                <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Status</th>
+                <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ padding: "12px 16px" }}>Sends</th>
                 <SortHeader label="Last Activity" field="lastEvent" />
                 <th style={{ padding: "12px 16px" }}></th>
               </tr>
@@ -256,7 +256,7 @@ export default function ReportsClient() {
                       <td colSpan={7} style={{ padding: "10px 16px" }}>
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-semibold text-white uppercase tracking-wider">{group}</span>
-                          <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full font-medium">{recipients.length}</span>
+                          <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-full font-medium">{recipients.length}</span>
                         </div>
                       </td>
                     </tr>

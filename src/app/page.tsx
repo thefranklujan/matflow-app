@@ -52,7 +52,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <p className="text-gray-600 text-xs mt-8">
+          <p className="text-gray-400 text-xs mt-8">
             Powered by {MATFLOW.name}
           </p>
         </div>
@@ -69,7 +69,7 @@ export default async function HomePage() {
           {MATFLOW.name}
         </h1>
         <p className="text-lg sm:text-xl text-gray-400 mb-3">{MATFLOW.tagline}</p>
-        <p className="text-gray-500 mb-10 max-w-lg mx-auto leading-relaxed">
+        <p className="text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed">
           The platform for Jiu Jitsu academies. Manage members, schedule classes,
           track attendance, and grow your gym.
         </p>
@@ -81,7 +81,7 @@ export default async function HomePage() {
               <Building2 className="h-5 w-5 text-brand-accent" />
             </div>
             <h2 className="text-lg font-semibold text-white mb-1">Academy owners</h2>
-            <p className="mb-5 flex-1 text-sm text-gray-500 leading-relaxed">
+            <p className="mb-5 flex-1 text-sm text-gray-400 leading-relaxed">
               Run your gym from one place. Members, schedule, attendance, belt
               tracking, and announcements.
             </p>
@@ -105,7 +105,7 @@ export default async function HomePage() {
               <GraduationCap className="h-5 w-5 text-brand-accent" />
             </div>
             <h2 className="text-lg font-semibold text-white mb-1">Students</h2>
-            <p className="mb-5 flex-1 text-sm text-gray-500 leading-relaxed">
+            <p className="mb-5 flex-1 text-sm text-gray-400 leading-relaxed">
               Find your academy, track every session, log your training, and
               follow your belt journey.
             </p>
@@ -124,7 +124,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <p className="text-gray-600 text-xs mt-10">
+        <p className="text-gray-400 text-xs mt-10">
           Powered by {MATFLOW.name}
         </p>
       </div>

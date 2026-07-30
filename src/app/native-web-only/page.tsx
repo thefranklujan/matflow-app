@@ -41,7 +41,7 @@ export default async function NativeWebOnlyPage() {
           <p className="text-sm text-gray-300 font-medium mb-2">
             What the iOS app is for
           </p>
-          <ul className="text-sm text-gray-500 space-y-1 list-none pl-0">
+          <ul className="text-sm text-gray-400 space-y-1 list-none pl-0">
             <li>Students: log training, view schedule, find gyms.</li>
             <li>Instructors and members: track progression, roll with your team.</li>
             <li>Community: discover academies and connect with training partners.</li>
@@ -57,7 +57,7 @@ export default async function NativeWebOnlyPage() {
           </button>
         </form>
 
-        <p className="text-gray-600 text-xs mt-5">
+        <p className="text-gray-400 text-xs mt-5">
           Sign in again with a student or instructor account to use the app.
         </p>
       </div>

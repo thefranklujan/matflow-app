@@ -100,16 +100,16 @@ export default async function StudentLeaderboardPage() {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <Trophy className="h-7 w-7 text-[#dc2626]" /> Leaderboard
+            <Trophy className="h-7 w-7 text-[#ef4444]" /> Leaderboard
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-400 text-sm mt-1">
             {me?.homeGym ? `Top grinders at ${me.homeGym}` : "Top grinders on MatFlow"}
           </p>
         </div>
         {myMonthRank > 0 && (
           <div className="bg-[#0a0a0a] border border-[#dc2626]/30 rounded-xl px-4 py-3 text-center">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Your Rank</p>
-            <p className="text-2xl font-bold text-[#dc2626]">#{myMonthRank}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Your Rank</p>
+            <p className="text-2xl font-bold text-[#ef4444]">#{myMonthRank}</p>
           </div>
         )}
       </div>
@@ -133,16 +133,16 @@ function LeaderboardTable({
   if (rows.length === 0) {
     return (
       <div>
-        <h2 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">{title}</h2>
+        <h2 className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-3">{title}</h2>
         <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-          <p className="text-gray-600 text-sm">No sessions logged yet.</p>
+          <p className="text-gray-400 text-sm">No sessions logged yet.</p>
         </div>
       </div>
     );
   }
   return (
     <div>
-      <h2 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">{title}</h2>
+      <h2 className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-3">{title}</h2>
       <div className="bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden">
         {rows.map((r, i) => {
           const rank = i + 1;
@@ -163,20 +163,20 @@ function LeaderboardTable({
                     : undefined
                 }
               >
-                {!medal && <span className="text-gray-500">{rank}</span>}
+                {!medal && <span className="text-gray-400">{rank}</span>}
                 {medal && rank}
               </div>
               {r.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={r.avatar} alt={r.name} className="h-9 w-9 rounded-full object-cover border border-white/10" />
               ) : (
-                <div className="h-9 w-9 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center font-bold text-xs border border-white/10">
+                <div className="h-9 w-9 rounded-full bg-[#dc2626]/20 text-[#ef4444] flex items-center justify-center font-bold text-xs border border-white/10">
                   {r.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm truncate">
-                  {r.name} {isMe && <span className="text-[#dc2626] text-[10px] font-normal">(you)</span>}
+                  {r.name} {isMe && <span className="text-[#ef4444] text-[10px] font-normal">(you)</span>}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`inline-block h-2 w-10 rounded-sm ${BELT_BAR[r.belt] || BELT_BAR.white}`} />
@@ -187,12 +187,12 @@ function LeaderboardTable({
                       ))}
                     </span>
                   )}
-                  <span className="text-gray-500 text-xs">{r.hours}h</span>
+                  <span className="text-gray-400 text-xs">{r.hours}h</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-white text-xl font-bold leading-none">{r.sessions}</p>
-                <p className="text-gray-500 text-[10px] uppercase tracking-wider">sessions</p>
+                <p className="text-gray-400 text-[10px] uppercase tracking-wider">sessions</p>
               </div>
             </div>
           );

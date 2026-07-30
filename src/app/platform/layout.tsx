@@ -20,7 +20,7 @@ export default async function PlatformLayout({ children }: { children: React.Rea
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="h-7 w-auto" />
-          <span className="bg-[#dc2626]/20 text-[#dc2626] text-xs font-semibold px-2 py-0.5 rounded">Platform Admin</span>
+          <span className="bg-[#dc2626]/20 text-[#ef4444] text-xs font-semibold px-2 py-0.5 rounded">Platform Admin</span>
         </div>
         <PlatformUserMenu name={session.name} email={session.email} />
       </header>

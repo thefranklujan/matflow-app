@@ -113,11 +113,11 @@ export default function NominationsClient({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Gym Nominations</h1>
-        <span className="text-gray-500 text-sm">{rows.filter((r) => r.status !== "claimed").length} open</span>
+        <span className="text-gray-400 text-sm">{rows.filter((r) => r.status !== "claimed").length} open</span>
       </div>
 
       {groups.length === 0 ? (
-        <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center text-gray-500">
+        <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center text-gray-400">
           No open gym nominations.
         </div>
       ) : (
@@ -144,7 +144,7 @@ export default function NominationsClient({
                       )}
                     </div>
                     {(first.city || first.state) && (
-                      <p className="text-gray-500 text-xs mt-1">{formatLocation(first.city, first.state)}</p>
+                      <p className="text-gray-400 text-xs mt-1">{formatLocation(first.city, first.state)}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -197,7 +197,7 @@ export default function NominationsClient({
                         <p className="text-white text-sm font-medium">
                           {n.student.firstName} {n.student.lastName}
                         </p>
-                        <p className="text-gray-500 text-xs">{n.student.email}</p>
+                        <p className="text-gray-400 text-xs">{n.student.email}</p>
                         {n.notes && (
                           <p className="text-gray-400 text-xs mt-1 italic">&ldquo;{n.notes}&rdquo;</p>
                         )}
@@ -219,7 +219,7 @@ export default function NominationsClient({
                             {n.ownerPhone}
                           </a>
                         )}
-                        <p className="text-gray-600 text-[10px] mt-1">
+                        <p className="text-gray-400 text-[10px] mt-1">
                           {new Date(n.createdAt).toLocaleDateString()}
                         </p>
                       </div>

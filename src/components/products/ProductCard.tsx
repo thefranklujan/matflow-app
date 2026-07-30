@@ -35,7 +35,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="object-cover"
           />
         ) : (
-          <Package className="h-10 w-10 text-gray-600" />
+          <Package className="h-10 w-10 text-gray-400" />
         )}
         {product.compareAt && product.compareAt > product.price && (
           <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -53,7 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center gap-2">
           <p className="text-brand-accent font-bold">{formatCurrency(product.price)}</p>
           {product.compareAt && product.compareAt > product.price && (
-            <p className="text-gray-500 text-sm line-through">
+            <p className="text-gray-400 text-sm line-through">
               {formatCurrency(product.compareAt)}
             </p>
           )}

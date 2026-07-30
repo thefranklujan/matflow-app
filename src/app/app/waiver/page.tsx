@@ -36,7 +36,7 @@ export default function MemberWaiverPage() {
     setLoading(false);
   }
 
-  if (!data) return <div className="text-gray-500 p-8">Loading...</div>;
+  if (!data) return <div className="text-gray-400 p-8">Loading...</div>;
 
   if (!data.template) {
     return (

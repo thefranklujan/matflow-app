@@ -64,7 +64,7 @@ export default function DropInsClient({
       {dropInUrl && (
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-5 mb-6">
           <p className="text-sm font-semibold text-white mb-1">Drop-in check-in link</p>
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-gray-400 mb-3">
             Share this link or print it as a QR code at your front desk. Visitors fill out their info and sign your waiver before class.
           </p>
           <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export default function DropInsClient({
                 <td className="px-4 py-3 text-sm text-white font-medium">
                   {d.firstName} {d.lastName}
                   {d.emergencyName && (
-                    <div className="text-xs text-gray-500">ICE: {d.emergencyName} {d.emergencyPhone || ""}</div>
+                    <div className="text-xs text-gray-400">ICE: {d.emergencyName} {d.emergencyPhone || ""}</div>
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-400">
@@ -122,7 +122,7 @@ export default function DropInsClient({
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-400">
                   {d.classType || "—"}
-                  {d.instructorName && <span className="text-gray-600"> · {d.instructorName}</span>}
+                  {d.instructorName && <span className="text-gray-400"> · {d.instructorName}</span>}
                 </td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-1 rounded-full ${d.waiverSigned ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
@@ -131,7 +131,7 @@ export default function DropInsClient({
                 </td>
                 <td className="px-4 py-3 text-right">
                   {d.converted ? (
-                    <span className="text-xs text-gray-500">Member</span>
+                    <span className="text-xs text-gray-400">Member</span>
                   ) : (
                     <button
                       onClick={() => convert(d)}
@@ -147,7 +147,7 @@ export default function DropInsClient({
           </tbody>
         </table>
         {dropIns.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm">
+          <div className="text-center py-8 text-gray-400 text-sm">
             No drop-ins yet. Share your check-in link to start capturing visitors.
           </div>
         )}

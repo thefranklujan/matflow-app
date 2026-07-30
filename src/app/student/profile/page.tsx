@@ -52,7 +52,7 @@ export default function StudentProfilePage() {
     setSaving(false);
   }
 
-  if (!profile) return <p className="text-gray-500">Loading...</p>;
+  if (!profile) return <p className="text-gray-400">Loading...</p>;
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -77,22 +77,23 @@ export default function StudentProfilePage() {
   return (
     <div className="max-w-lg">
       <h1 className="text-3xl font-bold text-white mb-2">Profile</h1>
-      <p className="text-gray-500 mb-8">Manage your personal info.</p>
+      <p className="text-gray-400 mb-8">Manage your personal info.</p>
 
       <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-4 flex items-center gap-4">
         {profile.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={profile.avatarUrl} alt="Avatar" className="h-20 w-20 rounded-full object-cover border border-white/10" />
         ) : (
-          <div className="h-20 w-20 rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center text-xl font-bold border border-white/10">
+          <div className="h-20 w-20 rounded-full bg-[#dc2626]/20 text-[#ef4444] flex items-center justify-center text-xl font-bold border border-white/10">
             {profile.firstName[0]}{profile.lastName[0]}
           </div>
         )}
         <div className="flex-1">
           <p className="text-white font-semibold text-sm">Profile Photo</p>
-          <p className="text-gray-500 text-xs mb-2">PNG, JPG, or WebP. Max 5MB.</p>
+          <p className="text-gray-400 text-xs mb-2">PNG, JPG, or WebP. Max 5MB.</p>
           <input
             type="file"
+            aria-label="Upload profile photo"
             accept="image/png,image/jpeg,image/webp"
             onChange={uploadAvatar}
             className="block text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#dc2626] file:text-white hover:file:bg-[#b91c1c]"
@@ -105,6 +106,7 @@ export default function StudentProfilePage() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">First Name</label>
             <input
+              aria-label="First name"
               type="text"
               value={profile.firstName}
               onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
@@ -115,6 +117,7 @@ export default function StudentProfilePage() {
           <div>
             <label className="block text-sm text-gray-400 mb-1">Last Name</label>
             <input
+              aria-label="Last name"
               type="text"
               value={profile.lastName}
               onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
@@ -126,15 +129,17 @@ export default function StudentProfilePage() {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Email</label>
           <input
+            aria-label="Email"
             type="email"
             value={profile.email}
             disabled
-            className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-gray-500 cursor-not-allowed"
+            className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-gray-400 cursor-not-allowed"
           />
         </div>
         <div>
           <label className="block text-sm text-gray-400 mb-1">Phone</label>
           <input
+            aria-label="Phone"
             type="tel"
             value={profile.phone || ""}
             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
@@ -142,12 +147,13 @@ export default function StudentProfilePage() {
           />
         </div>
         <div className="pt-4 mt-4 border-t border-white/5">
-          <h2 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">Jiu-Jitsu</h2>
+          <h2 className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-3">Jiu-Jitsu</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Home Gym</label>
               {gymOptions.length > 0 && !otherGym ? (
                 <select
+                  aria-label="Home gym"
                   value={profile.homeGym && gymOptions.includes(profile.homeGym) ? profile.homeGym : ""}
                   onChange={(e) => {
                     if (e.target.value === "__other") {
@@ -168,6 +174,7 @@ export default function StudentProfilePage() {
               ) : (
                 <div className="flex items-center gap-2">
                   <input
+                    aria-label="Gym name"
                     type="text"
                     value={profile.homeGym || ""}
                     onChange={(e) => setProfile({ ...profile, homeGym: e.target.value })}
@@ -189,7 +196,7 @@ export default function StudentProfilePage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Belt</label>
-                <select
+                <select aria-label="Belt"
                   value={profile.beltRank}
                   onChange={(e) => setProfile({ ...profile, beltRank: e.target.value })}
                   className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-white"
@@ -201,7 +208,7 @@ export default function StudentProfilePage() {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Stripes</label>
-                <select
+                <select aria-label="Stripes"
                   value={profile.stripes}
                   onChange={(e) => setProfile({ ...profile, stripes: Number(e.target.value) })}
                   className="w-full px-4 py-2 bg-black border border-white/10 rounded-lg text-white"
@@ -215,6 +222,7 @@ export default function StudentProfilePage() {
             <div>
               <label className="block text-sm text-gray-400 mb-1">Training Since</label>
               <input
+                aria-label="Training since"
                 type="date"
                 value={profile.trainingSince || ""}
                 onChange={(e) => setProfile({ ...profile, trainingSince: e.target.value || null })}

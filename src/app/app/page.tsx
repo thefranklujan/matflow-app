@@ -133,7 +133,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
               >
                 <div>
                   <p className="text-white text-sm font-medium">{order.customerName}</p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-gray-400 text-xs">
                     {new Date(order.createdAt).toLocaleDateString()} &middot; {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                   </p>
                 </div>
@@ -150,7 +150,7 @@ async function AdminDashboard({ gymId }: { gymId: string }) {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">No orders yet.</p>
+          <p className="text-gray-400 text-sm">No orders yet.</p>
         )}
       </div>
     </div>
@@ -178,7 +178,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
     }),
   ]);
 
-  if (!member) return <p className="text-gray-500">Member not found</p>;
+  if (!member) return <p className="text-gray-400">Member not found</p>;
 
   return (
     <div>
@@ -220,14 +220,14 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
               <div key={cls.id} className="flex items-center justify-between">
                 <div>
                   <p className="text-white font-medium">{cls.classType}</p>
-                  <p className="text-gray-500 text-sm">{cls.instructor} &middot; {cls.locationSlug}{cls.topic ? ` &middot; ${cls.topic}` : ""}</p>
+                  <p className="text-gray-400 text-sm">{cls.instructor} &middot; {cls.locationSlug}{cls.topic ? ` &middot; ${cls.topic}` : ""}</p>
                 </div>
                 <p className="text-[#c4b5a0] text-sm font-medium">{formatTime(cls.startTime)} - {formatTime(cls.endTime)}</p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">No classes scheduled today.</p>
+          <p className="text-gray-400 text-sm">No classes scheduled today.</p>
         )}
       </div>
 
@@ -243,7 +243,7 @@ async function MemberDashboard({ gymId, memberId }: { gymId: string; memberId: s
                   <h3 className="text-white font-semibold">{ann.title}</h3>
                 </div>
                 <p className="text-gray-400 text-sm">{ann.content}</p>
-                <p className="text-gray-600 text-xs mt-1">{new Date(ann.publishedAt).toLocaleDateString()}</p>
+                <p className="text-gray-400 text-xs mt-1">{new Date(ann.publishedAt).toLocaleDateString()}</p>
               </div>
             ))}
           </div>

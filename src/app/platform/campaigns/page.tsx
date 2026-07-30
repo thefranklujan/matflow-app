@@ -26,7 +26,7 @@ export default async function CampaignsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Email Campaigns</h1>
-          <p className="text-gray-500 mt-1">Send custom emails to students or gym admins.</p>
+          <p className="text-gray-400 mt-1">Send custom emails to students or gym admins.</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -46,9 +46,9 @@ export default async function CampaignsPage() {
 
       {campaigns.length === 0 ? (
         <div className="bg-[#111] border border-white/10 rounded-xl p-12 text-center">
-          <Mail className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+          <Mail className="h-10 w-10 text-gray-400 mx-auto mb-3" />
           <p className="text-white font-semibold mb-1">No campaigns yet</p>
-          <p className="text-gray-500 text-sm mb-4">Tell Claude what you want to send and it will draft the HTML for you.</p>
+          <p className="text-gray-400 text-sm mb-4">Tell Claude what you want to send and it will draft the HTML for you.</p>
           <Link href="/platform/campaigns/new" className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg text-sm">
             Create First Campaign
           </Link>
@@ -56,7 +56,7 @@ export default async function CampaignsPage() {
       ) : (
         <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-white/[0.02] text-gray-500 uppercase text-[10px] tracking-wider">
+            <thead className="bg-white/[0.02] text-gray-400 uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Subject</th>
                 <th className="text-left px-4 py-3 font-semibold">Audience</th>
@@ -81,12 +81,12 @@ export default async function CampaignsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-300">{c.sentCount}</td>
                   <td className="px-4 py-3">
-                    <span className={c.opened > 0 ? "text-emerald-400" : "text-gray-600"}>{c.opened}</span>
+                    <span className={c.opened > 0 ? "text-emerald-400" : "text-gray-400"}>{c.opened}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={c.clicked > 0 ? "text-purple-400" : "text-gray-600"}>{c.clicked}</span>
+                    <span className={c.clicked > 0 ? "text-purple-400" : "text-gray-400"}>{c.clicked}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-4 py-3 text-gray-400">
                     {(c.sentAt || c.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
                 </tr>

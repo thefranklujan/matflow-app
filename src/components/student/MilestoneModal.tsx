@@ -55,9 +55,9 @@ export default function MilestoneModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto h-20 w-20 rounded-full bg-[#dc2626]/15 border border-[#dc2626]/40 flex items-center justify-center mb-5">
-          <Trophy className="h-10 w-10 text-[#dc2626]" />
+          <Trophy className="h-10 w-10 text-[#ef4444]" />
         </div>
-        <p className="text-[10px] uppercase tracking-[0.25em] text-[#dc2626] font-bold mb-3">
+        <p className="text-[10px] uppercase tracking-[0.25em] text-[#ef4444] font-bold mb-3">
           Milestone Unlocked
         </p>
         <p className="text-7xl font-black text-white leading-none mb-2 tracking-tight">

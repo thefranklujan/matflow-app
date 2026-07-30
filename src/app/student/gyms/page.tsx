@@ -85,7 +85,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Find Your Gym</h1>
-      <p className="text-gray-500 mb-8">
+      <p className="text-gray-400 mb-8">
         Browse Jiu Jitsu academies on MatFlow. Request to join the one you train at, or nominate
         yours if it isn&apos;t here yet.
       </p>
@@ -101,9 +101,9 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
       </form>
 
       {cards.length === 0 ? (
-        <div className="text-gray-500">
+        <div className="text-gray-400">
           <p>No gyms found.{" "}
-            <Link href="/student/nominate" className="text-[#dc2626] hover:underline">Nominate yours</Link>{" "}
+            <Link href="/student/nominate" className="text-[#ef4444] hover:underline">Nominate yours</Link>{" "}
             and we&apos;ll get them on MatFlow.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
             <section>
               <div className="mb-4">
                 <h2 className="text-sm font-bold text-white uppercase tracking-wider">Gyms on MatFlow</h2>
-                <p className="text-gray-500 text-xs mt-0.5">
+                <p className="text-gray-400 text-xs mt-0.5">
                   These academies are active. Tap to view and request to join.
                 </p>
               </div>
@@ -128,13 +128,13 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
                       className="bg-[#0a0a0a] border border-white/10 hover:border-[#dc2626] rounded-xl p-5 transition h-full"
                     >
                       <div className="flex items-center gap-3 min-w-0 mb-3">
-                        <div className="h-12 w-12 rounded-lg flex items-center justify-center text-base font-bold bg-[#dc2626]/10 text-[#dc2626] shrink-0">
+                        <div className="h-12 w-12 rounded-lg flex items-center justify-center text-base font-bold bg-[#dc2626]/10 text-[#ef4444] shrink-0">
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-white font-semibold truncate">{card.name}</p>
                           {(card.city || card.state) && (
-                            <p className="text-gray-500 text-xs">
+                            <p className="text-gray-400 text-xs">
                               {card.city}{card.city && card.state ? ", " : ""}{card.state}
                             </p>
                           )}
@@ -155,7 +155,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
             <section>
               <div className="mb-4">
                 <h2 className="text-sm font-bold text-yellow-400 uppercase tracking-wider">Not Yet on MatFlow</h2>
-                <p className="text-gray-500 text-xs mt-0.5">
+                <p className="text-gray-400 text-xs mt-0.5">
                   Students nominated these gyms. Nominate yours too to grow the group, we&apos;ll reach out to the owner.
                 </p>
               </div>
@@ -176,7 +176,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
                           <div className="min-w-0">
                             <p className="text-white font-semibold truncate">{card.name}</p>
                             {(card.city || card.state) && (
-                              <p className="text-gray-500 text-xs">
+                              <p className="text-gray-400 text-xs">
                                 {card.city}{card.city && card.state ? ", " : ""}{card.state}
                               </p>
                             )}
@@ -186,7 +186,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
                           Not Active
                         </span>
                       </div>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-gray-400 text-xs">
                         {card.memberCount ?? 0} student{(card.memberCount ?? 0) === 1 ? "" : "s"} nominating.
                       </p>
                     </Link>

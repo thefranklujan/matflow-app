@@ -121,6 +121,7 @@ export default function AdminAttendanceClient() {
             <div>
               <label className="block text-sm text-gray-400 mb-1">Date</label>
               <input
+                aria-label="Attendance date"
                 type="date"
                 value={classDate}
                 onChange={(e) => setClassDate(e.target.value)}
@@ -130,6 +131,7 @@ export default function AdminAttendanceClient() {
             <div>
               <label className="block text-sm text-gray-400 mb-1">Class Type</label>
               <select
+                aria-label="Filter"
                 value={classType}
                 onChange={(e) => setClassType(e.target.value)}
                 className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
@@ -144,6 +146,7 @@ export default function AdminAttendanceClient() {
             <div>
               <label className="block text-sm text-gray-400 mb-1">Location</label>
               <select
+                aria-label="Filter"
                 value={locationSlug}
                 onChange={(e) => setLocationSlug(e.target.value)}
                 className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-accent"
@@ -170,7 +173,7 @@ export default function AdminAttendanceClient() {
               >
                 Select All
               </button>
-              <span className="text-gray-600">|</span>
+              <span className="text-gray-400">|</span>
               <button
                 onClick={deselectAll}
                 className="text-xs text-gray-400 hover:text-white transition"
@@ -181,9 +184,9 @@ export default function AdminAttendanceClient() {
           </div>
 
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading...</p>
+            <p className="text-gray-400 text-sm">Loading...</p>
           ) : members.length === 0 ? (
-            <p className="text-gray-500 text-sm">No approved members found.</p>
+            <p className="text-gray-400 text-sm">No approved members found.</p>
           ) : (
             <div className="space-y-1 max-h-96 overflow-y-auto">
               {members.map((member) => {
@@ -209,7 +212,7 @@ export default function AdminAttendanceClient() {
                     <span className="text-white text-sm">
                       {member.firstName} {member.lastName}
                     </span>
-                    <span className="text-gray-500 text-xs capitalize">
+                    <span className="text-gray-400 text-xs capitalize">
                       {member.beltRank}
                     </span>
                     {already && (

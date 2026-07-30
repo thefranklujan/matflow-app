@@ -56,7 +56,7 @@ export default async function AdminProductsPage() {
                         {product.images[0] ? (
                           <Image src={product.images[0].url} alt="" fill sizes="40px" className="object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-600" /></div>
+                          <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-400" /></div>
                         )}
                       </div>
                       <span className="text-white text-sm font-medium">{product.name}</span>
@@ -91,7 +91,7 @@ export default async function AdminProductsPage() {
           </tbody>
         </table>
         {products.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-400">
             No products yet. Click &quot;Add Product&quot; to get started.
           </div>
         )}

@@ -131,7 +131,7 @@ export default async function MemberDashboardPage() {
                 >
                   <div>
                     <p className="text-white font-medium capitalize">{cls.classType}</p>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-400 text-sm">
                       {cls.instructor} &middot;{" "}
                       <span className="capitalize">{cls.locationSlug}</span>
                       {cls.topic && (
@@ -146,7 +146,7 @@ export default async function MemberDashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-400 text-sm">
               No classes scheduled for today.
             </p>
           )}
@@ -175,14 +175,14 @@ export default async function MemberDashboardPage() {
                   <p className="text-gray-400 text-sm line-clamp-2">
                     {a.content}
                   </p>
-                  <p className="text-gray-600 text-xs mt-1">
+                  <p className="text-gray-400 text-xs mt-1">
                     {new Date(a.publishedAt).toLocaleDateString()}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No announcements.</p>
+            <p className="text-gray-400 text-sm">No announcements.</p>
           )}
         </div>
       </div>

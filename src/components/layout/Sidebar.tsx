@@ -70,14 +70,15 @@ export function Sidebar() {
             <span className="text-sm font-semibold text-white truncate leading-tight">
               {gym?.name || "MatFlow"}
             </span>
-            <span className="text-[10px] text-gray-500 font-medium tracking-wider uppercase leading-tight">
+            <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase leading-tight">
               MatFlow
             </span>
           </div>
         )}
         <button
           onClick={toggleCollapse}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-white/5 hover:text-gray-300 transition"
+          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-white/5 hover:text-gray-300 transition"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -106,7 +107,7 @@ export function Sidebar() {
         {groupedMain.map(({ group, items }, groupIndex) => (
           <div key={group} className={cn(groupIndex > 0 && (collapsed ? "mt-2 border-t border-white/5 pt-2" : "mt-3"))}>
             {!collapsed && (
-              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-600">
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                 {group}
               </p>
             )}

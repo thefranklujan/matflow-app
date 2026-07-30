@@ -129,7 +129,7 @@ export default function AddToCartSection({ product, variants, sizes, colors }: P
                   disabled={outOfStock}
                   className={`w-14 h-10 rounded-lg border text-sm font-medium transition ${
                     outOfStock
-                      ? "border-brand-gray/50 text-gray-600 cursor-not-allowed line-through"
+                      ? "border-brand-gray/50 text-gray-400 cursor-not-allowed line-through"
                       : isSelected
                       ? "border-brand-accent text-brand-accent bg-brand-accent/10"
                       : "border-brand-gray text-gray-300 hover:border-gray-500"
@@ -181,7 +181,7 @@ export default function AddToCartSection({ product, variants, sizes, colors }: P
             ? added
               ? "bg-green-500 text-white"
               : "bg-brand-accent text-brand-black hover:bg-brand-accent/90"
-            : "bg-brand-gray text-gray-500 cursor-not-allowed"
+            : "bg-brand-gray text-gray-400 cursor-not-allowed"
         }`}
       >
         {added ? "Added to Cart!" : hasSizes && !selectedSize ? "Select a Size" : "Add to Cart"}

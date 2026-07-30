@@ -104,7 +104,7 @@ export default async function AdminEventsPage() {
             </tbody>
           </table>
           {events.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-400">
               No events yet. Click &quot;New Event&quot; to get started.
             </div>
           )}

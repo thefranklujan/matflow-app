@@ -44,9 +44,9 @@ export default function WeeklyGoalRing({
     <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 flex flex-col">
       <div className="flex items-center gap-2 mb-2">
         <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
-          <Target className="h-4 w-4 text-[#dc2626]" />
+          <Target className="h-4 w-4 text-[#ef4444]" />
         </div>
-        <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Weekly Goal</p>
+        <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Weekly Goal</p>
       </div>
 
       <div className="flex items-center gap-3">
@@ -74,13 +74,13 @@ export default function WeeklyGoalRing({
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {complete ? (
-              <Check className="h-7 w-7 text-[#dc2626]" strokeWidth={3} />
+              <Check className="h-7 w-7 text-[#ef4444]" strokeWidth={3} />
             ) : (
               <>
                 <p className="text-white font-black text-lg leading-none">
                   {current}/{safeGoal}
                 </p>
-                <p className="text-[9px] uppercase tracking-wider text-gray-500 mt-0.5">this week</p>
+                <p className="text-[9px] uppercase tracking-wider text-gray-400 mt-0.5">this week</p>
               </>
             )}
           </div>
@@ -88,7 +88,7 @@ export default function WeeklyGoalRing({
 
         <div className="flex-1 min-w-0">
           {complete ? (
-            <p className="text-[#dc2626] text-xs font-bold uppercase tracking-wider">Goal Hit</p>
+            <p className="text-[#ef4444] text-xs font-bold uppercase tracking-wider">Goal Hit</p>
           ) : (
             <p className="text-gray-400 text-xs">
               {Math.max(0, safeGoal - current)} to go this week.
@@ -97,7 +97,7 @@ export default function WeeklyGoalRing({
           {!editing ? (
             <button
               onClick={() => setEditing(true)}
-              className="mt-2 inline-flex items-center gap-1 text-[11px] text-gray-500 hover:text-[#dc2626] transition"
+              className="mt-2 inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-[#ef4444] transition"
             >
               <Pencil className="h-3 w-3" /> Edit Goal
             </button>

@@ -34,7 +34,7 @@ export default function RequestsClient({ requests }: { requests: JoinRequest[] }
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-2">Join Requests</h1>
-      <p className="text-gray-500 mb-6">Students requesting to join your gym.</p>
+      <p className="text-gray-400 mb-6">Students requesting to join your gym.</p>
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {(["pending", "approved", "rejected", "all"] as const).map((s) => (
@@ -51,7 +51,7 @@ export default function RequestsClient({ requests }: { requests: JoinRequest[] }
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-brand-dark border border-brand-gray rounded-lg p-10 text-center text-gray-500">
+        <div className="bg-brand-dark border border-brand-gray rounded-lg p-10 text-center text-gray-400">
           No {filter !== "all" ? filter : ""} requests
         </div>
       ) : (
@@ -62,13 +62,13 @@ export default function RequestsClient({ requests }: { requests: JoinRequest[] }
                 <div className="flex-1">
                   <p className="text-white font-semibold">{r.student.firstName} {r.student.lastName}</p>
                   <p className="text-gray-400 text-sm">{r.student.email}</p>
-                  {r.student.phone && <p className="text-gray-500 text-xs">{r.student.phone}</p>}
+                  {r.student.phone && <p className="text-gray-400 text-xs">{r.student.phone}</p>}
                   {r.message && (
                     <div className="mt-3 bg-black/20 border-l-2 border-brand-accent/50 px-3 py-2 rounded">
                       <p className="text-gray-300 text-sm italic">&ldquo;{r.message}&rdquo;</p>
                     </div>
                   )}
-                  <p className="text-gray-600 text-xs mt-2">Submitted {new Date(r.createdAt).toLocaleDateString()}</p>
+                  <p className="text-gray-400 text-xs mt-2">Submitted {new Date(r.createdAt).toLocaleDateString()}</p>
                 </div>
                 {r.status === "pending" ? (
                   <div className="flex gap-2 shrink-0">

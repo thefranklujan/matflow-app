@@ -109,7 +109,7 @@ export default async function JoinGymPage({ params }: Props) {
           </div>
         )}
 
-        <p className="text-gray-600 text-sm mt-8">
+        <p className="text-gray-400 text-sm mt-8">
           Powered by {MATFLOW.name}
         </p>
       </div>

@@ -159,7 +159,7 @@ export default function AdminNewEventPage() {
               ))}
             </select>
             {instructors.length === 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 Add instructors under{" "}
                 <Link href="/app/instructors" className="text-brand-accent hover:underline">Instructors</Link>{" "}
                 to assign one.

@@ -311,7 +311,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             <p className="text-xs text-red-400 mt-1">{categoryError}</p>
           )}
           {!addingCategory && categories.length === 0 && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               Create your first category to start adding products.
             </p>
           )}
@@ -370,7 +370,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
               className="hidden"
             />
             <p className="text-gray-400">{uploading ? "Uploading..." : "Click to upload images"}</p>
-            <p className="text-xs text-gray-500 mt-1">JPG, PNG, or WebP. Max 5MB each.</p>
+            <p className="text-xs text-gray-400 mt-1">JPG, PNG, or WebP. Max 5MB each.</p>
           </label>
         </div>
       </div>
@@ -400,7 +400,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         </div>
 
         {variants.length === 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             No variants yet. Select a category and click &quot;Auto-generate sizes&quot; or add them manually.
           </p>
         )}
@@ -449,7 +449,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             <button
               type="button"
               onClick={() => removeVariant(i)}
-              className="text-gray-500 hover:text-red-400 transition p-1"
+              className="text-gray-400 hover:text-red-400 transition p-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -132,20 +132,20 @@ export default function TrainingLogClient({
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Sessions</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Sessions</p>
           <p className="text-2xl font-bold text-white mt-1">{totalSessions}</p>
         </div>
         <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Total Hours</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Total Hours</p>
           <p className="text-2xl font-bold text-white mt-1">{Math.round(totalMinutes / 60)}</p>
         </div>
         <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Rolls</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Rolls</p>
           <p className="text-2xl font-bold text-white mt-1">{totalRolls}</p>
         </div>
         <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Win %</p>
-          <p className="text-2xl font-bold text-[#dc2626] mt-1">
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Win %</p>
+          <p className="text-2xl font-bold text-[#ef4444] mt-1">
             {totalRolls > 0 ? Math.round((totalWins / totalRolls) * 100) : 0}%
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function TrainingLogClient({
         {sessions.length === 0 ? (
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center">
             <p className="text-white font-semibold mb-1">No sessions logged yet</p>
-            <p className="text-gray-500 text-sm">Tap Log Session to record your first training.</p>
+            <p className="text-gray-400 text-sm">Tap Log Session to record your first training.</p>
           </div>
         ) : (
           sessions.map((s) => (
@@ -219,17 +219,17 @@ export default function TrainingLogClient({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <p className="text-white font-semibold">{new Date(s.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
-                    <span className="bg-white/5 text-[#dc2626] text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded">{typeLabel(s.sessionType)}</span>
+                    <span className="bg-white/5 text-[#ef4444] text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded">{typeLabel(s.sessionType)}</span>
                     <span className="inline-flex items-center gap-1 text-gray-400 text-xs"><Clock className="h-3 w-3" /> {s.duration} min</span>
                     {(s.rollsWon > 0 || s.rollsLost > 0) && (
                       <span className="inline-flex items-center gap-1 text-gray-400 text-xs"><Swords className="h-3 w-3" /> {s.rollsWon}W · {s.rollsLost}L</span>
                     )}
                   </div>
                   {s.techniques && <p className="text-gray-300 text-sm mt-2">{s.techniques}</p>}
-                  {s.partners && <p className="text-gray-500 text-xs mt-1">Partners: {s.partners}</p>}
+                  {s.partners && <p className="text-gray-400 text-xs mt-1">Partners: {s.partners}</p>}
                   {s.notes && <p className="text-gray-400 text-sm mt-2 italic">&ldquo;{s.notes}&rdquo;</p>}
                 </div>
-                <button onClick={() => remove(s.id)} className="text-gray-600 hover:text-red-400 transition">
+                <button onClick={() => remove(s.id)} aria-label="Delete session" className="text-gray-400 hover:text-red-400 transition">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

@@ -70,7 +70,7 @@ export default async function AdminVideosPage() {
             </tbody>
           </table>
           {videos.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-400">
               No videos yet. Click &quot;Add Video&quot; to get started.
             </div>
           )}

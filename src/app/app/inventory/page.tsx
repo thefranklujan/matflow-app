@@ -48,7 +48,7 @@ export default async function AdminInventoryPage() {
           </tbody>
         </table>
         {variants.length === 0 && (
-          <div className="text-center py-8 text-gray-500">No inventory items.</div>
+          <div className="text-center py-8 text-gray-400">No inventory items.</div>
         )}
       </div>
     </div>

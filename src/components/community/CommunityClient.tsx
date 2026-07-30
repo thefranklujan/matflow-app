@@ -75,7 +75,7 @@ function Avatar({ name, url, className = "h-8 w-8 text-xs" }: { name: string; ur
     return <img src={url} alt={name} className={`${className} rounded-full object-cover shrink-0`} />;
   }
   return (
-    <div className={`${className} rounded-full bg-[#dc2626]/20 text-[#dc2626] flex items-center justify-center font-bold shrink-0`}>
+    <div className={`${className} rounded-full bg-[#dc2626]/20 text-[#ef4444] flex items-center justify-center font-bold shrink-0`}>
       {initials(name)}
     </div>
   );
@@ -294,9 +294,9 @@ export default function CommunityClient({
 
       {groups.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center">
-          <Users className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+          <Users className="h-10 w-10 text-gray-400 mx-auto mb-3" />
           <p className="text-white font-semibold mb-1">You&apos;re not in any community yet</p>
-          <p className="text-gray-500 text-sm mb-4">
+          <p className="text-gray-400 text-sm mb-4">
             Nominate a gym to start a private group with everyone else from your academy.
           </p>
           <a href="/student/nominate" className="inline-block bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-4 py-2 rounded-lg text-sm transition">
@@ -307,7 +307,7 @@ export default function CommunityClient({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Group list */}
           <div className="lg:col-span-1">
-            <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Your Groups</h2>
+            <h2 className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2">Your Groups</h2>
             <div className="space-y-2">
               {groups.map((g) => (
                 <a
@@ -329,9 +329,9 @@ export default function CommunityClient({
                     )}
                   </div>
                   {(g.city || g.state) && (
-                    <p className="text-gray-500 text-xs">{[g.city, g.state].filter(Boolean).join(", ")}</p>
+                    <p className="text-gray-400 text-xs">{[g.city, g.state].filter(Boolean).join(", ")}</p>
                   )}
-                  <p className="text-[#dc2626] text-xs font-semibold mt-1">
+                  <p className="text-[#ef4444] text-xs font-semibold mt-1">
                     {g.memberCount} member{g.memberCount === 1 ? "" : "s"}
                     {g.myStatus === "pending" && <span className="ml-2 text-yellow-400">· Pending vouch</span>}
                   </p>
@@ -345,7 +345,7 @@ export default function CommunityClient({
             {selected ? (
               <>
                 <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mb-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Group</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">Group</p>
                   <h2 className="text-2xl font-bold text-white mt-1 flex items-center gap-2">
                     {selected.name}
                     {isMod && (
@@ -355,9 +355,9 @@ export default function CommunityClient({
                     )}
                   </h2>
                   {(selected.city || selected.state) && (
-                    <p className="text-gray-500 text-sm">{[selected.city, selected.state].filter(Boolean).join(", ")}</p>
+                    <p className="text-gray-400 text-sm">{[selected.city, selected.state].filter(Boolean).join(", ")}</p>
                   )}
-                  <p className="text-[#dc2626] text-sm mt-2 font-semibold">
+                  <p className="text-[#ef4444] text-sm mt-2 font-semibold">
                     {selected.memberCount} student{selected.memberCount === 1 ? "" : "s"} from this gym
                   </p>
                 </div>
@@ -390,7 +390,7 @@ export default function CommunityClient({
                             </div>
                             <div>
                               <p className="text-white text-sm">{m.name}</p>
-                              <p className="text-gray-500 text-xs">{m.sessionCount} sessions logged · joined {daysAgo(m.joinedAt)}d ago</p>
+                              <p className="text-gray-400 text-xs">{m.sessionCount} sessions logged · joined {daysAgo(m.joinedAt)}d ago</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -425,7 +425,7 @@ export default function CommunityClient({
                       className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#dc2626]"
                     />
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-gray-600 text-xs">{body.length} / 500</span>
+                      <span className="text-gray-400 text-xs">{body.length} / 500</span>
                       <button
                         type="submit"
                         disabled={posting || !body.trim()}
@@ -442,7 +442,7 @@ export default function CommunityClient({
                 {myStatus === "active" && (
                   <div className="space-y-3 mb-6">
                     {posts.length === 0 ? (
-                      <p className="text-gray-600 text-sm text-center py-8">No posts yet. Be the first.</p>
+                      <p className="text-gray-400 text-sm text-center py-8">No posts yet. Be the first.</p>
                     ) : (
                       posts.map((p) => (
                         <div
@@ -462,13 +462,13 @@ export default function CommunityClient({
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-white font-semibold text-sm">{p.authorName}</p>
                                 <span className={`h-2 w-2 rounded-full ${BELT_DOT[p.authorBelt] || BELT_DOT.white}`} />
-                                <span className="text-gray-500 text-xs capitalize">{p.authorBelt} belt</span>
+                                <span className="text-gray-400 text-xs capitalize">{p.authorBelt} belt</span>
                                 <span className="text-gray-700 text-xs">·</span>
-                                <span className="text-gray-500 text-xs">{p.authorSessionCount} sessions</span>
+                                <span className="text-gray-400 text-xs">{p.authorSessionCount} sessions</span>
                                 {p.authorJoinedAt && (
                                   <>
                                     <span className="text-gray-700 text-xs">·</span>
-                                    <span className="text-gray-500 text-xs">{daysAgo(p.authorJoinedAt)}d on MatFlow</span>
+                                    <span className="text-gray-400 text-xs">{daysAgo(p.authorJoinedAt)}d on MatFlow</span>
                                   </>
                                 )}
                               </div>
@@ -477,7 +477,7 @@ export default function CommunityClient({
                                 <button
                                   onClick={() => toggleLike(p.id)}
                                   className={`inline-flex items-center gap-1 transition ${
-                                    p.likedByMe ? "text-[#dc2626]" : "text-gray-500 hover:text-[#dc2626]"
+                                    p.likedByMe ? "text-[#ef4444]" : "text-gray-400 hover:text-[#ef4444]"
                                   }`}
                                 >
                                   <Heart className="h-3.5 w-3.5" fill={p.likedByMe ? "currentColor" : "none"} />
@@ -485,14 +485,14 @@ export default function CommunityClient({
                                 </button>
                                 <button
                                   onClick={() => toggleComments(p.id)}
-                                  className="inline-flex items-center gap-1 text-gray-500 hover:text-white transition"
+                                  className="inline-flex items-center gap-1 text-gray-400 hover:text-white transition"
                                 >
                                   <MessageCircle className="h-3.5 w-3.5" />
                                   <span className="font-semibold">{p.comments.length}</span>
                                 </button>
                                 <span className="text-gray-700">{new Date(p.createdAt).toLocaleDateString()}</span>
                                 {!p.isMine && (
-                                  <button onClick={() => reportPost(p.id)} className="text-gray-600 hover:text-red-400 inline-flex items-center gap-1">
+                                  <button onClick={() => reportPost(p.id)} className="text-gray-400 hover:text-red-400 inline-flex items-center gap-1">
                                     <Flag className="h-3 w-3" /> Report
                                   </button>
                                 )}
@@ -513,7 +513,7 @@ export default function CommunityClient({
                                   </>
                                 )}
                                 {p.isMine && (
-                                  <button onClick={() => removePost(p.id)} className="text-gray-600 hover:text-red-400 inline-flex items-center gap-1">
+                                  <button onClick={() => removePost(p.id)} className="text-gray-400 hover:text-red-400 inline-flex items-center gap-1">
                                     <Trash2 className="h-3 w-3" /> Delete
                                   </button>
                                 )}
@@ -528,9 +528,9 @@ export default function CommunityClient({
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                           <span className="text-white text-xs font-semibold">{c.authorName}</span>
                                           <span className={`h-1.5 w-1.5 rounded-full ${BELT_DOT[c.authorBelt] || BELT_DOT.white}`} />
-                                          <span className="text-gray-600 text-[10px]">{new Date(c.createdAt).toLocaleDateString()}</span>
+                                          <span className="text-gray-400 text-[10px]">{new Date(c.createdAt).toLocaleDateString()}</span>
                                           {c.isMine && (
-                                            <button onClick={() => deleteComment(p.id, c.id)} className="text-gray-600 hover:text-red-400 ml-auto">
+                                            <button onClick={() => deleteComment(p.id, c.id)} className="text-gray-400 hover:text-red-400 ml-auto">
                                               <Trash2 className="h-3 w-3" />
                                             </button>
                                           )}
@@ -592,7 +592,7 @@ export default function CommunityClient({
                           <Avatar name={entry.name} url={entry.avatarUrl} className="h-7 w-7 text-[10px]" />
                           <div className="flex-1 min-w-0">
                             <p className="text-white text-xs font-semibold truncate">{entry.name}</p>
-                            <p className="text-gray-500 text-[10px] capitalize">{entry.belt} belt</p>
+                            <p className="text-gray-400 text-[10px] capitalize">{entry.belt} belt</p>
                           </div>
                           <span className="text-yellow-400 text-xs font-bold">{entry.sessions}</span>
                         </div>
@@ -604,7 +604,7 @@ export default function CommunityClient({
                 {/* Members */}
                 {myStatus === "active" && (
                   <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-                    <h3 className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">
+                    <h3 className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-3">
                       Members ({activeMembers.length})
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -620,7 +620,7 @@ export default function CommunityClient({
                                 </span>
                               )}
                             </p>
-                            <p className="text-gray-500 text-[10px] capitalize">{m.belt} belt · {m.sessionCount} sessions</p>
+                            <p className="text-gray-400 text-[10px] capitalize">{m.belt} belt · {m.sessionCount} sessions</p>
                           </div>
                           {isMod && m.role !== "mod" && (
                             <button
@@ -633,7 +633,7 @@ export default function CommunityClient({
                           {isMod && m.role === "mod" && (
                             <button
                               onClick={() => promoteOrDemote(m.studentId, "demote")}
-                              className="text-[10px] text-gray-500 hover:text-gray-300 font-bold uppercase tracking-wider px-2 py-1 rounded hover:bg-white/5"
+                              className="text-[10px] text-gray-400 hover:text-gray-300 font-bold uppercase tracking-wider px-2 py-1 rounded hover:bg-white/5"
                               title="Demote to member"
                             >
                               − Mod
@@ -646,7 +646,7 @@ export default function CommunityClient({
                 )}
               </>
             ) : (
-              <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center text-gray-500">
+              <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center text-gray-400">
                 Select a group to view its feed.
               </div>
             )}

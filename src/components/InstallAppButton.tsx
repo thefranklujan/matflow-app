@@ -75,7 +75,7 @@ export default function InstallAppButton() {
                 <li>Scroll down and tap &ldquo;Add to Home Screen&rdquo;</li>
                 <li>Tap Add in the top right</li>
               </ol>
-              <p className="text-xs text-gray-500 mt-4">
+              <p className="text-xs text-gray-400 mt-4">
                 MatFlow will open like a native app and send you push notifications.
               </p>
             </div>

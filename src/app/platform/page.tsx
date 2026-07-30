@@ -74,7 +74,7 @@ export default async function PlatformDashboard() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Platform Dashboard</h1>
-          <p className="text-gray-500">
+          <p className="text-gray-400">
             Real academies only (synthetic platform gyms excluded). Data as of {now.toLocaleString()}.
           </p>
         </div>
@@ -120,7 +120,7 @@ export default async function PlatformDashboard() {
           <h2 className="flex items-center gap-2 text-white font-semibold mb-1">
             <Scale className="h-4 w-4 text-orange-400" /> Billing reconciliation needed
           </h2>
-          <p className="text-gray-500 text-xs mb-3">
+          <p className="text-gray-400 text-xs mb-3">
             Excluded from the MRR estimate: unknown active prices, legacy free, unrecognized states.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -140,13 +140,13 @@ export default async function PlatformDashboard() {
           <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-white font-semibold"><Clock className="h-4 w-4 text-yellow-400" /> Trials Ending Soon</h2>
-              <p className="text-gray-500 text-xs">Valid trials ending within 7 days</p>
+              <p className="text-gray-400 text-xs">Valid trials ending within 7 days</p>
             </div>
             <span className="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-2 py-1 rounded">{b.trialsEnding7d.length}</span>
           </div>
           <div className="divide-y divide-white/5">
             {b.trialsEnding7d.length === 0 ? (
-              <p className="px-6 py-8 text-gray-500 text-sm text-center">No trials ending in the next 7 days</p>
+              <p className="px-6 py-8 text-gray-400 text-sm text-center">No trials ending in the next 7 days</p>
             ) : (
               b.trialsEnding7d.map((t) => (
                 <Link key={t.gymId} href={`/platform/gyms/${t.gymId}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition">
@@ -163,18 +163,18 @@ export default async function PlatformDashboard() {
           <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-white font-semibold"><AlertTriangle className="h-4 w-4 text-red-400" /> Needs Onboarding Help</h2>
-              <p className="text-gray-500 text-xs">Approved, access-holding academies with ≤1 active member {STUCK_DAYS}+ days after signup</p>
+              <p className="text-gray-400 text-xs">Approved, access-holding academies with ≤1 active member {STUCK_DAYS}+ days after signup</p>
             </div>
             <span className="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">{b.needsOnboardingHelp.length}</span>
           </div>
           <div className="divide-y divide-white/5">
             {b.needsOnboardingHelp.length === 0 ? (
-              <p className="px-6 py-8 text-gray-500 text-sm text-center">No access-holding academy is stuck at one active member</p>
+              <p className="px-6 py-8 text-gray-400 text-sm text-center">No access-holding academy is stuck at one active member</p>
             ) : (
               b.needsOnboardingHelp.slice(0, 5).map((g) => (
                 <Link key={g.gymId} href={`/platform/gyms/${g.gymId}`} className="flex items-center justify-between px-6 py-3 hover:bg-white/5 transition">
                   <p className="text-white text-sm font-medium">{g.name}</p>
-                  <span className="text-gray-500 text-xs">since {new Date(g.createdAt).toLocaleDateString()}</span>
+                  <span className="text-gray-400 text-xs">since {new Date(g.createdAt).toLocaleDateString()}</span>
                 </Link>
               ))
             )}
@@ -205,7 +205,7 @@ export default async function PlatformDashboard() {
             <div className="bg-[#111] border border-white/10 rounded-lg p-5">
               <h2 className="flex items-center gap-2 text-white font-semibold mb-3">
                 <Flame className="h-4 w-4 text-orange-400" /> Hot Nominations
-                <span className="text-xs text-gray-500 font-normal">3+ students, same gym</span>
+                <span className="text-xs text-gray-400 font-normal">3+ students, same gym</span>
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {hotNominations.map((n) => (
@@ -231,14 +231,14 @@ export default async function PlatformDashboard() {
             <Link key={gym.id} href={`/platform/gyms/${gym.id}`} className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition">
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium truncate">{gym.name}</p>
-                <p className="text-gray-500 text-xs">{gym.activeMemberCount} active member{gym.activeMemberCount !== 1 ? "s" : ""}</p>
+                <p className="text-gray-400 text-xs">{gym.activeMemberCount} active member{gym.activeMemberCount !== 1 ? "s" : ""}</p>
               </div>
               <div className="text-right shrink-0 ml-3">
                 <p className="text-gray-400 text-xs">{new Date(gym.createdAt).toLocaleDateString()}</p>
                 <span className={`text-xs font-medium capitalize ${
                   gym.subscriptionStatus === "active" ? "text-green-400"
                   : gym.subscriptionStatus === "trialing" ? "text-yellow-400"
-                  : "text-gray-500"
+                  : "text-gray-400"
                 }`}>{gym.subscriptionStatus}</span>
               </div>
             </Link>
@@ -249,12 +249,12 @@ export default async function PlatformDashboard() {
       {/* Explicit gaps — never faked */}
       <div className="bg-[#111] border border-white/10 rounded-lg p-5">
         <h2 className="text-white font-semibold mb-1">Not available yet</h2>
-        <p className="text-gray-500 text-xs mb-3">These metrics have no trustworthy source today and are never estimated.</p>
+        <p className="text-gray-400 text-xs mb-3">These metrics have no trustworthy source today and are never estimated.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
           {UNAVAILABLE_METRICS.map((m) => (
             <div key={m.label} className="flex items-center justify-between text-sm">
               <span className="text-gray-400">{m.label}</span>
-              <span className={`text-xs font-medium ${m.status === "Access Needed" ? "text-orange-400" : "text-gray-600"}`}>
+              <span className={`text-xs font-medium ${m.status === "Access Needed" ? "text-orange-400" : "text-gray-400"}`}>
                 {m.status}
               </span>
             </div>
@@ -270,7 +270,7 @@ function KPI({ label, value, sub, color = "text-white" }: { label: string; value
     <div className="bg-[#111] border border-white/10 rounded-lg p-5">
       <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-gray-400 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

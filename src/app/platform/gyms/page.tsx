@@ -26,7 +26,7 @@ export default async function GymsListPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">All Gyms</h1>
         <div className="flex items-center gap-3">
-          <span className="text-gray-500 text-sm">{gyms.length} total</span>
+          <span className="text-gray-400 text-sm">{gyms.length} total</span>
           <Link href="/platform/gyms/map" className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 font-medium px-3 py-1.5 rounded-lg transition text-sm">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             View on Map
@@ -37,7 +37,7 @@ export default async function GymsListPage() {
       <div className="bg-[#111] border border-white/10 rounded-lg overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-white/5 text-xs text-gray-500 uppercase tracking-wider">
+            <tr className="border-b border-white/5 text-xs text-gray-400 uppercase tracking-wider">
               <th className="text-left px-6 py-3">Gym</th>
               <th className="text-left px-6 py-3">Slug</th>
               <th className="text-center px-6 py-3">Members</th>
@@ -82,7 +82,7 @@ export default async function GymsListPage() {
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gym.name + (gym.city ? " " + gym.city : "") + (gym.state ? " " + gym.state : ""))}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-white transition"
+                      className="text-gray-400 hover:text-white transition"
                       title="View on Google Maps"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>

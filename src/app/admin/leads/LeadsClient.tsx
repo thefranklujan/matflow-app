@@ -77,7 +77,7 @@ export default function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) 
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-500">No leads yet. Leads from your website demo form will appear here.</p>
+        <p className="text-gray-400">No leads yet. Leads from your website demo form will appear here.</p>
       ) : (
         <div className="space-y-2">
           {filtered.map((lead) => (
@@ -88,12 +88,12 @@ export default function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) 
                   <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${STATUS_COLORS[lead.status] || ""}`}>
                     {lead.status}
                   </span>
-                  <span className="text-gray-600 text-xs">{lead.source}</span>
+                  <span className="text-gray-400 text-xs">{lead.source}</span>
                 </div>
                 <div className="text-gray-400 text-sm">
                   {lead.email} {lead.phone && `| ${lead.phone}`}
                 </div>
-                <div className="text-gray-600 text-xs mt-1">
+                <div className="text-gray-400 text-xs mt-1">
                   {new Date(lead.createdAt).toLocaleDateString()}
                 </div>
               </div>

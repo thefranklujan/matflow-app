@@ -204,7 +204,7 @@ export default async function StudentDashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">Welcome, {session.name.split(" ")[0]}</h1>
-      <p className="text-gray-500 mb-6">Your training, your gyms, your community.</p>
+      <p className="text-gray-400 mb-6">Your training, your gyms, your community.</p>
 
       {showAutoLog && myTodayPlan && (
         <div className="mb-6">
@@ -223,23 +223,23 @@ export default async function StudentDashboardPage() {
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
-                <CalendarDays className="h-4 w-4 text-[#dc2626]" />
+                <CalendarDays className="h-4 w-4 text-[#ef4444]" />
               </div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">This Week</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">This Week</p>
             </div>
             <p className="text-3xl font-bold text-white">{sessionsThisWeek}</p>
-            <p className="text-gray-500 text-xs mt-0.5">session{sessionsThisWeek === 1 ? "" : "s"}</p>
+            <p className="text-gray-400 text-xs mt-0.5">session{sessionsThisWeek === 1 ? "" : "s"}</p>
           </div>
 
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-[#dc2626]" />
+                <TrendingUp className="h-4 w-4 text-[#ef4444]" />
               </div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">This Month</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">This Month</p>
             </div>
             <p className="text-3xl font-bold text-white">{sessionsThisMonth}</p>
-            <p className="text-gray-500 text-xs mt-0.5">session{sessionsThisMonth === 1 ? "" : "s"}</p>
+            <p className="text-gray-400 text-xs mt-0.5">session{sessionsThisMonth === 1 ? "" : "s"}</p>
           </div>
 
           <div className="bg-gradient-to-br from-orange-500/15 to-[#dc2626]/5 border border-orange-500/30 rounded-xl p-4">
@@ -256,12 +256,12 @@ export default async function StudentDashboardPage() {
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-8 w-8 rounded-lg bg-[#dc2626]/15 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-[#dc2626]" />
+                <Clock className="h-4 w-4 text-[#ef4444]" />
               </div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Total Hours</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Total Hours</p>
             </div>
             <p className="text-3xl font-bold text-white">{totalHours}</p>
-            <p className="text-gray-500 text-xs mt-0.5">all time</p>
+            <p className="text-gray-400 text-xs mt-0.5">all time</p>
           </div>
 
           <WeeklyGoalRing current={sessionsThisWeek} goal={weeklyGoal} />
@@ -272,14 +272,14 @@ export default async function StudentDashboardPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">My Gyms</h2>
-          <Link href="/student/gyms" className="text-[#dc2626] text-sm hover:underline">Find more</Link>
+          <Link href="/student/gyms" className="text-[#ef4444] text-sm hover:underline">Find more</Link>
         </div>
 
         {memberships.length === 0 ? (
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center">
-            <Building2 className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+            <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-white font-semibold mb-2">You are not a member of any gym yet</p>
-            <p className="text-gray-500 text-sm mb-6">Find your gym, request to join, and get full access to schedule, videos, attendance, and belt tracking.</p>
+            <p className="text-gray-400 text-sm mb-6">Find your gym, request to join, and get full access to schedule, videos, attendance, and belt tracking.</p>
             <Link href="/student/gyms" className="inline-flex items-center gap-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white font-bold px-6 py-3 rounded-lg transition">
               <Search className="h-4 w-4" /> Find a Gym
             </Link>
@@ -290,16 +290,16 @@ export default async function StudentDashboardPage() {
               <form key={m.id} action={`/api/student/switch-gym/${m.gymId}`} method="POST">
                 <button type="submit" className="w-full text-left bg-[#0a0a0a] border border-white/10 rounded-xl p-5 hover:border-[#dc2626] transition group">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-lg bg-[#dc2626]/10 flex items-center justify-center text-[#dc2626] text-sm font-bold">
+                    <div className="h-10 w-10 rounded-lg bg-[#dc2626]/10 flex items-center justify-center text-[#ef4444] text-sm font-bold">
                       {m.gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <p className="text-white font-semibold">{m.gym.name}</p>
-                      {m.gym.city && <p className="text-gray-500 text-xs">{m.gym.city}{m.gym.state ? `, ${m.gym.state}` : ""}</p>}
+                      {m.gym.city && <p className="text-gray-400 text-xs">{m.gym.city}{m.gym.state ? `, ${m.gym.state}` : ""}</p>}
                     </div>
                   </div>
                   <p className="text-xs text-gray-400 capitalize">{m.beltRank} belt {m.stripes > 0 && `(${m.stripes})`}</p>
-                  <p className="text-[#dc2626] text-xs font-medium mt-2 group-hover:underline">Open Gym &rarr;</p>
+                  <p className="text-[#ef4444] text-xs font-medium mt-2 group-hover:underline">Open Gym &rarr;</p>
                 </button>
               </form>
             ))}
@@ -311,31 +311,31 @@ export default async function StudentDashboardPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Training Log</h2>
-          <Link href="/student/training" className="text-[#dc2626] text-sm hover:underline">Log session</Link>
+          <Link href="/student/training" className="text-[#ef4444] text-sm hover:underline">Log session</Link>
         </div>
         {totalSessions === 0 ? (
           <Link href="/student/training" className="block bg-[#0a0a0a] border border-dashed border-white/15 rounded-xl p-8 text-center hover:border-[#dc2626] transition">
             <p className="text-white font-semibold mb-1">Start your training log</p>
-            <p className="text-gray-500 text-sm">Track techniques, partners, rolls, and time on the mat.</p>
+            <p className="text-gray-400 text-sm">Track techniques, partners, rolls, and time on the mat.</p>
           </Link>
         ) : (
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Sessions</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Sessions</p>
                 <p className="text-2xl font-bold text-white mt-1">{totalSessions}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Hours</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Hours</p>
                 <p className="text-2xl font-bold text-white mt-1">{totalHours}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Rolls</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Rolls</p>
                 <p className="text-2xl font-bold text-white mt-1">{totalRolls}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Win %</p>
-                <p className="text-2xl font-bold text-[#dc2626] mt-1">{winRate}%</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Win %</p>
+                <p className="text-2xl font-bold text-[#ef4444] mt-1">{winRate}%</p>
               </div>
             </div>
             {recentSessions.length > 0 && (
@@ -361,7 +361,7 @@ export default async function StudentDashboardPage() {
                 <p className="text-white font-bold text-lg mb-1">Your gym isn&apos;t on MatFlow yet?</p>
                 <p className="text-gray-400 text-sm">Nominate your academy. When enough students nominate, we&apos;ll reach out to the owner and activate it for free.</p>
               </div>
-              <span className="text-[#dc2626] text-2xl">→</span>
+              <span className="text-[#ef4444] text-2xl">→</span>
             </div>
           </Link>
         </section>
@@ -372,7 +372,7 @@ export default async function StudentDashboardPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Pending Requests</h2>
-            <Link href="/student/requests" className="text-[#dc2626] text-sm hover:underline">View all</Link>
+            <Link href="/student/requests" className="text-[#ef4444] text-sm hover:underline">View all</Link>
           </div>
           <div className="bg-[#0a0a0a] border border-yellow-500/30 rounded-xl divide-y divide-white/5">
             {requests.filter((r) => r.status === "pending").slice(0, 3).map((r) => (
@@ -399,9 +399,9 @@ export default async function StudentDashboardPage() {
               <div key={c.id} className="flex items-center justify-between px-5 py-3">
                 <div>
                   <p className="text-white text-sm font-medium">{c.classType}{c.topic ? ` · ${c.topic}` : ""}</p>
-                  <p className="text-gray-500 text-xs">{c.gym.name} · {c.instructor}</p>
+                  <p className="text-gray-400 text-xs">{c.gym.name} · {c.instructor}</p>
                 </div>
-                <p className="text-[#dc2626] text-sm font-medium">{c.startTime} to {c.endTime}</p>
+                <p className="text-[#ef4444] text-sm font-medium">{c.startTime} to {c.endTime}</p>
               </div>
             ))}
           </div>
@@ -422,7 +422,7 @@ export default async function StudentDashboardPage() {
                   <p className="text-white text-sm font-semibold">{a.title}</p>
                 </div>
                 <p className="text-gray-400 text-sm">{a.content}</p>
-                <p className="text-gray-600 text-xs mt-1">{a.gym.name}</p>
+                <p className="text-gray-400 text-xs mt-1">{a.gym.name}</p>
               </div>
             ))}
           </div>
@@ -439,7 +439,7 @@ export default async function StudentDashboardPage() {
             {recentVideos.map((v) => (
               <div key={v.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
                 <p className="text-white text-sm font-semibold">{v.title}</p>
-                <p className="text-gray-500 text-xs mt-1">{v.gym.name}</p>
+                <p className="text-gray-400 text-xs mt-1">{v.gym.name}</p>
               </div>
             ))}
           </div>
@@ -456,8 +456,8 @@ export default async function StudentDashboardPage() {
             {recentProducts.map((p) => (
               <div key={p.id} className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4">
                 <p className="text-white text-sm font-semibold">{p.name}</p>
-                <p className="text-[#dc2626] text-sm font-bold mt-1">${p.price.toFixed(2)}</p>
-                <p className="text-gray-600 text-xs mt-1">{p.gym.name}</p>
+                <p className="text-[#ef4444] text-sm font-bold mt-1">${p.price.toFixed(2)}</p>
+                <p className="text-gray-400 text-xs mt-1">{p.gym.name}</p>
               </div>
             ))}
           </div>
@@ -469,7 +469,7 @@ export default async function StudentDashboardPage() {
         <section>
           <div className="mb-4">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">Gyms on MatFlow</h2>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-gray-400 text-xs mt-0.5">
               These academies are active — tap to request to join.
             </p>
           </div>
@@ -481,12 +481,12 @@ export default async function StudentDashboardPage() {
                 className="bg-[#0a0a0a] border border-white/10 hover:border-[#dc2626] rounded-xl p-5 transition"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold bg-[#dc2626]/10 text-[#dc2626] shrink-0">
+                  <div className="h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold bg-[#dc2626]/10 text-[#ef4444] shrink-0">
                     {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-white font-semibold truncate">{gym.name}</p>
-                    {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
+                    {gym.city && <p className="text-gray-400 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
                   </div>
                 </div>
               </Link>
@@ -500,7 +500,7 @@ export default async function StudentDashboardPage() {
         <section>
           <div className="mb-4">
             <h2 className="text-sm font-bold text-yellow-400 uppercase tracking-wider">Not Yet on MatFlow</h2>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-gray-400 text-xs mt-0.5">
               Students nominated these gyms. Nominate yours too, and we&apos;ll reach out to the owner.
             </p>
           </div>
@@ -518,7 +518,7 @@ export default async function StudentDashboardPage() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-white font-semibold truncate">{gym.name}</p>
-                      {gym.city && <p className="text-gray-500 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
+                      {gym.city && <p className="text-gray-400 text-xs">{gym.city}{gym.state ? `, ${gym.state}` : ""}</p>}
                       <p className="text-yellow-400/80 text-[10px] mt-0.5">
                         {gym.memberCount ?? 0} student{(gym.memberCount ?? 0) === 1 ? "" : "s"} nominating
                       </p>

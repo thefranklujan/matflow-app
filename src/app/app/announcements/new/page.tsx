@@ -112,7 +112,7 @@ export default function AdminNewAnnouncementPage() {
             <p className="text-sm font-medium text-gray-300">Delivery</p>
             <label className="flex items-center gap-2 text-sm text-gray-400">
               <input type="checkbox" checked disabled className="rounded border-brand-gray" />
-              In-app &amp; push notification <span className="text-gray-600">(always on)</span>
+              In-app &amp; push notification <span className="text-gray-400">(always on)</span>
             </label>
             <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
               <input
@@ -148,7 +148,7 @@ export default function AdminNewAnnouncementPage() {
                   />
                   Send a test to myself only
                 </label>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   Members who unsubscribed from email are skipped automatically.
                 </p>
               </div>

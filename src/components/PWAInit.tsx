@@ -61,9 +61,9 @@ export default function PWAInit() {
         <div className="h-10 w-10 rounded-lg bg-[#c4b5a0]/10 flex items-center justify-center text-[#c4b5a0] font-bold">M</div>
         <div className="flex-1">
           <p className="text-white font-semibold text-sm">Install MatFlow</p>
-          <p className="text-gray-500 text-xs mt-0.5">Add to your home screen for the full app experience</p>
+          <p className="text-gray-400 text-xs mt-0.5">Add to your home screen for the full app experience</p>
         </div>
-        <button onClick={dismiss} className="text-gray-600 hover:text-white text-xl leading-none">&times;</button>
+        <button onClick={dismiss} className="text-gray-400 hover:text-white text-xl leading-none">&times;</button>
       </div>
       <div className="flex gap-2 mt-3">
         <button onClick={dismiss} className="flex-1 px-3 py-2 text-gray-400 hover:text-white text-sm">Not now</button>

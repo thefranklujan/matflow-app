@@ -121,7 +121,7 @@ export default function BillingPage() {
         </button>
       </div>
 
-      <p className="text-gray-600 text-xs mt-6">
+      <p className="text-gray-400 text-xs mt-6">
         All plans include a 14-day free trial. Cancel anytime.
       </p>
     </div>

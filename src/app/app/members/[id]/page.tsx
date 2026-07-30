@@ -119,7 +119,7 @@ export default async function AdminMemberDetailPage({
 
             <h3 className="text-sm font-bold text-white mt-6 mb-3">Belt History</h3>
             {member.beltHistory.length === 0 ? (
-              <p className="text-gray-500 text-sm">No belt history yet.</p>
+              <p className="text-gray-400 text-sm">No belt history yet.</p>
             ) : (
               <div className="space-y-2">
                 {member.beltHistory.map((bp) => {
@@ -131,7 +131,7 @@ export default async function AdminMemberDetailPage({
                         <MiniBelt beltRank={bp.beltRank} stripes={bp.stripes} />
                         {bp.note && <p className="text-gray-400 text-xs mt-0.5">{bp.note}</p>}
                       </div>
-                      <span className="text-gray-500 text-xs">
+                      <span className="text-gray-400 text-xs">
                         {new Date(bp.awardedAt).toLocaleDateString()}
                       </span>
                     </div>

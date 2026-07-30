@@ -111,7 +111,7 @@ export default function StudentShell({
               // eslint-disable-next-line @next/next/no-img-element
               <img src="/logo-icon.svg" alt="MatFlow" className="h-7 w-7" />
             )}
-            <button onClick={toggle} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-white/5 hover:text-gray-300 transition">
+            <button onClick={toggle} aria-label={collapsed ? "Expand navigation" : "Collapse navigation"} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-white/5 hover:text-gray-300 transition">
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </button>
           </div>
@@ -146,7 +146,7 @@ export default function StudentShell({
                       {badge > 0 && (
                         <span className={cn(
                           "shrink-0 h-5 min-w-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center leading-none",
-                          isActive ? "bg-white text-[#dc2626]" : "bg-red-500 text-white"
+                          isActive ? "bg-white text-[#ef4444]" : "bg-red-500 text-white"
                         )}>
                           {badge > 99 ? "99+" : badge}
                         </span>
@@ -242,11 +242,11 @@ export default function StudentShell({
                   href={item.href}
                   className={cn(
                     "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors relative",
-                    isActive ? "text-[#dc2626]" : "text-gray-500"
+                    isActive ? "text-[#ef4444]" : "text-gray-400"
                   )}
                 >
                   <div className="relative">
-                    <Icon className={cn("h-5 w-5", isActive && "text-[#dc2626]")} />
+                    <Icon className={cn("h-5 w-5", isActive && "text-[#ef4444]")} />
                     {badge > 0 && (
                       <span className="absolute -top-1.5 -right-2 h-4 min-w-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
                         {badge > 9 ? "9+" : badge}
@@ -261,7 +261,7 @@ export default function StudentShell({
               onClick={() => setMoreOpen(true)}
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors",
-                MOBILE_MORE.some((i) => pathname.startsWith(i.href)) ? "text-[#dc2626]" : "text-gray-500"
+                MOBILE_MORE.some((i) => pathname.startsWith(i.href)) ? "text-[#ef4444]" : "text-gray-400"
               )}
             >
               <MoreHorizontal className="h-5 w-5" />
@@ -299,7 +299,7 @@ export default function StudentShell({
                       onClick={() => setMoreOpen(false)}
                       className={cn(
                         "flex items-center gap-3 px-3 py-3 rounded-lg transition",
-                        isActive ? "bg-[#dc2626]/10 text-[#dc2626]" : "text-gray-300 hover:bg-white/5"
+                        isActive ? "bg-[#dc2626]/10 text-[#ef4444]" : "text-gray-300 hover:bg-white/5"
                       )}
                     >
                       <Icon className="h-5 w-5" />

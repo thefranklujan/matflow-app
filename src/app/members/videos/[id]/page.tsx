@@ -40,7 +40,7 @@ export default async function MemberVideoDetailPage({
             <span className="text-xs bg-brand-accent/20 text-brand-accent px-3 py-1 rounded-full font-medium">
               {video.classType}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-400">
               {new Date(video.classDate).toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",

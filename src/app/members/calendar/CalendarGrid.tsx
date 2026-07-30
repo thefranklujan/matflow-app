@@ -363,7 +363,7 @@ export default function CalendarGrid({
                     );
                   })}
                   {dayClasses.length > 3 && (
-                    <span className="text-[8px] text-gray-500">+{dayClasses.length - 3}</span>
+                    <span className="text-[8px] text-gray-400">+{dayClasses.length - 3}</span>
                   )}
                 </div>
 
@@ -386,10 +386,10 @@ export default function CalendarGrid({
                 {/* Members count bubble */}
                 {uniqueMembers.size > 0 && (
                   <div className="hidden md:flex items-center gap-0.5 mt-0.5">
-                    <svg className="w-2.5 h-2.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-2.5 h-2.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                     </svg>
-                    <span className="text-[8px] text-gray-500">{uniqueMembers.size}</span>
+                    <span className="text-[8px] text-gray-400">{uniqueMembers.size}</span>
                   </div>
                 )}
               </button>
@@ -454,7 +454,7 @@ export default function CalendarGrid({
                                   {cls.locationSlug === "magnolia" ? "Magnolia" : "Cypress"}
                                 </span>
                               </div>
-                              <p className="text-gray-500 text-xs mt-1">{cls.instructor} &middot; {formatTime(cls.startTime)} - {formatTime(cls.endTime)}</p>
+                              <p className="text-gray-400 text-xs mt-1">{cls.instructor} &middot; {formatTime(cls.startTime)} - {formatTime(cls.endTime)}</p>
                             </div>
                           </div>
 
@@ -490,12 +490,12 @@ export default function CalendarGrid({
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${BELT_COLORS[m.beltRank] || "bg-white"}`} />
                                   {m.firstName} {m.lastName.charAt(0)}.
                                   {m.status === "committed" && (
-                                    <span className="text-[9px] text-gray-500">(planned)</span>
+                                    <span className="text-[9px] text-gray-400">(planned)</span>
                                   )}
                                 </div>
                               ))}
                               {members.length > 12 && (
-                                <span className="text-[11px] text-gray-500 px-2 py-1">+{members.length - 12} more</span>
+                                <span className="text-[11px] text-gray-400 px-2 py-1">+{members.length - 12} more</span>
                               )}
                             </div>
                           </div>
@@ -505,7 +505,7 @@ export default function CalendarGrid({
                   })}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No classes scheduled for this day.</p>
+                <p className="text-gray-400 text-sm">No classes scheduled for this day.</p>
               )}
             </div>
 
@@ -530,7 +530,7 @@ export default function CalendarGrid({
             )}
 
             {selectedDayClasses.length === 0 && selectedDayEvents.length === 0 && (
-              <p className="text-gray-500 text-sm text-center py-4">Nothing scheduled for this day.</p>
+              <p className="text-gray-400 text-sm text-center py-4">Nothing scheduled for this day.</p>
             )}
           </div>
         </div>

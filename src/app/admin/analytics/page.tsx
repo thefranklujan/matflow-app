@@ -132,13 +132,13 @@ export default async function AnalyticsPage() {
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-6">
           <h2 className="text-white font-semibold mb-4">Top Classes (This Month)</h2>
           {topClasses.length === 0 ? (
-            <p className="text-gray-500">No attendance data yet this month.</p>
+            <p className="text-gray-400">No attendance data yet this month.</p>
           ) : (
             <div className="space-y-3">
               {topClasses.map((c, i) => (
                 <div key={c.classType} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-gray-500 w-6 text-right">#{i + 1}</span>
+                    <span className="text-gray-400 w-6 text-right">#{i + 1}</span>
                     <span className="text-white">{c.classType}</span>
                   </div>
                   <span className="text-brand-accent font-bold">{c._count} check-ins</span>
@@ -207,7 +207,7 @@ function StatCard({ label, value, sub, highlight }: { label: string; value: stri
     <div className={`bg-brand-dark border rounded-lg p-5 ${highlight ? "border-yellow-500/30" : "border-brand-gray"}`}>
       <p className="text-gray-400 text-sm mb-1">{label}</p>
       <p className={`text-2xl font-bold ${highlight ? "text-yellow-400" : "text-white"}`}>{value}</p>
-      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-gray-400 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

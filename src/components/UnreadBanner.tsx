@@ -45,7 +45,7 @@ export default function UnreadBanner({ variant = "student" }: { variant?: "stude
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-3 bg-[#dc2626] text-white px-4 py-2.5 text-sm font-medium hover:bg-[#b91c1c] transition shrink-0"
+      className="flex items-center justify-between gap-3 bg-[#b91c1c] text-white px-4 py-2.5 text-sm font-medium hover:bg-[#991b1b] transition shrink-0"
     >
       <span className="inline-flex items-center gap-2 min-w-0">
         <Bell className="h-4 w-4 shrink-0" />
@@ -54,7 +54,7 @@ export default function UnreadBanner({ variant = "student" }: { variant?: "stude
         </span>
       </span>
       <span className="flex items-center gap-3 shrink-0">
-        <span className="text-white/90 text-xs font-bold underline">View</span>
+        <span className="text-white text-xs font-bold underline">View</span>
         <button
           onClick={dismiss}
           className="opacity-80 hover:opacity-100 transition"

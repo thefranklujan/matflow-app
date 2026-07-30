@@ -109,25 +109,27 @@ export default function SettingsPage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={settings.logo} alt="Gym logo" className="h-full w-full object-cover" />
             ) : (
-              <span className="text-gray-600 text-xs">No logo</span>
+              <span className="text-gray-400 text-xs">No logo</span>
             )}
           </div>
           <div className="flex-1">
             <input
               type="file"
+              aria-label="Upload academy logo"
               accept="image/png,image/jpeg,image/webp"
               onChange={handleLogoUpload}
               className="block text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-brand-accent file:text-brand-black hover:file:bg-brand-accent/90"
             />
-            <p className="text-gray-600 text-xs mt-1">PNG, JPG, or WebP. Max 5MB.</p>
+            <p className="text-gray-400 text-xs mt-1">PNG, JPG, or WebP. Max 5MB.</p>
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Gym Name</label>
+          <label htmlFor="set-name" className="block text-sm font-medium text-gray-300 mb-2">Gym Name</label>
           <input
+            id="set-name"
             type="text"
             value={settings.name}
             onChange={(e) => setSettings({ ...settings, name: e.target.value })}
@@ -137,21 +139,24 @@ export default function SettingsPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">URL Slug</label>
-          <p className="text-gray-500 text-sm mb-1">app.mymatflow.com/join/{settings.slug}</p>
-          <p className="text-gray-600 text-xs">Slug cannot be changed after creation.</p>
+          <p className="text-gray-400 text-sm mb-1">app.mymatflow.com/join/{settings.slug}</p>
+          <p className="text-gray-400 text-xs">Slug cannot be changed after creation.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Primary Color</label>
+            <label htmlFor="set-primary" className="block text-sm font-medium text-gray-300 mb-2">Primary Color</label>
             <div className="flex items-center gap-3">
               <input
+                id="set-primary"
+                aria-label="Primary color picker"
                 type="color"
                 value={settings.primaryColor}
                 onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
                 className="w-10 h-10 rounded cursor-pointer bg-transparent border-0"
               />
               <input
+                aria-label="Primary color hex value"
                 type="text"
                 value={settings.primaryColor}
                 onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
@@ -160,15 +165,18 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Secondary Color</label>
+            <label htmlFor="set-secondary" className="block text-sm font-medium text-gray-300 mb-2">Secondary Color</label>
             <div className="flex items-center gap-3">
               <input
+                id="set-secondary"
+                aria-label="Secondary color picker"
                 type="color"
                 value={settings.secondaryColor || "#1a1a1a"}
                 onChange={(e) => setSettings({ ...settings, secondaryColor: e.target.value })}
                 className="w-10 h-10 rounded cursor-pointer bg-transparent border-0"
               />
               <input
+                aria-label="Secondary color hex value"
                 type="text"
                 value={settings.secondaryColor || ""}
                 onChange={(e) => setSettings({ ...settings, secondaryColor: e.target.value || null })}
@@ -180,8 +188,9 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+          <label htmlFor="set-phone" className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
           <input
+            id="set-phone"
             type="tel"
             value={settings.phone || ""}
             onChange={(e) => setSettings({ ...settings, phone: e.target.value || null })}
@@ -191,8 +200,9 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Website</label>
+          <label htmlFor="set-website" className="block text-sm font-medium text-gray-300 mb-2">Website</label>
           <input
+            id="set-website"
             type="url"
             value={settings.website || ""}
             onChange={(e) => setSettings({ ...settings, website: e.target.value || null })}
@@ -202,8 +212,9 @@ export default function SettingsPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
+          <label htmlFor="set-timezone" className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
           <select
+            id="set-timezone"
             value={settings.timezone}
             onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
             className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"

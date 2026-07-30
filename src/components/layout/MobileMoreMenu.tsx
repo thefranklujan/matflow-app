@@ -106,7 +106,7 @@ export function MobileMoreMenu({ onClose }: { onClose: () => void }) {
 
         {groupedItems.map(({ group, items: groupItems }) => (
           <div key={group} className="pt-3 first:pt-1">
-            <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-600">
+            <p className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
               {group}
             </p>
             {groupItems.map((item) => {

@@ -44,7 +44,7 @@ export default async function AnnouncementsPage() {
                   )}
                 </div>
                 <p className="text-gray-400 text-xs line-clamp-2">{a.content}</p>
-                <p className="text-gray-500 text-xs mt-1">
+                <p className="text-gray-400 text-xs mt-1">
                   {new Date(a.publishedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -52,7 +52,7 @@ export default async function AnnouncementsPage() {
             </div>
           ))}
           {announcements.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-400">
               No announcements yet. Click &quot;New Announcement&quot; to get started.
             </div>
           )}

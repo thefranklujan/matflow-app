@@ -153,12 +153,12 @@ function ActivityRow({ log, showGym }: { log: ActivityEntry; showGym?: boolean }
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-200">{description}</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-gray-500">{timeAgo(log.createdAt)}</span>
+          <span className="text-xs text-gray-400">{timeAgo(log.createdAt)}</span>
           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${config.bg} ${config.color}`}>
             {config.label}
           </span>
           {showGym && log.gym?.name && (
-            <span className="text-xs text-gray-600 bg-white/5 px-1.5 py-0.5 rounded">{log.gym.name}</span>
+            <span className="text-xs text-gray-400 bg-white/5 px-1.5 py-0.5 rounded">{log.gym.name}</span>
           )}
         </div>
       </div>
@@ -170,7 +170,7 @@ function GroupHeader({ label, count }: { label: string; count: number }) {
   return (
     <div className="flex items-center gap-3 px-4 pt-5 pb-2">
       <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</h3>
-      <span className="text-[10px] text-gray-600 bg-white/5 px-1.5 py-0.5 rounded-full">{count}</span>
+      <span className="text-[10px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded-full">{count}</span>
       <div className="flex-1 h-px bg-white/5" />
     </div>
   );
@@ -263,7 +263,7 @@ export default function ActivityFeedClient({ apiUrl, showGym }: { apiUrl: string
           <ActivityIcon className="h-6 w-6 text-brand-accent" />
           <h1 className="text-2xl font-bold text-white">Activity</h1>
           {!loading && (
-            <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">{logs.length} events</span>
+            <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">{logs.length} events</span>
           )}
         </div>
       </div>
@@ -297,7 +297,7 @@ export default function ActivityFeedClient({ apiUrl, showGym }: { apiUrl: string
         {(actionFilter || groupBy !== "date" || sortOrder !== "newest") && (
           <button
             onClick={() => { setActionFilter(""); setSortOrder("newest"); setGroupBy("date"); }}
-            className="flex items-center gap-1 px-2 py-2 text-xs text-gray-500 hover:text-white transition"
+            className="flex items-center gap-1 px-2 py-2 text-xs text-gray-400 hover:text-white transition"
           >
             <X className="h-3 w-3" />
             Reset
@@ -307,9 +307,9 @@ export default function ActivityFeedClient({ apiUrl, showGym }: { apiUrl: string
 
       {/* Feed */}
       {loading ? (
-        <div className="text-gray-500 text-sm py-12 text-center">Loading activity...</div>
+        <div className="text-gray-400 text-sm py-12 text-center">Loading activity...</div>
       ) : sortedLogs.length === 0 ? (
-        <div className="text-gray-500 text-sm py-12 text-center">
+        <div className="text-gray-400 text-sm py-12 text-center">
           {actionFilter ? "No activity matches this filter." : "No activity yet. Actions will appear here as they happen."}
         </div>
       ) : (

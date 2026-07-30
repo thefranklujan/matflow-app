@@ -280,7 +280,7 @@ export default function BJJClockClient() {
       {!isLandscape && (
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white">BJJ Clock</h1>
-          <p className="text-gray-500 text-sm mt-1">Round timer for sparring, drilling, and open mats.</p>
+          <p className="text-gray-400 text-sm mt-1">Round timer for sparring, drilling, and open mats.</p>
         </div>
       )}
 
@@ -324,7 +324,7 @@ export default function BJJClockClient() {
                   {fmt(secondsLeft)}
                 </div>
                 {phase === "round" && (
-                  <div className="text-gray-500 text-xs uppercase tracking-wider mt-3">
+                  <div className="text-gray-400 text-xs uppercase tracking-wider mt-3">
                     {settings.totalRounds - round} {settings.totalRounds - round === 1 ? "round" : "rounds"} remaining
                   </div>
                 )}
@@ -376,20 +376,20 @@ export default function BJJClockClient() {
         {isLandscape && (
           <div className="text-white text-sm space-y-3 max-w-[180px]">
             <div>
-              <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mb-1">Round</div>
+              <div className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1">Round</div>
               <div className="text-2xl font-bold">{fmt(settings.roundSec)}</div>
             </div>
             <div>
-              <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mb-1">Rest</div>
+              <div className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1">Rest</div>
               <div className="text-2xl font-bold">{fmt(settings.restSec)}</div>
             </div>
             <div>
-              <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mb-1">Rounds</div>
+              <div className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-1">Rounds</div>
               <div className="text-2xl font-bold">{settings.totalRounds}</div>
             </div>
             <button
               onClick={() => setSettings((s) => ({ ...s, soundOn: !s.soundOn }))}
-              className="text-gray-500 hover:text-white text-xs flex items-center gap-1.5 mt-2"
+              className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 mt-2"
             >
               {settings.soundOn ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
               {settings.soundOn ? "Sound on" : "Sound off"}
@@ -409,7 +409,7 @@ export default function BJJClockClient() {
               {settings.soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               {settings.soundOn ? "Sound on" : "Sound off"}
             </button>
-            <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
               <Maximize2 className="h-3 w-3" />
               Rotate phone for full screen
             </div>
@@ -417,7 +417,7 @@ export default function BJJClockClient() {
 
           {/* Quick presets */}
           <div className="mb-6">
-            <h2 className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-3">Quick Start</h2>
+            <h2 className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-3">Quick Start</h2>
             <div className="grid grid-cols-2 gap-2">
               {PRESETS.map((p) => {
                 const active =
@@ -435,7 +435,7 @@ export default function BJJClockClient() {
                     }`}
                   >
                     <div className="text-white font-semibold text-sm">{p.label}</div>
-                    <div className="text-gray-500 text-xs mt-0.5">
+                    <div className="text-gray-400 text-xs mt-0.5">
                       {p.sub} · {p.rounds} rounds · {p.rest}s rest
                     </div>
                   </button>
@@ -448,7 +448,7 @@ export default function BJJClockClient() {
           <div>
             <button
               onClick={() => setShowCustom((v) => !v)}
-              className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-3 hover:text-white flex items-center gap-1"
+              className="text-xs uppercase tracking-wider text-gray-400 font-bold mb-3 hover:text-white flex items-center gap-1"
             >
               {showCustom ? "Hide" : "Customize"}
             </button>

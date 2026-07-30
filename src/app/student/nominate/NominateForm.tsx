@@ -92,7 +92,7 @@ export default function NominateForm({ existingGroups = [] }: { existingGroups?:
           <option value={NEW_GYM}>+ Nominate a new gym</option>
         </select>
         {!isNew && selected && (
-          <p className="text-gray-500 text-xs mt-2">
+          <p className="text-gray-400 text-xs mt-2">
             You&apos;ll be added to the existing group for <span className="text-white">{selected.name}</span>.
           </p>
         )}

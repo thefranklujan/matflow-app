@@ -59,7 +59,7 @@ export default function LeaderboardTable({
   if (entries.length === 0) {
     return (
       <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center">
-        <p className="text-gray-500">No data for this period yet.</p>
+        <p className="text-gray-400">No data for this period yet.</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function LeaderboardTable({
                   <p className={`font-bold text-lg ${style.valueColor}`}>
                     {entry.value}
                   </p>
-                  <p className="text-gray-500 text-[10px] uppercase tracking-wider">
+                  <p className="text-gray-400 text-[10px] uppercase tracking-wider">
                     {entry.label}
                   </p>
                 </div>

@@ -169,7 +169,7 @@ export default function AdminAttendancePage() {
               >
                 Select All
               </button>
-              <span className="text-gray-600">|</span>
+              <span className="text-gray-400">|</span>
               <button
                 onClick={deselectAll}
                 className="text-xs text-gray-400 hover:text-white transition"
@@ -180,9 +180,9 @@ export default function AdminAttendancePage() {
           </div>
 
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading...</p>
+            <p className="text-gray-400 text-sm">Loading...</p>
           ) : members.length === 0 ? (
-            <p className="text-gray-500 text-sm">No approved members found.</p>
+            <p className="text-gray-400 text-sm">No approved members found.</p>
           ) : (
             <div className="space-y-1 max-h-96 overflow-y-auto">
               {members.map((member) => {
@@ -208,7 +208,7 @@ export default function AdminAttendancePage() {
                     <span className="text-white text-sm">
                       {member.firstName} {member.lastName}
                     </span>
-                    <span className="text-gray-500 text-xs capitalize">
+                    <span className="text-gray-400 text-xs capitalize">
                       {member.beltRank}
                     </span>
                     {already && (

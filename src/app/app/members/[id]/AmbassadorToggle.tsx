@@ -31,7 +31,7 @@ export default function AmbassadorToggle({
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <span className="text-yellow-400">👑</span> Gym Ambassador
           </h2>
-          <p className="text-gray-500 text-xs mt-1">
+          <p className="text-gray-400 text-xs mt-1">
             Highlight this member as a representative of your gym.
           </p>
         </div>

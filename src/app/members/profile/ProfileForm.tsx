@@ -168,9 +168,9 @@ export default function ProfileForm() {
             type="email"
             value={profile?.email || ""}
             disabled
-            className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-gray-500 cursor-not-allowed"
+            className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-gray-400 cursor-not-allowed"
           />
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-gray-400 mt-1">
             Email cannot be changed.
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function ProfileForm() {
                 profile.locationSlug === "magnolia" ? "Magnolia" : "Cypress"
               }
               disabled
-              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-gray-500 cursor-not-allowed capitalize"
+              className="w-full bg-brand-black border border-brand-gray rounded-lg px-4 py-3 text-gray-400 cursor-not-allowed capitalize"
             />
           </div>
         )}

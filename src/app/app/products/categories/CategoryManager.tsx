@@ -134,7 +134,7 @@ export default function CategoryManager({ initial }: { initial: Category[] }) {
       {/* List */}
       <div className="bg-brand-dark border border-brand-gray rounded-lg divide-y divide-brand-gray/50">
         {categories.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm">
+          <div className="text-center py-8 text-gray-400 text-sm">
             No categories yet. Add your first one above.
           </div>
         )}
@@ -177,7 +177,7 @@ export default function CategoryManager({ initial }: { initial: Category[] }) {
               ) : (
                 <>
                   <span className="flex-1 text-white text-sm font-medium">{c.name}</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-400">
                     {c.productCount} {c.productCount === 1 ? "product" : "products"}
                   </span>
                   {!isUncategorized && (

@@ -58,7 +58,7 @@ export default async function ProductPage({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Package className="h-16 w-16 text-gray-600" />
+                <Package className="h-16 w-16 text-gray-400" />
               </div>
             )}
           </div>
@@ -85,7 +85,7 @@ export default async function ProductPage({
               {formatCurrency(product.price)}
             </span>
             {product.compareAt && product.compareAt > product.price && (
-              <span className="text-xl text-gray-500 line-through">
+              <span className="text-xl text-gray-400 line-through">
                 {formatCurrency(product.compareAt)}
               </span>
             )}

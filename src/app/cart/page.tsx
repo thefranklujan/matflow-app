@@ -49,7 +49,7 @@ export default function CartPage() {
                 <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Package className="h-8 w-8 text-gray-600" />
+                  <Package className="h-8 w-8 text-gray-400" />
                 </div>
               )}
             </div>
@@ -96,7 +96,7 @@ export default function CartPage() {
             {/* Remove */}
             <button
               onClick={() => removeItem(item.variantId)}
-              className="text-gray-500 hover:text-red-400 transition p-1"
+              className="text-gray-400 hover:text-red-400 transition p-1"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -113,7 +113,7 @@ export default function CartPage() {
           <span className="text-2xl font-bold text-brand-accent">{formatCurrency(subtotal)}</span>
         </div>
 
-        <p className="text-gray-500 text-xs mb-4">
+        <p className="text-gray-400 text-xs mb-4">
           Payment collected at pickup or by arrangement.
         </p>
 

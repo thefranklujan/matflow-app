@@ -81,7 +81,7 @@ export default async function AdminCompetitionsPage() {
             </tbody>
           </table>
           {results.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-400">
               No competition results yet. Click &quot;Record Result&quot; to get started.
             </div>
           )}

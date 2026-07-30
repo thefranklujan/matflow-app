@@ -23,7 +23,7 @@ export default function UnsubscribePage() {
         </p>
         <a
           href="https://mymatflow.com"
-          className="text-sm text-gray-500 hover:text-white transition"
+          className="text-sm text-gray-400 hover:text-white transition"
         >
           mymatflow.com
         </a>

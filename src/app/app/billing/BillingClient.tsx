@@ -100,7 +100,7 @@ function StatusBanner({
           </div>
         </div>
         <div className="bg-[#1a1a1a] rounded-lg p-3">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
             <span>Trial progress</span>
             <span>{30 - daysLeft} of 30 days used</span>
           </div>
@@ -340,7 +340,7 @@ export default function BillingClient() {
         </div>
       )}
 
-      <p className="text-gray-600 text-xs mt-6">
+      <p className="text-gray-400 text-xs mt-6">
         30 day free trial for new gyms. Prices in USD.
       </p>
     </div>

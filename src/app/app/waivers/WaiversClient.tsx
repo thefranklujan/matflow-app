@@ -149,7 +149,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
           <button type="submit" disabled={loading} className="bg-brand-accent text-brand-black font-bold px-6 py-2 rounded-lg disabled:opacity-50">
             {loading ? "Creating..." : "Create Waiver"}
           </button>
-          <p className="text-gray-500 text-xs">Creating a new waiver will deactivate any existing active waiver and bump the version.</p>
+          <p className="text-gray-400 text-xs">Creating a new waiver will deactivate any existing active waiver and bump the version.</p>
         </form>
       )}
 
@@ -169,7 +169,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
                 rows={10}
                 className="w-full px-4 py-2 bg-brand-black border border-brand-gray rounded-lg text-white text-sm"
               />
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-400 text-xs">
                 Changing the wording bumps the version — members will be asked to re-sign.
               </p>
               <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
               <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
               <div className="flex items-center gap-4 text-sm">
                 <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
-                <span className="text-gray-600">Version {activeTemplate.version}</span>
+                <span className="text-gray-400">Version {activeTemplate.version}</span>
               </div>
 
               {activeTemplate.signatures.length > 0 && (
@@ -204,9 +204,9 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
                       <div key={sig.id} className="flex items-center justify-between text-sm">
                         <span className="text-white">
                           {signerName(sig)}
-                          {sig.dropIn && <span className="text-gray-500 text-xs ml-2">drop-in</span>}
+                          {sig.dropIn && <span className="text-gray-400 text-xs ml-2">drop-in</span>}
                         </span>
-                        <span className="text-gray-500">{new Date(sig.signedAt).toLocaleDateString()}</span>
+                        <span className="text-gray-400">{new Date(sig.signedAt).toLocaleDateString()}</span>
                       </div>
                     ))}
                   </div>
@@ -225,9 +225,9 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
               <div className="flex items-center justify-between">
                 <span className="text-gray-300">{t.title} (v{t.version})</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-500 text-sm">{t.signatures.length} signatures</span>
+                  <span className="text-gray-400 text-sm">{t.signatures.length} signatures</span>
                   {t.signatures.length === 0 && (
-                    <button onClick={() => deleteTemplate(t)} className="text-sm text-gray-500 hover:text-red-400 transition">
+                    <button onClick={() => deleteTemplate(t)} className="text-sm text-gray-400 hover:text-red-400 transition">
                       Delete
                     </button>
                   )}

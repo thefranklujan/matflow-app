@@ -48,7 +48,7 @@ export default function StudentSignUpPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
           <p className="text-gray-400">Student Companion App</p>
-          <p className="text-gray-600 text-xs mt-2 uppercase tracking-wider">Create your student account</p>
+          <p className="text-gray-400 text-xs mt-2 uppercase tracking-wider">Create your student account</p>
         </div>
 
         <form
@@ -119,15 +119,15 @@ export default function StudentSignUpPage() {
             {loading ? "Creating account..." : "Create Student Account"}
           </button>
 
-          <p className="text-center text-gray-500 text-sm">
+          <p className="text-center text-gray-400 text-sm">
             Already have an account?{" "}
-            <Link href="/sign-in" className="text-[#dc2626] hover:underline">
+            <Link href="/sign-in" className="text-[#ef4444] hover:underline">
               Sign in
             </Link>
           </p>
         </form>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
+        <p className="text-center text-gray-400 text-xs mt-6">
           Free forever for students. No credit card required.
         </p>
       </div>

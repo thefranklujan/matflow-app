@@ -40,7 +40,7 @@ export default async function AdminOrdersPage() {
                 </td>
                 <td className="px-4 py-3">
                   <p className="text-white text-sm">{order.customerName}</p>
-                  <p className="text-gray-500 text-xs">{order.customerEmail}</p>
+                  <p className="text-gray-400 text-xs">{order.customerEmail}</p>
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-400">
                   {order.items.length} item{order.items.length !== 1 ? "s" : ""}
@@ -73,7 +73,7 @@ export default async function AdminOrdersPage() {
           </tbody>
         </table>
         {orders.length === 0 && (
-          <div className="text-center py-8 text-gray-500">No orders yet.</div>
+          <div className="text-center py-8 text-gray-400">No orders yet.</div>
         )}
       </div>
     </div>

@@ -90,7 +90,7 @@ export default function NotificationInbox() {
 
   if (loading) {
     return (
-      <div className="text-gray-500 text-sm py-10 text-center">Loading notifications...</div>
+      <div className="text-gray-400 text-sm py-10 text-center">Loading notifications...</div>
     );
   }
 
@@ -120,7 +120,7 @@ export default function NotificationInbox() {
       {notifications.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-12 text-center">
           <Inbox className="h-10 w-10 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-400 text-sm">
             No notifications yet. Announcements, join requests, and belt promotions will show up here.
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function NotificationInbox() {
                     {isUnread && <span className="h-2 w-2 rounded-full bg-[#c4b5a0] shrink-0" />}
                   </div>
                   <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">{n.body}</p>
-                  <p className="text-xs text-gray-600 mt-1">{timeAgo(n.createdAt)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
                 </div>
                 {isUnread && (
                   <button
@@ -160,7 +160,7 @@ export default function NotificationInbox() {
                       e.stopPropagation();
                       markRead(n.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition text-gray-500 hover:text-white shrink-0"
+                    className="opacity-0 group-hover:opacity-100 transition text-gray-400 hover:text-white shrink-0"
                     title="Mark as read"
                   >
                     <Check className="h-4 w-4" />

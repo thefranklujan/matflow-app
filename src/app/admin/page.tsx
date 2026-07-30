@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
               >
                 <div>
                   <p className="text-white text-sm font-medium">{order.customerName}</p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-gray-400 text-xs">
                     {new Date(order.createdAt).toLocaleDateString()} &middot;{" "}
                     {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                   </p>
@@ -87,7 +87,7 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">No orders yet.</p>
+          <p className="text-gray-400 text-sm">No orders yet.</p>
         )}
       </div>
     </div>

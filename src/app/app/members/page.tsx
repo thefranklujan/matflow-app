@@ -104,7 +104,7 @@ export default async function AdminMembersPage() {
             </tbody>
           </table>
           {members.length === 0 && (
-            <div className="text-center py-8 text-gray-500">No members yet.</div>
+            <div className="text-center py-8 text-gray-400">No members yet.</div>
           )}
         </div>
       </div>

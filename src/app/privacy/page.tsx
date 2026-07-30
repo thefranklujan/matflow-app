@@ -9,11 +9,11 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <Link href="/" className="text-gray-500 hover:text-white text-sm mb-8 inline-block">
+        <Link href="/" className="text-gray-400 hover:text-white text-sm mb-8 inline-block">
           &larr; Back
         </Link>
         <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-gray-500 text-sm mb-8">Last updated: April 17, 2026</p>
+        <p className="text-gray-400 text-sm mb-8">Last updated: April 17, 2026</p>
 
         <div className="space-y-6 text-gray-300 leading-relaxed">
           <p>
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage() {
               <li>Revoke location / camera access in iOS Settings → MatFlow.</li>
               <li>
                 Email{" "}
-                <a href="mailto:frank@craftedsystems.io" className="text-[#c4b5a0] hover:underline">
+                <a href="mailto:frank@craftedsystems.io" className="text-[#c4b5a0] underline">
                   frank@craftedsystems.io
                 </a>{" "}
                 to request your data or deletion.
@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
             <p>
               Crafted Systems LLC<br />
               Email:{" "}
-              <a href="mailto:frank@craftedsystems.io" className="text-[#c4b5a0] hover:underline">
+              <a href="mailto:frank@craftedsystems.io" className="text-[#c4b5a0] underline">
                 frank@craftedsystems.io
               </a>
             </p>

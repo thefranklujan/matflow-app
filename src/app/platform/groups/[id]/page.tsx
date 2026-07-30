@@ -38,7 +38,7 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
 
   return (
     <div>
-      <Link href="/platform/nominations" className="inline-flex items-center gap-1 text-gray-500 hover:text-white text-sm mb-4">
+      <Link href="/platform/nominations" className="inline-flex items-center gap-1 text-gray-400 hover:text-white text-sm mb-4">
         <ArrowLeft className="h-4 w-4" /> Back to nominations
       </Link>
 
@@ -46,11 +46,11 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
         <div>
           <h1 className="text-3xl font-bold text-white">{group.name}</h1>
           {(group.city || group.state) && (
-            <p className="text-gray-500 mt-1">{group.city}{group.city && group.state ? ", " : ""}{group.state}</p>
+            <p className="text-gray-400 mt-1">{group.city}{group.city && group.state ? ", " : ""}{group.state}</p>
           )}
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Active Members</p>
+          <p className="text-xs text-gray-400 uppercase tracking-wider">Active Members</p>
           <p className="text-3xl font-bold text-cyan-400">{activeMembers.length}</p>
         </div>
       </div>
@@ -83,12 +83,12 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
                           </span>
                         )}
                       </p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-gray-400 text-xs">
                         {m.student?.email} . joined {new Date(m.joinedAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <span className="text-gray-500 text-xs capitalize">{m.student?.beltRank || "white"}</span>
+                  <span className="text-gray-400 text-xs capitalize">{m.student?.beltRank || "white"}</span>
                 </div>
               ))}
             </div>
@@ -111,14 +111,14 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
             <h2 className="text-white font-semibold mb-3">Recent Posts ({group.posts.length})</h2>
             {group.posts.length === 0 ? (
-              <p className="text-gray-600 text-sm">No posts yet.</p>
+              <p className="text-gray-400 text-sm">No posts yet.</p>
             ) : (
               <div className="space-y-3">
                 {group.posts.map((p) => (
                   <div key={p.id} className={`border-l-2 pl-3 py-1 ${p.hidden ? "border-yellow-500/50 opacity-60" : "border-cyan-500/40"}`}>
                     <p className="text-white text-sm font-medium">
                       {p.student?.firstName} {p.student?.lastName}
-                      <span className="text-gray-600 text-xs ml-2">{new Date(p.createdAt).toLocaleDateString()}</span>
+                      <span className="text-gray-400 text-xs ml-2">{new Date(p.createdAt).toLocaleDateString()}</span>
                       {p.hidden && <span className="ml-2 text-yellow-400 text-[10px] uppercase">Hidden</span>}
                     </p>
                     <p className="text-gray-300 text-sm mt-1 whitespace-pre-wrap">{p.body}</p>
@@ -136,13 +136,13 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
               <Shield className="h-3.5 w-3.5" /> Moderators ({mods.length})
             </h2>
             {mods.length === 0 ? (
-              <p className="text-gray-600 text-sm">No mods.</p>
+              <p className="text-gray-400 text-sm">No mods.</p>
             ) : (
               <div className="space-y-2">
                 {mods.map((m) => (
                   <div key={m.id} className="text-white text-sm">
                     {m.student?.firstName} {m.student?.lastName}
-                    <p className="text-gray-500 text-xs">{m.student?.email}</p>
+                    <p className="text-gray-400 text-xs">{m.student?.email}</p>
                   </div>
                 ))}
               </div>
@@ -152,13 +152,13 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
           <div className="bg-[#0a0a0a] border border-orange-500/20 rounded-xl p-5">
             <h2 className="text-orange-400 text-xs uppercase tracking-wider font-semibold mb-3">Nominations ({nominations.length})</h2>
             {nominations.length === 0 ? (
-              <p className="text-gray-600 text-sm">No nomination records.</p>
+              <p className="text-gray-400 text-sm">No nomination records.</p>
             ) : (
               <div className="space-y-3">
                 {nominations.map((n) => (
                   <div key={n.id} className="text-sm">
                     <p className="text-white">{n.student?.firstName} {n.student?.lastName}</p>
-                    <p className="text-gray-500 text-xs">{n.student?.email}</p>
+                    <p className="text-gray-400 text-xs">{n.student?.email}</p>
                     {(n.ownerEmail || n.ownerPhone) && (
                       <div className="text-orange-400 text-xs mt-1">
                         {n.ownerEmail && <a href={`mailto:${n.ownerEmail}`} className="block hover:underline">{n.ownerEmail}</a>}
@@ -179,7 +179,7 @@ export default async function PlatformGroupDetail({ params }: { params: Promise<
 function KPI({ label, value, color = "text-white" }: { label: string; value: number; color?: string }) {
   return (
     <div className="bg-[#0a0a0a] border border-white/10 rounded-lg p-4">
-      <p className="text-xs text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
     </div>
   );

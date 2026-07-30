@@ -308,7 +308,7 @@ export default function ScheduleClient({
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Day</label>
-              <select value={adminDay} onChange={(e) => setAdminDay(Number(e.target.value))} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+              <select aria-label="Day of week" value={adminDay} onChange={(e) => setAdminDay(Number(e.target.value))} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
                 {DAYS_OF_WEEK.map((day, i) => (<option key={i} value={i}>{day}</option>))}
               </select>
             </div>
@@ -322,13 +322,14 @@ export default function ScheduleClient({
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Class Type</label>
-              <select value={adminClassType} onChange={(e) => setAdminClassType(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+              <select aria-label="Class type" value={adminClassType} onChange={(e) => setAdminClassType(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
                 {CLASS_TYPES.map((ct) => (<option key={ct.value} value={ct.value}>{ct.label}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Instructor</label>
               <select
+                aria-label="Instructor"
                 value={adminInstructorId}
                 onChange={(e) => setAdminInstructorId(e.target.value)}
                 className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm"
@@ -349,7 +350,7 @@ export default function ScheduleClient({
                 />
               )}
               {instructors.length === 0 && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   Tip: add instructors under{" "}
                   <a href="/app/instructors" className="text-brand-accent hover:underline">Instructors</a>{" "}
                   to pick them from a list.
@@ -358,7 +359,7 @@ export default function ScheduleClient({
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Topic (Optional)</label>
-              <select value={adminTopic} onChange={(e) => setAdminTopic(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
+              <select aria-label="Topic" value={adminTopic} onChange={(e) => setAdminTopic(e.target.value)} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
                 <option value="">No Topic</option>
                 {SCHEDULE_TOPICS.map((t) => (<option key={t} value={t}>{t}</option>))}
               </select>
@@ -378,6 +379,7 @@ export default function ScheduleClient({
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+              aria-label="Previous month"
               className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -385,6 +387,7 @@ export default function ScheduleClient({
             <h2 className="text-lg font-bold text-white">{monthLabel}</h2>
             <button
               onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+              aria-label="Next month"
               className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white"
             >
               <ChevronRight className="h-5 w-5" />
@@ -404,7 +407,7 @@ export default function ScheduleClient({
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {DAY_INITIALS.map((d, i) => (
-              <div key={i} className="text-center text-xs text-gray-500 font-semibold py-1">{d}</div>
+              <div key={i} className="text-center text-xs text-gray-400 font-semibold py-1">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -430,7 +433,7 @@ export default function ScheduleClient({
                       ? "bg-white/5 border-white/30 text-white"
                       : dayClasses.length > 0 || dayEvents.length > 0
                       ? "border-white/5 text-white hover:bg-white/5"
-                      : "border-transparent text-gray-500 hover:bg-white/5"
+                      : "border-transparent text-gray-400 hover:bg-white/5"
                   }`}
                 >
                   <span className={isToday ? "font-bold" : ""}>{date.getDate()}</span>
@@ -475,7 +478,7 @@ export default function ScheduleClient({
             </div>
           )}
           {selectedClasses.length === 0 && selectedEvents.length === 0 ? (
-            <p className="text-gray-500 text-sm">No classes scheduled.</p>
+            <p className="text-gray-400 text-sm">No classes scheduled.</p>
           ) : selectedClasses.length === 0 ? null : (
             <div className="space-y-3">
               {selectedClasses.map((c) => {
@@ -494,7 +497,7 @@ export default function ScheduleClient({
                           <p className="text-sm font-semibold">{formatTime(c.startTime)} to {formatTime(c.endTime)}</p>
                         </div>
                         <p className="text-white text-sm font-medium mt-0.5">{classLabel(c.classType)}{c.topic ? ` · ${c.topic}` : ""}</p>
-                        <p className="text-gray-500 text-xs">{c.instructor}</p>
+                        <p className="text-gray-400 text-xs">{c.instructor}</p>
                       </div>
                       {isAdmin ? (
                         <button
@@ -551,7 +554,7 @@ export default function ScheduleClient({
                     <p className="text-gray-400 text-sm mt-1">
                       {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                     </p>
-                    <p className="text-gray-500 text-xs mt-2">Instructor: {c.instructor}</p>
+                    <p className="text-gray-400 text-xs mt-2">Instructor: {c.instructor}</p>
                   </div>
                   <button
                     onClick={() => setOpenClass(null)}
@@ -577,7 +580,7 @@ export default function ScheduleClient({
 
               {matchingVideos.length > 0 && (
                 <div className="p-6 border-b border-white/10">
-                  <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">Related Videos</h3>
+                  <h3 className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-3">Related Videos</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {matchingVideos.map((v) => (
                       <a
@@ -588,7 +591,7 @@ export default function ScheduleClient({
                         className="block bg-white/5 border border-white/10 rounded-lg p-3 hover:border-white/20 transition"
                       >
                         <p className="text-white text-sm font-semibold">{v.title}</p>
-                        {v.description && <p className="text-gray-500 text-xs mt-1 line-clamp-2">{v.description}</p>}
+                        {v.description && <p className="text-gray-400 text-xs mt-1 line-clamp-2">{v.description}</p>}
                         <p className="text-brand-accent text-xs mt-2">Watch →</p>
                       </a>
                     ))}
@@ -597,11 +600,11 @@ export default function ScheduleClient({
               )}
 
               <div className="p-6">
-                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3">
+                <h3 className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-3">
                   Going ({going.length})
                 </h3>
                 {going.length === 0 ? (
-                  <p className="text-gray-600 text-sm">No one is going yet. Be the first.</p>
+                  <p className="text-gray-400 text-sm">No one is going yet. Be the first.</p>
                 ) : (
                   <div className="space-y-2">
                     {going.map((a, idx) => (
@@ -610,7 +613,7 @@ export default function ScheduleClient({
                           {a.firstName[0]}{a.lastName[0]}
                         </div>
                         <span className="text-sm text-white flex-1">{a.firstName} {a.lastName}</span>
-                        <span className="text-xs text-gray-500 capitalize">{a.beltRank} belt</span>
+                        <span className="text-xs text-gray-400 capitalize">{a.beltRank} belt</span>
                       </div>
                     ))}
                   </div>

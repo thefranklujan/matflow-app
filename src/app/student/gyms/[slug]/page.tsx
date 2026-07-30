@@ -31,11 +31,11 @@ export default async function GymProfilePage({ params }: { params: Promise<{ slu
 
   return (
     <div className="max-w-3xl">
-      <Link href="/student/gyms" className="text-gray-500 text-sm hover:text-white mb-4 inline-block">&larr; Back to Gyms</Link>
+      <Link href="/student/gyms" className="text-gray-400 text-sm hover:text-white mb-4 inline-block">&larr; Back to Gyms</Link>
 
       <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 mb-6">
         <div className="flex items-start gap-5 mb-6">
-          <div className="h-16 w-16 rounded-xl bg-[#dc2626]/10 flex items-center justify-center text-[#dc2626] text-xl font-bold flex-shrink-0">
+          <div className="h-16 w-16 rounded-xl bg-[#dc2626]/10 flex items-center justify-center text-[#ef4444] text-xl font-bold flex-shrink-0">
             {gym.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
           </div>
           <div className="flex-1">
@@ -43,7 +43,7 @@ export default async function GymProfilePage({ params }: { params: Promise<{ slu
             {(gym.city || gym.state) && (
               <p className="text-gray-400 text-sm">{gym.city}{gym.city && gym.state ? ", " : ""}{gym.state}</p>
             )}
-            <p className="text-gray-600 text-xs mt-1">{gym._count.members} member{gym._count.members !== 1 ? "s" : ""}</p>
+            <p className="text-gray-400 text-xs mt-1">{gym._count.members} member{gym._count.members !== 1 ? "s" : ""}</p>
           </div>
         </div>
 
@@ -51,13 +51,13 @@ export default async function GymProfilePage({ params }: { params: Promise<{ slu
 
         {gym.website && (
           <p className="text-sm mb-2">
-            <span className="text-gray-500">Website: </span>
-            <a href={gym.website} target="_blank" className="text-[#dc2626] hover:underline">{gym.website}</a>
+            <span className="text-gray-400">Website: </span>
+            <a href={gym.website} target="_blank" className="text-[#ef4444] hover:underline">{gym.website}</a>
           </p>
         )}
         {gym.phone && (
           <p className="text-sm mb-4">
-            <span className="text-gray-500">Phone: </span>
+            <span className="text-gray-400">Phone: </span>
             <span className="text-gray-300">{gym.phone}</span>
           </p>
         )}
@@ -101,7 +101,7 @@ export default async function GymProfilePage({ params }: { params: Promise<{ slu
               return (
                 <div key={cls.id} className="flex items-center justify-between text-sm">
                   <span className="text-white">{days[cls.dayOfWeek]} . {cls.classType}</span>
-                  <span className="text-gray-500">{cls.startTime} to {cls.endTime}</span>
+                  <span className="text-gray-400">{cls.startTime} to {cls.endTime}</span>
                 </div>
               );
             })}

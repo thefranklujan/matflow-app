@@ -110,7 +110,7 @@ export default function GymLocationCard() {
         </div>
         <div className="flex-1">
           <h3 className="text-white font-bold">Gym Location & Geofence</h3>
-          <p className="text-gray-500 text-xs mt-0.5">
+          <p className="text-gray-400 text-xs mt-0.5">
             When a student with the MatFlow app arrives within your geofence, we log an arrival
             and ping you. Set the address or drop in the coordinates directly.
           </p>
@@ -134,7 +134,7 @@ export default function GymLocationCard() {
           placeholder="123 Mat Lane, Austin, TX 78701"
           className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-brand-accent transition"
         />
-        <p className="text-gray-500 text-[11px] mt-1">
+        <p className="text-gray-400 text-[11px] mt-1">
           We&apos;ll auto-resolve coordinates from this address when you save, unless you enter
           exact lat/lng below.
         </p>
@@ -175,6 +175,7 @@ export default function GymLocationCard() {
           </span>
         </label>
         <input
+          aria-label="Arrival check-in radius in meters"
           type="range"
           min={50}
           max={1000}
@@ -183,7 +184,7 @@ export default function GymLocationCard() {
           onChange={(e) => setRadius(Number(e.target.value))}
           className="w-full accent-[#dc2626]"
         />
-        <div className="flex justify-between text-[10px] text-gray-600 mt-0.5">
+        <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
           <span>50 m (small studio)</span>
           <span>1000 m (large campus)</span>
         </div>

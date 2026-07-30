@@ -206,9 +206,9 @@ export default function NotificationSettings() {
               {row.on ? (
                 <Check className="h-4 w-4 text-emerald-400 shrink-0" />
               ) : (
-                <X className="h-4 w-4 text-gray-600 shrink-0" />
+                <X className="h-4 w-4 text-gray-400 shrink-0" />
               )}
-              <span className={row.on ? "text-gray-300" : "text-gray-600"}>{row.label}</span>
+              <span className={row.on ? "text-gray-300" : "text-gray-400"}>{row.label}</span>
             </li>
           ))}
         </ul>

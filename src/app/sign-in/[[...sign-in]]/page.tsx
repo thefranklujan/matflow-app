@@ -60,7 +60,7 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-gray-400">Sign in to your account</p>
+          <h1 className="text-gray-400 text-base font-normal">Sign in to your account</h1>
         </div>
 
         <form
@@ -74,8 +74,9 @@ export default function SignInPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label htmlFor="signin-email" className="block text-sm font-medium text-gray-300 mb-2">Email</label>
             <input
+              id="signin-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -86,8 +87,9 @@ export default function SignInPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+            <label htmlFor="signin-password" className="block text-sm font-medium text-gray-300 mb-2">Password</label>
             <input
+              id="signin-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -111,9 +113,9 @@ export default function SignInPage() {
             </Link>
           </div>
 
-          <p className="text-center text-gray-500 text-sm">
+          <p className="text-center text-gray-400 text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/sign-up" className="text-brand-accent hover:underline">
+            <Link href="/sign-up" className="text-brand-accent underline">
               Create account
             </Link>
           </p>

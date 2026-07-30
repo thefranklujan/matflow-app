@@ -49,7 +49,7 @@ export default function ShareMatFlow({ studentId, variant = "button" }: { studen
         >
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-[#dc2626]/20 flex items-center justify-center shrink-0">
-              <Share2 className="h-5 w-5 text-[#dc2626]" />
+              <Share2 className="h-5 w-5 text-[#ef4444]" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white font-semibold text-sm">Share MatFlow</p>
@@ -72,17 +72,17 @@ export default function ShareMatFlow({ studentId, variant = "button" }: { studen
           <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold text-white">Share MatFlow</h2>
-              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white">
+              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-gray-500 text-sm mb-5">Invite your training partners. They sign up free.</p>
+            <p className="text-gray-400 text-sm mb-5">Invite your training partners. They sign up free.</p>
 
             {showQR ? (
               <div className="text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={qrUrl} alt="QR code" className="mx-auto rounded-lg border border-white/10" />
-                <p className="text-gray-500 text-xs mt-3">Have them point a phone camera at this</p>
+                <p className="text-gray-400 text-xs mt-3">Have them point a phone camera at this</p>
                 <button onClick={() => setShowQR(false)} className="text-gray-400 hover:text-white text-sm mt-3">Back</button>
               </div>
             ) : (

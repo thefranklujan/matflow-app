@@ -101,7 +101,7 @@ export default async function MemberSchedulePage({
                           <p className="text-white font-medium capitalize">
                             {cls.classType}
                           </p>
-                          <p className="text-gray-500 text-sm">
+                          <p className="text-gray-400 text-sm">
                             {cls.instructor}
                             {cls.topic && (
                               <span className="text-brand-accent/70"> · {cls.topic}</span>
@@ -128,7 +128,7 @@ export default async function MemberSchedulePage({
           </div>
         ) : (
           <div className="bg-brand-dark border border-brand-gray rounded-lg p-12 text-center">
-            <p className="text-gray-500">No classes scheduled.</p>
+            <p className="text-gray-400">No classes scheduled.</p>
           </div>
         )}
       </div>

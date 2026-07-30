@@ -123,20 +123,20 @@ export default function InstructorsClient({ initial }: { initial: Instructor[] }
       {/* List */}
       <div className="bg-brand-dark border border-brand-gray rounded-lg divide-y divide-brand-gray/50">
         {instructors.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm">
+          <div className="text-center py-8 text-gray-400 text-sm">
             No instructors yet. Add your first one above.
           </div>
         )}
         {instructors.map((i) => (
           <div key={i.id} className="flex items-center gap-3 px-4 py-3">
             <div className="flex-1 min-w-0">
-              <span className={`text-sm font-medium ${i.active ? "text-white" : "text-gray-500"}`}>
+              <span className={`text-sm font-medium ${i.active ? "text-white" : "text-gray-400"}`}>
                 {i.name}
               </span>
               {beltLabel(i.beltRank) && (
-                <span className="text-xs text-gray-500 ml-2">{beltLabel(i.beltRank)}</span>
+                <span className="text-xs text-gray-400 ml-2">{beltLabel(i.beltRank)}</span>
               )}
-              {!i.active && <span className="text-xs text-gray-600 ml-2">(inactive)</span>}
+              {!i.active && <span className="text-xs text-gray-400 ml-2">(inactive)</span>}
             </div>
             <button
               type="button"

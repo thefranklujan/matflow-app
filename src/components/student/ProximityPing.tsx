@@ -257,7 +257,7 @@ export default function ProximityPing() {
             <button
               onClick={dismissExplainer}
               aria-label="Not now"
-              className="shrink-0 rounded-md p-1.5 text-gray-500 transition hover:bg-white/5 hover:text-gray-300"
+              className="shrink-0 rounded-md p-1.5 text-gray-400 transition hover:bg-white/5 hover:text-gray-300"
             >
               <X className="h-4 w-4" />
             </button>

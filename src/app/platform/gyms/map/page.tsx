@@ -62,22 +62,22 @@ export default function GymsMapPage() {
         <div className="flex items-center gap-3">
           <MapPin className="h-5 w-5 text-brand-accent" />
           <h1 className="text-xl font-bold text-white">Active Gyms Map</h1>
-          <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded-full">{pins.length} gyms</span>
+          <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">{pins.length} gyms</span>
         </div>
       </div>
 
       <div className="border border-white/10 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 200px)" }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-gray-500 text-sm">Locating gyms...</div>
+            <div className="text-gray-400 text-sm">Locating gyms...</div>
           </div>
         ) : mappedPins.length > 0 ? (
           <GymsMapView pins={mappedPins} />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="text-gray-500 text-sm" style={{ marginBottom: "8px" }}>No gyms could be located on the map yet.</div>
-              <div className="text-gray-600 text-xs">Gyms need a city and state set in their settings to appear here.</div>
+              <div className="text-gray-400 text-sm" style={{ marginBottom: "8px" }}>No gyms could be located on the map yet.</div>
+              <div className="text-gray-400 text-xs">Gyms need a city and state set in their settings to appear here.</div>
             </div>
           </div>
         )}
@@ -85,7 +85,7 @@ export default function GymsMapPage() {
 
       {unmappedPins.length > 0 && (
         <div style={{ marginTop: "16px" }}>
-          <p className="text-xs text-gray-600" style={{ marginBottom: "8px" }}>{unmappedPins.length} gym{unmappedPins.length !== 1 ? "s" : ""} could not be located: {unmappedPins.map(p => p.name).join(", ")}</p>
+          <p className="text-xs text-gray-400" style={{ marginBottom: "8px" }}>{unmappedPins.length} gym{unmappedPins.length !== 1 ? "s" : ""} could not be located: {unmappedPins.map(p => p.name).join(", ")}</p>
         </div>
       )}
     </div>

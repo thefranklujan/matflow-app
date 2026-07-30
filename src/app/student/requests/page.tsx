@@ -18,12 +18,12 @@ export default async function StudentRequestsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-2">My Requests</h1>
-      <p className="text-gray-500 mb-8">All your join requests and their status.</p>
+      <p className="text-gray-400 mb-8">All your join requests and their status.</p>
 
       {requests.length === 0 ? (
         <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-10 text-center">
-          <p className="text-gray-500 mb-4">You have not requested to join any gyms yet.</p>
-          <Link href="/student/gyms" className="text-[#dc2626] hover:underline">Find a gym &rarr;</Link>
+          <p className="text-gray-400 mb-4">You have not requested to join any gyms yet.</p>
+          <Link href="/student/gyms" className="text-[#ef4444] hover:underline">Find a gym &rarr;</Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -32,9 +32,9 @@ export default async function StudentRequestsPage() {
               <div>
                 <Link href={`/student/gyms/${r.gym.slug}`} className="text-white font-semibold hover:underline">{r.gym.name}</Link>
                 {(r.gym.city || r.gym.state) && (
-                  <p className="text-gray-500 text-xs">{r.gym.city}{r.gym.city && r.gym.state ? ", " : ""}{r.gym.state}</p>
+                  <p className="text-gray-400 text-xs">{r.gym.city}{r.gym.city && r.gym.state ? ", " : ""}{r.gym.state}</p>
                 )}
-                <p className="text-gray-600 text-xs mt-1">Requested {new Date(r.createdAt).toLocaleDateString()}</p>
+                <p className="text-gray-400 text-xs mt-1">Requested {new Date(r.createdAt).toLocaleDateString()}</p>
               </div>
               <span className={`text-xs font-bold px-3 py-1.5 rounded ${
                 r.status === "pending" ? "bg-yellow-500/20 text-yellow-400" :

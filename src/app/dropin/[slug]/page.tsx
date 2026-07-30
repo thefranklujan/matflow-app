@@ -35,7 +35,7 @@ export default async function DropInPage({ params }: Props) {
 
         <DropInForm gymSlug={gym.slug} waiver={waiver} />
 
-        <p className="text-gray-600 text-sm mt-8 text-center">Powered by {MATFLOW.name}</p>
+        <p className="text-gray-400 text-sm mt-8 text-center">Powered by {MATFLOW.name}</p>
       </div>
     </div>
   );

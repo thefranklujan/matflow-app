@@ -280,7 +280,7 @@ export default function TrainingPlanClient({
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Training Schedule</h1>
-          <p className="text-gray-500 text-sm mt-1">Tap any future day to plan when you&apos;ll train.</p>
+          <p className="text-gray-400 text-sm mt-1">Tap any future day to plan when you&apos;ll train.</p>
         </div>
       </div>
 
@@ -293,12 +293,12 @@ export default function TrainingPlanClient({
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${share ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-white/5 text-gray-500"}`}>
+            <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${share ? "bg-[#dc2626]/20 text-[#ef4444]" : "bg-white/5 text-gray-400"}`}>
               {share ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Share my schedule</p>
-              <p className="text-gray-500 text-xs">{share ? "Friends from your gym groups can see your training days." : "Your schedule is private."}</p>
+              <p className="text-gray-400 text-xs">{share ? "Friends from your gym groups can see your training days." : "Your schedule is private."}</p>
             </div>
           </div>
           <div className={`relative h-6 w-11 rounded-full transition shrink-0 ${share ? "bg-[#dc2626]" : "bg-white/10"}`}>
@@ -313,12 +313,12 @@ export default function TrainingPlanClient({
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${show ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-white/5 text-gray-500"}`}>
+            <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${show ? "bg-[#dc2626]/20 text-[#ef4444]" : "bg-white/5 text-gray-400"}`}>
               {show ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Show friends&apos; schedules</p>
-              <p className="text-gray-500 text-xs">{show ? "See when your gym crew is training." : "Hide friends from this page."}</p>
+              <p className="text-gray-400 text-xs">{show ? "See when your gym crew is training." : "Hide friends from this page."}</p>
             </div>
           </div>
           <div className={`relative h-6 w-11 rounded-full transition shrink-0 ${show ? "bg-[#dc2626]" : "bg-white/10"}`}>
@@ -342,7 +342,7 @@ export default function TrainingPlanClient({
                   <Trash2 className="h-3 w-3" /> Clear
                 </button>
               )}
-              <button onClick={() => setSelectedDate(null)} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
+              <button onClick={() => setSelectedDate(null)} className="text-gray-400 hover:text-white text-lg leading-none">×</button>
             </div>
           </div>
 
@@ -395,22 +395,22 @@ export default function TrainingPlanClient({
         {/* Calendar */}
         <div className="lg:col-span-2 bg-[#0a0a0a] border border-white/10 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white">
+            <button aria-label="Previous month" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))} className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white">
               <ChevronLeft className="h-5 w-5" />
             </button>
             <h2 className="text-lg font-bold text-white">{monthLabel}</h2>
-            <button onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white">
+            <button aria-label="Next month" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))} className="p-1.5 rounded hover:bg-white/5 text-gray-400 hover:text-white">
               <ChevronRight className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 pb-4 border-b border-white/5 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4 pb-4 border-b border-white/5 text-xs text-gray-400">
             <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#dc2626]" /> You</span>
             <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-blue-400" /> Friends</span>
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-2">
-            {DAY_INITIALS.map((d, i) => (<div key={i} className="text-center text-xs text-gray-500 font-semibold py-1">{d}</div>))}
+            {DAY_INITIALS.map((d, i) => (<div key={i} className="text-center text-xs text-gray-400 font-semibold py-1">{d}</div>))}
           </div>
           <div className="grid grid-cols-7 gap-1">
             {cells.map((d, i) => {
@@ -447,10 +447,10 @@ export default function TrainingPlanClient({
 
         {/* Side panel: one card per day, mine + friends combined */}
         <div className="space-y-3">
-          <h2 className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Upcoming ({unifiedDays.length})</h2>
+          <h2 className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Upcoming ({unifiedDays.length})</h2>
           {unifiedDays.length === 0 ? (
             <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5">
-              <p className="text-gray-600 text-sm">No training planned yet. Tap a day on the calendar to start.</p>
+              <p className="text-gray-400 text-sm">No training planned yet. Tap a day on the calendar to start.</p>
             </div>
           ) : (
             unifiedDays.slice(0, 12).map((day) => (
@@ -535,7 +535,7 @@ function DayCard({
       <button onClick={onEdit} className="w-full text-left p-4">
         <div className="flex items-center gap-3 mb-2">
           <div className={`h-12 w-12 rounded-lg flex flex-col items-center justify-center shrink-0 ${
-            hasMine ? "bg-[#dc2626]/20 text-[#dc2626]" : "bg-blue-400/20 text-blue-400"
+            hasMine ? "bg-[#dc2626]/20 text-[#ef4444]" : "bg-blue-400/20 text-blue-400"
           }`}>
             <span className="text-[10px] font-bold uppercase leading-none">{d.toLocaleDateString("en-US", { month: "short" })}</span>
             <span className="text-lg font-bold leading-none mt-0.5">{d.getDate()}</span>
@@ -551,7 +551,7 @@ function DayCard({
               )}
             </p>
             {hasMine ? (
-              <p className={`text-xs truncate ${isCompleted ? "text-gray-500 line-through" : "text-gray-400"}`}>
+              <p className={`text-xs truncate ${isCompleted ? "text-gray-400 line-through" : "text-gray-400"}`}>
                 {blockSummary(mine)}{mine.gym ? ` · ${mine.gym}` : ""}
               </p>
             ) : (
@@ -575,7 +575,7 @@ function DayCard({
               className={`shrink-0 h-9 w-9 rounded-full flex items-center justify-center transition border ${
                 isCompleted
                   ? "bg-green-500 border-green-500 text-white"
-                  : "bg-transparent border-white/20 text-gray-500 hover:border-green-500/60 hover:text-green-400"
+                  : "bg-transparent border-white/20 text-gray-400 hover:border-green-500/60 hover:text-green-400"
               }`}
               title={isCompleted ? "Mark as not done" : "Mark as complete"}
             >
@@ -591,7 +591,7 @@ function DayCard({
                   onDelete();
                 }
               }}
-              className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#dc2626] transition p-1 shrink-0"
+              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-[#ef4444] transition p-1 shrink-0"
               title="Delete"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -614,7 +614,7 @@ function DayCard({
                   {f.friendName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                 </div>
                 <span className="text-white font-medium">{f.friendName}</span>
-                <span className="text-gray-500 truncate">
+                <span className="text-gray-400 truncate">
                   {blockSummary(f)}{f.gym ? ` · ${f.gym}` : ""}
                 </span>
               </div>

@@ -46,7 +46,7 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <div>
-      <Link href="/platform/gyms" className="text-gray-500 text-sm hover:text-white mb-4 inline-block">
+      <Link href="/platform/gyms" className="text-gray-400 text-sm hover:text-white mb-4 inline-block">
         &larr; Back to Gyms
       </Link>
 
@@ -57,7 +57,7 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
           </div>
           <div>
             <h1 className="text-3xl font-bold text-white">{gym.name}</h1>
-            <p className="text-gray-500 font-mono text-sm">{gym.slug}</p>
+            <p className="text-gray-400 font-mono text-sm">{gym.slug}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -94,26 +94,26 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
           {owner ? (
             <div className="space-y-2">
               <div>
-                <p className="text-gray-500 text-xs uppercase">Name</p>
+                <p className="text-gray-400 text-xs uppercase">Name</p>
                 <p className="text-white font-medium">{owner.firstName} {owner.lastName}</p>
               </div>
               <div>
-                <p className="text-gray-500 text-xs uppercase">Email</p>
+                <p className="text-gray-400 text-xs uppercase">Email</p>
                 <p className="text-white">{owner.email}</p>
               </div>
               {owner.phone && (
                 <div>
-                  <p className="text-gray-500 text-xs uppercase">Phone</p>
+                  <p className="text-gray-400 text-xs uppercase">Phone</p>
                   <p className="text-white">{owner.phone}</p>
                 </div>
               )}
               <div>
-                <p className="text-gray-500 text-xs uppercase">Joined</p>
+                <p className="text-gray-400 text-xs uppercase">Joined</p>
                 <p className="text-white">{new Date(owner.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
           ) : (
-            <p className="text-gray-500">No owner found</p>
+            <p className="text-gray-400">No owner found</p>
           )}
         </div>
 
@@ -122,21 +122,21 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Subscription</h2>
           <div className="space-y-2">
             <div>
-              <p className="text-gray-500 text-xs uppercase">Status</p>
+              <p className="text-gray-400 text-xs uppercase">Status</p>
               <p className="text-white capitalize">{gym.subscriptionStatus}</p>
             </div>
             {gym.trialEndsAt && (
               <div>
-                <p className="text-gray-500 text-xs uppercase">Trial Ends</p>
+                <p className="text-gray-400 text-xs uppercase">Trial Ends</p>
                 <p className="text-white">{new Date(gym.trialEndsAt).toLocaleDateString()}</p>
               </div>
             )}
             <div>
-              <p className="text-gray-500 text-xs uppercase">Stripe Customer</p>
+              <p className="text-gray-400 text-xs uppercase">Stripe Customer</p>
               <p className="text-white text-sm font-mono">{gym.stripeCustomerId || "Not set"}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase">Created</p>
+              <p className="text-gray-400 text-xs uppercase">Created</p>
               <p className="text-white">{new Date(gym.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
@@ -150,11 +150,11 @@ export default async function GymDetailPage({ params }: { params: Promise<{ id: 
               <div key={m.id} className="flex items-center justify-between py-2 border-b border-white/5">
                 <div>
                   <p className="text-white text-sm">{m.firstName} {m.lastName} {i === 0 && <span className="text-xs text-orange-400 ml-2">(Owner)</span>}</p>
-                  <p className="text-gray-500 text-xs">{m.email}</p>
+                  <p className="text-gray-400 text-xs">{m.email}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-white text-sm capitalize">{m.beltRank} {m.stripes > 0 && `(${m.stripes})`}</p>
-                  <p className="text-gray-600 text-xs">{m.active ? "Active" : "Inactive"}</p>
+                  <p className="text-gray-400 text-xs">{m.active ? "Active" : "Inactive"}</p>
                 </div>
               </div>
             ))}
@@ -193,7 +193,7 @@ function Stat({ label, value, sub }: { label: string; value: number | string; su
     <div className="bg-[#111] border border-white/10 rounded-lg p-5">
       <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">{label}</p>
       <p className="text-2xl font-bold text-white">{value}</p>
-      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+      {sub && <p className="text-gray-400 text-xs mt-1">{sub}</p>}
     </div>
   );
 }

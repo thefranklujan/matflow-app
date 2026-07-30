@@ -84,7 +84,7 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
                   Duration (minutes)
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -105,7 +105,7 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
                   Type
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -126,7 +126,7 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
                   Gym
                 </label>
                 <input
@@ -139,7 +139,7 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">
                   Notes (optional)
                 </label>
                 <textarea
@@ -152,7 +152,7 @@ export default function QuickLogFAB({ defaultGym }: { defaultGym?: string | null
               </div>
 
               {error && (
-                <p className="text-[#dc2626] text-xs">{error}</p>
+                <p className="text-[#ef4444] text-xs">{error}</p>
               )}
 
               <button
