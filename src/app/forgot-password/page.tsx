@@ -38,11 +38,15 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-gray-400">Reset your password</p>
+          <h1 className="text-gray-400 text-base font-normal">Reset your password</h1>
         </div>
 
         {sent ? (
-          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 text-center space-y-4">
+          <div
+            role="status"
+            aria-live="polite"
+            className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 text-center space-y-4"
+          >
             <h2 className="text-xl font-bold text-white">Check your email</h2>
             <p className="text-gray-400 text-sm">
               If an account exists for <span className="text-white">{email}</span>, we just sent a
@@ -52,7 +56,7 @@ export default function ForgotPasswordPage() {
               Didn&apos;t get it? Check spam, or&nbsp;
               <button
                 onClick={() => setSent(false)}
-                className="text-[#ef4444] hover:underline"
+                className="text-[#ef4444] underline"
               >
                 try a different email
               </button>
@@ -60,7 +64,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/sign-in"
-              className="inline-block mt-4 text-[#ef4444] hover:underline text-sm"
+              className="inline-block mt-4 text-[#ef4444] underline text-sm"
             >
               Back to sign in
             </Link>
@@ -71,7 +75,11 @@ export default function ForgotPasswordPage() {
             className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 space-y-5"
           >
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+              <div
+                id="forgot-error"
+                role="alert"
+                className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm"
+              >
                 {error}
               </div>
             )}
@@ -82,10 +90,16 @@ export default function ForgotPasswordPage() {
             </p>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+              <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-300 mb-1.5">
+                Email
+              </label>
               <input
+                id="forgot-email"
+                name="email"
                 type="email"
+                inputMode="email"
                 required
+                aria-describedby={error ? "forgot-error" : undefined}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -104,7 +118,7 @@ export default function ForgotPasswordPage() {
 
             <p className="text-center text-gray-400 text-sm">
               Remembered it?{" "}
-              <Link href="/sign-in" className="text-[#ef4444] hover:underline">
+              <Link href="/sign-in" className="text-[#ef4444] underline">
                 Sign in
               </Link>
             </p>

@@ -168,7 +168,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-gray-400">
+          <h1 className="text-gray-400 text-base font-normal">
             {joinSlug
               ? "Join your gym"
               : step === 1
@@ -176,7 +176,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               : step === 2
               ? "I am signing up as..."
               : "Set up your gym"}
-          </p>
+          </h1>
         </div>
 
         {!joinSlug && (
@@ -194,7 +194,11 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
           className="bg-brand-dark border border-brand-gray rounded-lg p-8 space-y-5"
         >
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
+            <div
+              id="signup-error"
+              role="alert"
+              className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm"
+            >
               {error}
             </div>
           )}
@@ -265,8 +269,13 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">First Name</label>
+                  <label htmlFor="signup-first-name" className="block text-sm font-medium text-gray-300 mb-1.5">
+                    First Name
+                  </label>
                   <input
+                    id="signup-first-name"
+                    name="given-name"
+                    autoComplete="given-name"
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -276,8 +285,13 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Last Name</label>
+                  <label htmlFor="signup-last-name" className="block text-sm font-medium text-gray-300 mb-1.5">
+                    Last Name
+                  </label>
                   <input
+                    id="signup-last-name"
+                    name="family-name"
+                    autoComplete="family-name"
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -289,9 +303,16 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+                <label htmlFor="signup-email" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Email
+                </label>
                 <input
+                  id="signup-email"
+                  name="email"
+                  autoComplete="email"
+                  inputMode="email"
                   type="email"
+                  aria-describedby={error ? "signup-error" : undefined}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
@@ -301,10 +322,13 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                <label htmlFor="signup-phone" className="block text-sm font-medium text-gray-300 mb-1.5">
                   Phone <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <input
+                  id="signup-phone"
+                  name="tel"
+                  inputMode="tel"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -315,9 +339,15 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+                <label htmlFor="signup-password" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Password
+                </label>
                 <input
+                  id="signup-password"
+                  name="new-password"
+                  autoComplete="new-password"
                   type="password"
+                  aria-describedby={error ? "signup-error" : undefined}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
@@ -338,8 +368,13 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
           ) : (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Gym Name</label>
+                <label htmlFor="signup-gym-name" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Gym Name
+                </label>
                 <input
+                  id="signup-gym-name"
+                  name="organization"
+                  autoComplete="organization"
                   type="text"
                   value={gymName}
                   onChange={(e) => handleGymNameChange(e.target.value)}
@@ -350,11 +385,16 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Gym URL</label>
+                <label htmlFor="signup-gym-slug" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Gym URL
+                </label>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
                   <input
+                    id="signup-gym-slug"
+                    name="gym-url"
                     type="text"
+                    aria-describedby="signup-gym-slug-hint"
                     value={gymSlug}
                     onChange={(e) => setGymSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                     className="min-w-0 flex-1 px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
@@ -362,14 +402,18 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                     required
                   />
                 </div>
-                <p className="text-gray-400 text-xs mt-1">
+                <p id="signup-gym-slug-hint" className="text-gray-400 text-xs mt-1">
                   Members will use this link to join your gym
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Timezone</label>
+                <label htmlFor="signup-timezone" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Timezone
+                </label>
                 <select
+                  id="signup-timezone"
+                  name="timezone"
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
@@ -404,7 +448,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
 
           <p className="text-center text-gray-400 text-sm pt-2">
             Already have an account?{" "}
-            <Link href="/sign-in" className="text-brand-accent hover:underline">
+            <Link href="/sign-in" className="text-brand-accent underline">
               Sign in
             </Link>
           </p>

@@ -76,11 +76,15 @@ export default function ResetPasswordForm() {
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-gray-400">Pick a new password</p>
+          <h1 className="text-gray-400 text-base font-normal">Pick a new password</h1>
         </div>
 
         {done ? (
-          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 text-center space-y-3">
+          <div
+            role="status"
+            aria-live="polite"
+            className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 text-center space-y-3"
+          >
             <h2 className="text-xl font-bold text-white">Password updated</h2>
             <p className="text-gray-400 text-sm">
               You can sign in with your new password now. Taking you there...
@@ -92,16 +96,25 @@ export default function ResetPasswordForm() {
             className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 space-y-5"
           >
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+              <div
+                id="reset-error"
+                role="alert"
+                className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm"
+              >
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">New password</label>
+              <label htmlFor="reset-password" className="block text-sm font-medium text-gray-300 mb-1.5">
+                New password
+              </label>
               <input
+                id="reset-password"
+                name="new-password"
                 type="password"
                 required
+                aria-describedby={error ? "reset-error" : undefined}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
@@ -111,12 +124,15 @@ export default function ResetPasswordForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+              <label htmlFor="reset-confirm" className="block text-sm font-medium text-gray-300 mb-1.5">
                 Confirm password
               </label>
               <input
+                id="reset-confirm"
+                name="confirm-password"
                 type="password"
                 required
+                aria-describedby={error ? "reset-error" : undefined}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 autoComplete="new-password"
