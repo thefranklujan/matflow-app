@@ -103,8 +103,18 @@ function recordObject(manifest, record) {
   saveManifest(manifest);
 }
 
+
+/** Template placeholders are NOT filled-in values. Kept in sync with
+ * src/lib/stripe-readiness.ts; src/lib/stripe-cli-parity.test.ts spawns this
+ * file and asserts the two agree. */
+const PLACEHOLDER_PATTERNS = [/REPLACE_ME/i, /USER:PASSWORD/i];
+function isPlaceholder(v) {
+  return typeof v === "string" && PLACEHOLDER_PATTERNS.some((re) => re.test(v));
+}
+
 function classifyKey(value) {
   if (typeof value !== "string" || value.trim() === "") return "missing";
+  if (isPlaceholder(value)) return "placeholder";
   const v = value.trim();
   if (/^(sk|rk)_test_/.test(v)) return "test";
   if (/^(sk|rk)_live_/.test(v)) return "live";
@@ -124,6 +134,13 @@ async function openSandbox(env, { requirePin = true } = {}) {
   if (mode === "live") {
     console.error("Refusing to continue: a LIVE Stripe key is configured. This tooling never runs against live mode.");
     process.exit(EXIT_LIVE_REFUSED);
+  }
+  // Caught before any network call: an unfilled template must not cost a
+  // doomed round trip to Stripe, and the message must say what is actually
+  // wrong rather than "authentication failed".
+  if (mode === "placeholder") {
+    console.error("STRIPE_SECRET_KEY is still the template placeholder. Fill in .env.stripe-test with sandbox values first.");
+    process.exit(EXIT_REFUSED);
   }
   if (mode !== "test") {
     console.error(`STRIPE_SECRET_KEY is ${mode}; a sandbox test-mode key is required.`);

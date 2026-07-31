@@ -37,8 +37,32 @@ export interface ReadinessReport {
   problems: string[];
 }
 
+/**
+ * Values that are structurally present but obviously not filled in.
+ *
+ * .env.stripe-test is created from the example template, so a half-configured
+ * file is the NORMAL intermediate state, not an exotic one. Treating
+ * `sk_test_REPLACE_ME` as a real key made the gate pass with exit 0 and print
+ * "ready", which is exactly the fail-open this tooling exists to prevent.
+ */
+const PLACEHOLDER_PATTERNS = [/REPLACE_ME/i, /USER:PASSWORD/i];
+
+export function isPlaceholder(value: string | undefined): boolean {
+  if (typeof value !== "string") return false;
+  return PLACEHOLDER_PATTERNS.some((re) => re.test(value));
+}
+
+/** Present means filled in. A template placeholder is not filled in. */
 function present(value: string | undefined): boolean {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === "string" && value.trim().length > 0 && !isPlaceholder(value);
+}
+
+/** Which of the supplied keys still hold template placeholders. */
+export function unfilledPlaceholderKeys(env: Record<string, string | undefined>): string[] {
+  return Object.entries(env)
+    .filter(([, v]) => isPlaceholder(v))
+    .map(([k]) => k)
+    .sort();
 }
 
 export function classifySecretKey(value: string | undefined): KeyMode {

@@ -14,7 +14,7 @@
  * ($49 Basic / $99 Pro) is a business decision, not a test fixture.
  */
 
-import { classifyAppUrl, classifySecretKey, type KeyMode, type UrlKind } from "./stripe-readiness";
+import { classifyAppUrl, classifySecretKey, isPlaceholder, unfilledPlaceholderKeys, type KeyMode, type UrlKind } from "./stripe-readiness";
 import stageData from "./stripe-lifecycle-stages.json";
 
 export const EXIT_OK = 0;
@@ -58,7 +58,8 @@ export type RefusalCode =
   | "IDENTICAL_PRICE_IDS"
   | "NOT_A_TEST_KEY"
   | "MISSING_SANDBOX_FINGERPRINT"
-  | "MISSING_PORTAL_CONFIGURATION";
+  | "MISSING_PORTAL_CONFIGURATION"
+  | "UNFILLED_PLACEHOLDER";
 
 export interface LifecycleEnv {
   STRIPE_SECRET_KEY?: string;
@@ -91,7 +92,7 @@ export interface LifecyclePlan {
 }
 
 function present(v: string | undefined): boolean {
-  return typeof v === "string" && v.trim().length > 0;
+  return typeof v === "string" && v.trim().length > 0 && !isPlaceholder(v);
 }
 
 /**
@@ -145,6 +146,18 @@ export function planLifecycle(env: LifecycleEnv, opts: { execute: boolean }): Li
   }
 
   const refusals: Refusal[] = [];
+
+  // Named first, because "the template was never filled in" is a far more
+  // useful message than six separate "missing" lines. Key NAMES are not
+  // secrets; values are never echoed.
+  const unfilled = unfilledPlaceholderKeys(env as Record<string, string | undefined>);
+  if (unfilled.length > 0) {
+    refusals.push({
+      code: "UNFILLED_PLACEHOLDER",
+      message: `Still holding template placeholders: ${unfilled.join(", ")}.`,
+    });
+  }
+
   if (secretKeyMode !== "test") {
     refusals.push({ code: "NOT_A_TEST_KEY", message: `STRIPE_SECRET_KEY is ${secretKeyMode}; a test-mode key is required.` });
   }

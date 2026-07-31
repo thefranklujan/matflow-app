@@ -24,6 +24,15 @@ const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 // deliberate copy of src/lib/stripe-readiness.ts kept here to make this script
 // dependency-free. src/lib/stripe-cli-parity.test.ts spawns this file and
 // asserts the two agree, so the copies cannot drift apart unnoticed.
+
+/** Template placeholders are NOT filled-in values. Kept in sync with
+ * src/lib/stripe-readiness.ts; src/lib/stripe-cli-parity.test.ts spawns this
+ * file and asserts the two agree. */
+const PLACEHOLDER_PATTERNS = [/REPLACE_ME/i, /USER:PASSWORD/i];
+function isPlaceholder(v) {
+  return typeof v === "string" && PLACEHOLDER_PATTERNS.some((re) => re.test(v));
+}
+
 const EXIT_LIVE_KEY_REFUSED = 87;
 const EXIT_FORBIDDEN_FILE = 88;
 
@@ -100,7 +109,7 @@ async function main() {
 
 /* ---- Copy of src/lib/stripe-readiness.ts (parity-tested) ---- */
 function evaluateReadiness(env, opts) {
-  const present = (v) => typeof v === "string" && v.trim().length > 0;
+  const present = (v) => typeof v === "string" && v.trim().length > 0 && !isPlaceholder(v);
   const mode = !present(env.STRIPE_SECRET_KEY)
     ? "missing"
     : /^(sk|rk)_test_/.test(env.STRIPE_SECRET_KEY.trim())

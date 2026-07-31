@@ -29,6 +29,16 @@ const CASES: Record<string, LifecycleEnv> = {
     STRIPE_PORTAL_CONFIGURATION_ID: "bpc_FAKE",
   },
   live_key: { STRIPE_SECRET_KEY: "sk_live_FAKE" },
+  unfilled_template: {
+    STRIPE_SECRET_KEY: "sk_test_REPLACE_ME",
+    STRIPE_WEBHOOK_SECRET: "whsec_REPLACE_ME",
+    STRIPE_BASIC_PRICE_ID: "price_REPLACE_ME_BASIC_49",
+    STRIPE_PRO_PRICE_ID: "price_REPLACE_ME_PRO_99",
+    STRIPE_PORTAL_CONFIGURATION_ID: "bpc_REPLACE_ME",
+    STRIPE_SANDBOX_FINGERPRINT: "REPLACE_ME",
+    NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+    E2E_DATABASE_URL: "postgresql://USER:PASSWORD@localhost:5544/matflow_test",
+  },
   empty: {},
   identical_prices: {
     STRIPE_SECRET_KEY: "sk_test_FAKE",

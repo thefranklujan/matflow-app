@@ -8,6 +8,8 @@ import {
   evaluateReadiness,
   formatReport,
   isForbiddenEnvFile,
+  isPlaceholder,
+  unfilledPlaceholderKeys,
 } from "./stripe-readiness";
 
 /** Values here are obviously fake shapes, never real credentials. */
@@ -57,6 +59,54 @@ describe("isForbiddenEnvFile", () => {
   it("allows explicit test files", () => {
     expect(isForbiddenEnvFile(".env.stripe-test")).toBe(false);
     expect(isForbiddenEnvFile(".env.local")).toBe(false);
+  });
+});
+
+// .env.stripe-test is copied from the example template, so a half-filled file
+// is the normal intermediate state. Treating sk_test_REPLACE_ME as a real key
+// made the gate report READY with exit 0.
+describe("template placeholders are never treated as configured", () => {
+  it("recognizes the template markers", () => {
+    expect(isPlaceholder("sk_test_REPLACE_ME")).toBe(true);
+    expect(isPlaceholder("price_REPLACE_ME_BASIC_49")).toBe(true);
+    expect(isPlaceholder("postgresql://USER:PASSWORD@localhost:5544/matflow_test")).toBe(true);
+    expect(isPlaceholder("replace_me")).toBe(true);
+  });
+
+  it("does not flag real-shaped values", () => {
+    expect(isPlaceholder("sk_test_abc123")).toBe(false);
+    expect(isPlaceholder("postgresql://matflow:pw@localhost:5544/matflow_test")).toBe(false);
+    expect(isPlaceholder(undefined)).toBe(false);
+    expect(isPlaceholder("")).toBe(false);
+  });
+
+  it("names every unfilled key, sorted", () => {
+    expect(unfilledPlaceholderKeys({ B: "REPLACE_ME", A: "sk_test_REPLACE_ME", C: "real" })).toEqual(["A", "B"]);
+  });
+
+  it("a fully unfilled template is NOT ready", () => {
+    const report = evaluateReadiness(
+      {
+        STRIPE_SECRET_KEY: "sk_test_REPLACE_ME",
+        STRIPE_WEBHOOK_SECRET: "whsec_REPLACE_ME",
+        STRIPE_BASIC_PRICE_ID: "price_REPLACE_ME_BASIC_49",
+        STRIPE_PRO_PRICE_ID: "price_REPLACE_ME_PRO_99",
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      },
+      CLI,
+    );
+    expect(report.ready).toBe(false);
+    expect(report.exitCode).toBe(EXIT_INCOMPLETE);
+    expect(report.secretKeyMode).toBe("missing");
+  });
+
+  it("distinct placeholder price ids still do not count as distinct prices", () => {
+    const report = evaluateReadiness(
+      { ...COMPLETE, STRIPE_BASIC_PRICE_ID: "price_REPLACE_ME_BASIC_49", STRIPE_PRO_PRICE_ID: "price_REPLACE_ME_PRO_99" },
+      CLI,
+    );
+    expect(report.ready).toBe(false);
+    expect(report.pricesDistinct).toBe(false);
   });
 });
 

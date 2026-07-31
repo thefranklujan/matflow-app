@@ -167,6 +167,31 @@ describe("guards — every refusal path", () => {
     expect(codes({ ...SAFE, STRIPE_PORTAL_CONFIGURATION_ID: undefined })).toContain("MISSING_PORTAL_CONFIGURATION");
   });
 
+  it("UNFILLED_PLACEHOLDER names the keys still holding template values", () => {
+    const c = codes({ ...SAFE, STRIPE_SECRET_KEY: "sk_test_REPLACE_ME", STRIPE_PORTAL_CONFIGURATION_ID: "bpc_REPLACE_ME" });
+    expect(c).toContain("UNFILLED_PLACEHOLDER");
+    const plan = planLifecycle({ ...SAFE, STRIPE_SECRET_KEY: "sk_test_REPLACE_ME" }, { execute: true });
+    const refusal = plan.refusals.find((r) => r.code === "UNFILLED_PLACEHOLDER");
+    expect(refusal?.message).toContain("STRIPE_SECRET_KEY");
+  });
+
+  // The exact fail-open this guard closes: a freshly copied template used to
+  // pass the gate with exit 0 and print "Dry run" as though ready.
+  it("a freshly copied template is refused, not reported ready", () => {
+    const plan = planLifecycle({
+      STRIPE_SECRET_KEY: "sk_test_REPLACE_ME",
+      STRIPE_WEBHOOK_SECRET: "whsec_REPLACE_ME",
+      STRIPE_BASIC_PRICE_ID: "price_REPLACE_ME_BASIC_49",
+      STRIPE_PRO_PRICE_ID: "price_REPLACE_ME_PRO_99",
+      STRIPE_PORTAL_CONFIGURATION_ID: "bpc_REPLACE_ME",
+      STRIPE_SANDBOX_FINGERPRINT: "REPLACE_ME",
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      E2E_DATABASE_URL: "postgresql://USER:PASSWORD@localhost:5544/matflow_test",
+    }, { execute: false });
+    expect(plan.allowed).toBe(false);
+    expect(plan.exitCode).toBe(EXIT_REFUSED);
+  });
+
   it("an empty environment is refused, never allowed by default", () => {
     const plan = planLifecycle({}, { execute: true });
     expect(plan.allowed).toBe(false);

@@ -28,6 +28,15 @@ const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 const STAGES_FILE = path.join(REPO_ROOT, "src/lib/stripe-lifecycle-stages.json");
 const MANIFEST_FILE = path.join(REPO_ROOT, ".stripe-test-objects.json");
 
+
+/** Template placeholders are NOT filled-in values. Kept in sync with
+ * src/lib/stripe-readiness.ts; src/lib/stripe-cli-parity.test.ts spawns this
+ * file and asserts the two agree. */
+const PLACEHOLDER_PATTERNS = [/REPLACE_ME/i, /USER:PASSWORD/i];
+function isPlaceholder(v) {
+  return typeof v === "string" && PLACEHOLDER_PATTERNS.some((re) => re.test(v));
+}
+
 const EXIT_OK = 0;
 const EXIT_REFUSED = 1;
 const EXIT_LIVE_REFUSED = 87;
@@ -42,6 +51,8 @@ const TEST_IDENTITY_DOMAIN = "stripe-test.matflow.test";
  */
 function classifySecretKey(value) {
   if (typeof value !== "string" || value.trim() === "") return "missing";
+  // A template placeholder is not a key, even though it is shaped like one.
+  if (isPlaceholder(value)) return "missing";
   const v = value.trim();
   if (/^(sk|rk)_test_/.test(v)) return "test";
   if (/^(sk|rk)_live_/.test(v)) return "live";
@@ -50,6 +61,7 @@ function classifySecretKey(value) {
 
 function classifyAppUrl(value) {
   if (typeof value !== "string" || value.trim() === "") return "missing";
+  if (isPlaceholder(value)) return "missing";
   const v = value.trim().toLowerCase();
   if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?/.test(v)) return "localhost";
   if (v.includes("vercel.app") || v.includes("-preview") || v.includes("staging")) return "preview";
@@ -58,6 +70,9 @@ function classifyAppUrl(value) {
 
 function isLocalDatabaseUrl(value) {
   if (typeof value !== "string" || value.trim() === "") return false;
+  // A placeholder URL happens to parse to localhost, but it is not a
+  // configured database.
+  if (isPlaceholder(value)) return false;
   let host;
   try {
     host = new URL(value.trim()).hostname.toLowerCase();
@@ -68,7 +83,7 @@ function isLocalDatabaseUrl(value) {
 }
 
 function present(v) {
-  return typeof v === "string" && v.trim() !== "";
+  return typeof v === "string" && v.trim() !== "" && !isPlaceholder(v);
 }
 
 function planLifecycle(env, opts) {
@@ -87,6 +102,10 @@ function planLifecycle(env, opts) {
   }
 
   const refusals = [];
+  const unfilled = Object.entries(env).filter(([, v]) => isPlaceholder(v)).map(([k]) => k).sort();
+  if (unfilled.length > 0) {
+    refusals.push({ code: "UNFILLED_PLACEHOLDER", message: `Still holding template placeholders: ${unfilled.join(", ")}.` });
+  }
   if (secretKeyMode !== "test") {
     refusals.push({ code: "NOT_A_TEST_KEY", message: `STRIPE_SECRET_KEY is ${secretKeyMode}; a test-mode key is required.` });
   }
