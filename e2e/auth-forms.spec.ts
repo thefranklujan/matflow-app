@@ -167,3 +167,49 @@ test("auth forms expose correct autocomplete hints", async ({ page }) => {
   await expect(page.locator("#reset-password")).toHaveAttribute("autocomplete", "new-password");
   await expect(page.locator("#reset-confirm")).toHaveAttribute("autocomplete", "new-password");
 });
+
+
+test.describe("retired onboarding path", () => {
+  test("signed-out visitors are sent to sign-up", async ({ page }) => {
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/sign-up/);
+  });
+
+  test("an academy owner is sent to the dashboard", async ({ browser }) => {
+    const { storageStatePath } = await import("./helpers/env");
+    const context = await browser.newContext({ storageState: storageStatePath("owner-basic") });
+    const page = await context.newPage();
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/app$/);
+    await context.close();
+  });
+
+  test("a student is sent to the student portal", async ({ browser }) => {
+    const { storageStatePath } = await import("./helpers/env");
+    const context = await browser.newContext({ storageState: storageStatePath("student-member") });
+    const page = await context.newPage();
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/student/);
+    await context.close();
+  });
+
+  test("the legacy API is gone and creates nothing", async ({ page }) => {
+    const res = await page.request.post("/api/onboarding", {
+      data: { gymName: "E2E Should Never Exist", slug: "e2e-should-never-exist", timezone: "America/Chicago" },
+    });
+    expect(res.status()).toBe(410);
+    expect((await res.json()).code).toBe("ONBOARDING_RETIRED");
+
+    // Prove no academy was created: the slug must not resolve anywhere public.
+    const join = await page.request.get("/join/e2e-should-never-exist");
+    expect([404, 307, 308]).toContain(join.status());
+  });
+
+  test("no customer-facing page links to the retired onboarding form", async ({ page }) => {
+    for (const path of ["/", "/sign-up", "/sign-in", "/student/sign-up"]) {
+      await page.goto(path);
+      const links = await page.locator('a[href="/onboarding"], a[href^="/onboarding?"]').count();
+      expect(links, `${path} must not link to /onboarding`).toBe(0);
+    }
+  });
+});
