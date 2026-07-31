@@ -45,7 +45,7 @@ advanced analytics.
 | Session + dashboard | `/app` | Verified |
 | Activation | four setup milestones (below) | Verified |
 | First live usage | first attendance record | Verified |
-| Trial → paid | Stripe Checkout from `/app/billing` | **Partial** — code path exists and is race-safe, but the full test-mode lifecycle is unproven (Access Needed) |
+| Trial → paid | Stripe Checkout from `/app/billing` | **Partial** — code path is race-safe and the return experience now reports a truthful processing state, but the sandbox lifecycle is unproven (Access Needed) |
 | Renewal / churn | — | Missing (no lifecycle instrumentation) |
 
 ---
@@ -225,10 +225,12 @@ Outside Stripe:
 | Motion | Verdict | Reasoning |
 |---|---|---|
 | **Founder-led no-card trials** | **GO** | Registration is validated, atomic, and race-safe; the trial is set automatically; activation is measurable; the founder queue shows who needs help. No payment path is touched. |
-| **Founder-assisted paid subscriptions** | **CONDITIONAL GO** | Checkout is duplicate-safe and entitlement-enforced, but production price IDs and the full test-mode lifecycle are unverified. Only sell with Frank personally watching the first subscriptions end to end. |
-| **Unattended paid self-service** | **NO-GO** | Requires the completed Stripe test-mode lifecycle, portal plan-switch configuration, webhook idempotency, and trial-to-paid instrumentation. |
+| **Founder-assisted paid sandbox verification** | **READY TO RUN** | Sandbox tooling, identity guard, catalog rules, and portal support are built and unit-tested. Blocked only on the `MatFlow Billing QA` sandbox being created and the CLI authenticated to it. |
+| **Founder-assisted live paid launch** | **CONDITIONAL GO** | Only with Frank personally watching each of the first subscriptions end to end, and only after the sandbox lifecycle has actually run green. It has not run at all yet. |
+| **Unattended paid self-service** | **NO-GO** | Stays NO-GO even after a clean sandbox run, until the eight production approvals are separately granted. |
 
-Reasoning and evidence for all three: **[MATFLOW-STRIPE-LAUNCH-GATE.md](MATFLOW-STRIPE-LAUNCH-GATE.md)**.
+Reasoning, evidence, and the exact remaining steps:
+**[MATFLOW-STRIPE-LAUNCH-GATE.md](MATFLOW-STRIPE-LAUNCH-GATE.md)**.
 Nothing in this repository has ever contacted Stripe, so no Stripe-side claim
 is Verified.
 

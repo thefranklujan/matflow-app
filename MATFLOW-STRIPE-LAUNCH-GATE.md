@@ -8,9 +8,14 @@ this repository), **Partial**, **Missing**, **Planned**, **Unknown**, or
 
 **Nothing in this repository has ever contacted Stripe.** No Stripe object has
 been created, modified, or read. Every Stripe-side claim below is therefore
-**Access Needed** or **Unknown** until the test-mode lifecycle is actually run.
+**Access Needed** or **Unknown** until the sandbox lifecycle is actually run.
 A passing unit test proves our code behaves correctly against a *mock*; it is
 never evidence that Stripe behaves as we assumed.
+
+The tooling to run that lifecycle now exists (section 15) and is blocked on one
+thing only: the dedicated **MatFlow Billing QA** sandbox does not exist yet, and
+creating it plus authenticating the Stripe CLI to it both require Frank at a
+browser. Section 14 is the exact list.
 
 Stripe documentation reviewed: **31 July 2026**. Every external claim links to
 the official page it came from.
@@ -19,17 +24,20 @@ Last updated: 2026-07-31.
 
 ---
 
-## 1. Verdict
+## 1. Verdicts
+
+Four separate motions, because they carry very different risk.
 
 | Motion | Verdict | Blocking reason |
 |---|---|---|
 | **Founder-led no-card trials** | **GO** | No payment path is touched. Registration is atomic and race-safe; the 30-day trial is set in-app, not by Stripe. |
-| **Founder-assisted paid subscriptions** | **CONDITIONAL GO** | Only with Frank personally watching each of the first subscriptions end to end, and only after items 1–4 of section 14 are supplied. |
-| **Unattended paid self-service** | **NO-GO** | Five gates are unmet: the test-mode lifecycle has never run, webhook idempotency has no event store, Customer Portal plan switching is unconfigured, live-mode configuration does not exist, and trial-to-paid instrumentation is Missing. |
+| **Founder-assisted paid sandbox verification** | **READY TO RUN** | Tooling, guards, catalog rules, and portal support are built and unit-tested. Blocked only on the sandbox existing and being pinned — items 1–4 of section 14. |
+| **Founder-assisted live paid launch** | **CONDITIONAL GO** | Only with Frank personally watching each of the first subscriptions end to end, and only after the sandbox lifecycle has actually run green. Today it has not run at all. |
+| **Unattended paid self-service** | **NO-GO** | Unchanged, and stays NO-GO even after a clean sandbox run until the eight production approvals in section 17 are separately granted. |
 
 The NO-GO is a statement about evidence, not a suspicion about the code. The
-code paths are unit-tested and were corrected against official documentation
-in this packet. They have simply never been exercised against Stripe.
+code paths are unit-tested and were corrected twice against official
+documentation. They have simply never been exercised against Stripe.
 
 ---
 
@@ -157,16 +165,21 @@ arrival order; snapshot payloads are an "eventually-consistent snapshot" that
 ([webhooks](https://docs.stripe.com/webhooks),
 [event destinations](https://docs.stripe.com/event-destinations)).
 
-**This packet moved MatFlow toward that model.** `checkout.session.completed`,
-`checkout.session.async_payment_succeeded`, and `invoice.payment_failed` now
-re-retrieve the Subscription from Stripe and write *its* status, instead of
-assuming a status from the event type.
+**MatFlow now follows that model completely.** Every subscription-bearing event
+is treated as a trigger only: the handler re-reads the Subscription from Stripe
+and writes that. The event payload's status is never used.
 
 | Item | Status |
 |---|---|
-| Checkout and invoice handlers re-read the Subscription as source of truth | **Verified** — tested |
-| `customer.subscription.updated` / `.deleted` still write the event payload directly | **Partial** — a stale, out-of-order event can overwrite newer state |
-| Out-of-order `updated`-after-`deleted` regression | **Missing** — documented by a deliberate failing-behavior test in [route.test.ts](src/app/api/webhooks/stripe/route.test.ts); the durable fix needs the event store from section 6 |
+| All checkout, subscription, and invoice handlers re-read the Subscription | **Verified** — tested |
+| A stale `updated` arriving after a newer `deleted` no longer resurrects the subscription | **Verified** — tested; this was a real regression and is now asserted, not documented as a gap |
+| Duplicate delivery converges on identical state | **Verified** — tested |
+| Stored price always comes from the current subscription, never the event | **Verified** — tested |
+| A Stripe read failure returns 500 so Stripe retries | **Verified** — tested |
+| Behavior against genuinely out-of-order Stripe deliveries | **Access Needed** — proven only against mocks so far |
+
+Re-reading costs one API call per event. That is the price of correctness here,
+and Stripe's own guidance recommends it.
 
 ---
 
@@ -262,7 +275,9 @@ configuring the sandbox portal does **not** configure the live one
 | Item | Status |
 |---|---|
 | App creates portal sessions and handles portal outage with a 502 | **Verified** — tested |
-| Portal configured in test mode (switch plan + catalog) | **Access Needed** |
+| Optional `STRIPE_PORTAL_CONFIGURATION_ID` pins a known configuration; unset leaves production behavior unchanged | **Verified** — tested both ways |
+| Provisioning scopes the portal catalog to exactly the two approved prices | **Verified** — code and rules unit-tested; never executed |
+| Portal configured in test mode (switch plan + catalog) | **Access Needed** — one command once the sandbox exists |
 | Portal configured in **live** mode | **Access Needed** — separate action; sandbox configuration does not carry over |
 
 Constraints that affect the $49/$99 offer directly: at most **10 products** may
@@ -336,87 +351,158 @@ MatFlow enforces its own five layers before creating a Checkout Session
 
 ---
 
-## 14. What Frank must supply
+## 14. What Frank must supply to run the sandbox lifecycle
 
-Ten items, in the order they unblock work. Items 1–4 unblock the test-mode
-lifecycle; items 5–10 are required before any live charge.
+Four items, and only the first two need Frank at a keyboard. Everything else is
+already built and waiting.
 
-1. **Stripe test-mode key** (`sk_test_` or `rk_test_`), from a dedicated
-   sandbox rather than the settings-sharing default sandbox.
-2. **Two test-mode recurring monthly prices** on **separate Products**: Basic
-   $49 and Pro $99. The tooling deliberately cannot create these — a tool that
-   can invent a price can silently invent an offer.
-3. **Test-mode webhook signing secret**, from `stripe listen` for local runs.
-4. **Approval to run the lifecycle**, at which point the twenty stages in
-   `scripts/stripe-lifecycle.mjs` can be executed with `--execute-test-mode`.
-5. **Customer Portal configured in test mode**: Switch plan on, product catalog
-   set to the two prices above.
-6. **Customer Portal configured in live mode** — a separate action, because
-   portal configuration does not cross modes.
-7. **Dunning decision**: retry schedule, and what a subscription becomes when
-   recovery fails (`canceled`, `unpaid`, or stays `past_due`).
-8. **Webhook idempotency migration approval** — the `StripeWebhookEvent` table
-   that closes sections 6 and 7. No migration was created in this packet.
-9. **PACKET-1 decision**: whether to backfill legacy `"cancelled"` rows to the
-   canonical `"canceled"`.
-10. **Production Stripe configuration**: account activation, live keys stored
-    in Vercel, a live webhook endpoint over HTTPS with TLS 1.2+, and live
-    price IDs confirmed to match the published $49/$99 offer.
+**1. Create the sandbox.** In the Stripe Dashboard, open the account picker →
+**Switch to sandbox** → **Create sandbox** → name it exactly
+`MatFlow Billing QA` → choose **Create from scratch**.
 
-Nothing in this list can be done from this repository, and none of it was
-attempted.
+Create from scratch matters: Stripe warns that the *default* test-mode sandbox
+shares settings with live mode, so changing a setting there can change it in
+production. A purpose-created sandbox is fully isolated.
 
-**To run the preflight once items 1–3 exist** (it prints classifications only,
-never values, and never contacts Stripe):
+**2. Authenticate the CLI to it.** Run `stripe login`, and during the browser
+authorization **select the MatFlow Billing QA sandbox**, not the live account.
+
+This step matters more than it looks. This machine's default Stripe CLI profile
+currently holds a **live-mode key**, so the CLI is one careless command away
+from production. Nothing in this repository will use that profile.
+
+**3. Pin and provision** — these are single commands:
 
 ```bash
-cp .env.stripe-test.example .env.stripe-test && npm run stripe:readiness:test
+cp .env.stripe-test.example .env.stripe-test && chmod 600 .env.stripe-test
 ```
 
-**To see the lifecycle plan without touching anything:**
+Put the sandbox test key in that file, then:
 
 ```bash
-npm run stripe:lifecycle -- --config .env.stripe-test
+npm run stripe:sandbox -- --pin && npm run stripe:sandbox -- --provision-sandbox-catalog
 ```
+
+`--pin` records a one-way fingerprint of the sandbox account; every mutating
+command afterwards refuses to touch any other account. `--provision-sandbox-
+catalog` creates or reuses MatFlow Basic ($49) and MatFlow Pro ($99) on separate
+Products with matching tax behavior, plus a portal configuration scoped to
+exactly those two prices, and writes the ids into the git-ignored file without
+printing them.
+
+**4. Approve the lifecycle run**, which then exercises checkout, duplicate
+prevention, plan switching, payment failure, cancellation, and resubscription.
+
+| Item | Status |
+|---|---|
+| Sandbox `MatFlow Billing QA` exists | **Access Needed** — Frank, browser |
+| Stripe CLI authenticated to that sandbox | **Access Needed** — Frank, browser |
+| Fingerprint pinned | **Planned** — one command, blocked on the above |
+| Catalog and portal provisioned | **Planned** — one command, blocked on the above |
+| Lifecycle executed | **Missing** — has never run |
 
 ---
 
-## 15. Tooling built in this packet
+## 15. Lifecycle stage evidence
+
+Twenty stages are defined in `src/lib/stripe-lifecycle-stages.json`. **Every one
+of them is currently `Blocked`**, for the single reason that the sandbox does
+not exist.
+
+No stage has an alias, a Stripe observable, a local observable, or a cleanup
+result, because no stage has run. That table will be filled in from the run
+manifest after an actual execution, and not before. Anything else would be
+fabricated evidence.
+
+| Stage group | Stages | Status | Reason |
+|---|---|---|---|
+| Preflight and catalog validation (1–4) | 4 | **Blocked** | No pinned sandbox |
+| Tenant and customer setup (5–7) | 3 | **Blocked** | No pinned sandbox |
+| Checkout and activation (8–12) | 5 | **Blocked** | No pinned sandbox |
+| Duplicate prevention and idempotency (13–14) | 2 | **Blocked** | No pinned sandbox |
+| Plan switching (15–16) | 2 | **Blocked** | No pinned sandbox |
+| Failure, cancellation, recovery (17–20) | 4 | **Blocked** | No pinned sandbox |
+
+The manifest treats `partial`, `manual`, `blocked`, and `skipped` as failures
+for the purpose of the overall verdict, so a run cannot be summarized as
+verified unless every stage genuinely passed.
+
+---
+
+## 16. Tooling
 
 | File | Purpose |
 |---|---|
-| [src/lib/stripe-readiness.ts](src/lib/stripe-readiness.ts) | Pure preflight logic: configuration shape only, no values printed |
+| [src/lib/stripe-readiness.ts](src/lib/stripe-readiness.ts) | Configuration-shape preflight; prints classifications, never values |
 | [scripts/stripe-readiness.mjs](scripts/stripe-readiness.mjs) | CLI. Exit 0 ready, 1 incomplete, 87 live key refused, 88 forbidden file |
-| [src/lib/stripe-lifecycle.ts](src/lib/stripe-lifecycle.ts) | The twenty stages and every refusal guard |
-| [scripts/stripe-lifecycle.mjs](scripts/stripe-lifecycle.mjs) | Dry-run-by-default runner |
-| [src/lib/stripe-lifecycle-stages.json](src/lib/stripe-lifecycle-stages.json) | Canonical stage list, read by both the module and the CLI |
-| [src/lib/stripe-cli-parity.test.ts](src/lib/stripe-cli-parity.test.ts) | Spawns the real CLIs and asserts they agree with the TypeScript modules |
+| [src/lib/stripe-lifecycle.ts](src/lib/stripe-lifecycle.ts) | The twenty stages and every execution guard |
+| [scripts/stripe-lifecycle.mjs](scripts/stripe-lifecycle.mjs) | Dry-run planner |
+| [src/lib/stripe-sandbox-guard.ts](src/lib/stripe-sandbox-guard.ts) | One-way sandbox fingerprint; fails closed when unpinned |
+| [src/lib/stripe-catalog.ts](src/lib/stripe-catalog.ts) | Price/product matching and the portal-switchability rules |
+| [src/lib/stripe-manifest.ts](src/lib/stripe-manifest.ts) | Run manifest, resume logic, alias-only redaction |
+| [scripts/stripe-sandbox.mjs](scripts/stripe-sandbox.mjs) | The only script that mutates Stripe. `--pin`, `--provision-sandbox-catalog`, `--execute-test-mode` |
+| [src/lib/subscription-reconcile.ts](src/lib/subscription-reconcile.ts) | Re-reads Stripe and resolves the owning academy safely |
+| [src/lib/stripe-cli-parity.test.ts](src/lib/stripe-cli-parity.test.ts) | Spawns the real CLIs and asserts they match the TypeScript modules |
 | [.env.stripe-test.example](.env.stripe-test.example) | Names and placeholders only |
 
-The runners are dependency-free `.mjs` because Node 20 cannot import
-TypeScript, so each carries a copy of the guard logic. The parity test is what
-keeps the copies honest. `--execute-test-mode` is accepted by the guards but
-exits non-zero on purpose: the mutating stages are unimplemented, so a green
-run can never be mistaken for a completed lifecycle.
+Secrets live only in `.env.stripe-test` and `.stripe-test-objects.json`, both
+git-ignored and both required to be mode 600 — the runner refuses to start
+otherwise. Stripe ids never appear in reports; aliases like `basic_price` and
+`test_customer_1` are used instead.
+
+Exit codes are deliberately distinct so a refusal is never mistaken for a pass:
+**87** live credential, **88** forbidden env file, **89** sandbox mismatch or
+unpinned, **1** incomplete or refused.
+
+CI never needs Stripe credentials. Everything in the automated suite is mocked
+or dry-run; sandbox execution is an explicit local command.
 
 ---
 
-## 16. Corrections made in this packet
+## 17. Production approvals still required
 
-Both were found by auditing MatFlow's handlers against official Stripe
-documentation, and both were entitlement-correctness defects.
+Even after a completely clean sandbox run, unattended paid self-service stays
+**NO-GO** until Frank separately approves each of these. None was attempted in
+this packet.
 
-**`checkout.session.completed` asserted `active` unconditionally.** It also
-cleared `trialEndsAt` in the same write. A subscription that came back
-`incomplete` — a failed or unauthenticated payment — would have been recorded
-as a paying customer and stripped of its trial simultaneously. Now the handler
-retrieves the Subscription and writes Stripe's status, and clears the trial only
-when the status is `active` or `trialing`.
+1. Durable `StripeWebhookEvent` migration (processed-event storage).
+2. Production subscription-status audit and the legacy `"cancelled"` backfill decision.
+3. Live Products and Prices, confirmed to match the published $49/$99 offer.
+4. Live Customer Portal configuration — a separate action, because portal configuration does not cross modes.
+5. Live webhook endpoint and its signing secret.
+6. Production Vercel environment variables.
+7. Dunning policy: retry schedule, and what a subscription becomes when recovery fails.
+8. Tax and refund operational decisions.
+
+---
+
+## 18. Corrections made from documentation review
+
+Four defects, all found by auditing MatFlow's handlers against official Stripe
+documentation rather than by a test failing. All four were entitlement or
+tenancy correctness problems.
+
+**`checkout.session.completed` asserted `active` unconditionally** and cleared
+`trialEndsAt` in the same write. A subscription that came back `incomplete` — a
+failed or unauthenticated payment — would have been recorded as a paying
+customer and stripped of its trial simultaneously.
 
 **`invoice.payment_failed` asserted `past_due` unconditionally.** On a
-subscription's first invoice Stripe keeps the subscription `incomplete`, and the
-failing invoice may not belong to a subscription at all. Now the handler
-retrieves the subscription and writes its real status, and ignores invoices with
-no subscription.
+subscription's first invoice Stripe keeps it `incomplete`, and the failing
+invoice may not belong to a subscription at all.
 
-Neither correction touches `prisma/schema.prisma`, and no migration was created.
+**Subscription events trusted the payload.** A stale `updated` arriving after a
+newer `deleted` would resurrect a cancelled subscription and restore paid access
+to a churned academy. Handlers now re-read Stripe, making arrival order
+irrelevant.
+
+**`invoice.payment_failed` used `updateMany` keyed on the Stripe customer id.**
+A customer id is not a tenant key. If two academies ever shared one, a single
+failed payment would have marked both `past_due`. Ownership now resolves to
+exactly one academy, or the write is refused and Stripe is asked to retry.
+
+Alongside these, the billing return page stopped implying that returning from
+Checkout means the payment succeeded; it now reports a bounded processing state
+and waits for server-derived truth.
+
+None of these touched `prisma/schema.prisma`, and no migration was created.
