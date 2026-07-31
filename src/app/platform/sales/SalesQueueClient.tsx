@@ -63,8 +63,8 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
         </p>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-        <div className="lg:col-span-2">
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 min-w-0">
+        <div className="lg:col-span-2 min-w-0">
           <label htmlFor="sales-search" className="block text-xs text-gray-400 mb-1">
             Search academy or owner
           </label>
@@ -77,7 +77,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
             className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="sales-priority" className="block text-xs text-gray-400 mb-1">Priority</label>
           <select
             id="sales-priority"
@@ -91,7 +91,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="sales-activation" className="block text-xs text-gray-400 mb-1">Activation</label>
           <select
             id="sales-activation"
@@ -104,7 +104,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
             <option value="not_activated">Not activated</option>
           </select>
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="sales-billing" className="block text-xs text-gray-400 mb-1">Billing</label>
           <select
             id="sales-billing"
@@ -118,7 +118,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
             <option value="trouble">Needs attention</option>
           </select>
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="sales-sort" className="block text-xs text-gray-400 mb-1">Sort</label>
           <select
             id="sales-sort"
@@ -134,13 +134,13 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3 min-w-0">
         <label htmlFor="sales-plan" className="text-xs text-gray-400">Plan</label>
         <select
           id="sales-plan"
           value={plan}
           onChange={(e) => setPlan(e.target.value as QueueFilters["plan"])}
-          className="bg-[#0a0a0a] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white"
+          className="min-w-0 max-w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white"
         >
           <option value="all">All plans</option>
           <option value="basic">Basic</option>
@@ -251,7 +251,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
           {/* Mobile list — purpose-built, never a squeezed table */}
           <ul className="lg:hidden space-y-3">
             {visible.map((row) => (
-              <li key={row.gymId} className="border border-white/10 rounded-lg p-4">
+              <li key={row.gymId} className="border border-white/10 rounded-lg p-4 min-w-0 overflow-hidden">
                 <div className="flex items-start justify-between gap-3">
                   <Link href={`/platform/gyms/${row.gymId}`} className="text-white font-semibold hover:underline min-w-0 truncate">
                     {row.gymName}
@@ -263,7 +263,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
                 <p className="text-xs text-gray-400 mt-1 truncate">
                   {row.owner.known ? `${row.owner.name ?? ""} ${row.owner.email ?? ""}`.trim() : "Owner unknown"}
                 </p>
-                <dl className="mt-3 grid grid-cols-2 gap-y-1 text-xs">
+                <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-xs">
                   <dt className="text-gray-400">Billing</dt>
                   <dd className="text-gray-300 text-right">{row.subscriptionStatus} · {planLabel(row)}</dd>
                   <dt className="text-gray-400">Trial</dt>
@@ -272,11 +272,11 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
                   <dd className="text-gray-300 text-right">{row.milestonesComplete}/{row.milestonesTotal}</dd>
                   <dt className="text-gray-400">Live usage</dt>
                   <dd className="text-gray-300 text-right">{row.hasLiveUsage ? "Yes" : "No"}</dd>
-                  <dt className="text-gray-400">Members / instructors / classes</dt>
+                  <dt className="text-gray-400 min-w-0 break-words">Members / instructors / classes</dt>
                   <dd className="text-gray-300 text-right">
                     {row.activeMembers} / {row.activeInstructors} / {row.activeClasses}
                   </dd>
-                  <dt className="text-gray-400">Check-ins ({recentDays}d)</dt>
+                  <dt className="text-gray-400 min-w-0 break-words">Check-ins ({recentDays}d)</dt>
                   <dd className="text-gray-300 text-right">{row.recentAttendanceCount}</dd>
                 </dl>
                 <p className="text-xs text-gray-400 mt-3">{row.recommendedAction}</p>
@@ -286,7 +286,7 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
         </>
       )}
 
-      <section className="mt-8 border border-white/10 rounded-lg p-5">
+      <section className="mt-8 border border-white/10 rounded-lg p-5 min-w-0 break-words">
         <h2 className="text-sm font-semibold text-white mb-3">What these columns mean</h2>
         <dl className="text-xs text-gray-400 space-y-1.5">
           <div><dt className="inline text-gray-300">Setup:</dt> <dd className="inline">profile complete, first member beyond the owner, an active instructor, an active class.</dd></div>
