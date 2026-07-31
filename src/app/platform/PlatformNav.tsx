@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail, Activity, Database, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Building2, Users, Megaphone, Flame, Mail, Activity, Database, ShieldCheck, Target } from "lucide-react";
 
 const tabs = [
   { href: "/platform", label: "Dashboard", icon: LayoutDashboard },
   { href: "/platform/activity", label: "Activity", icon: Activity },
+  { href: "/platform/sales", label: "Sales", icon: Target },
   { href: "/platform/gyms", label: "Gyms", icon: Building2 },
   { href: "/platform/students", label: "Students", icon: Users },
   { href: "/platform/nominations", label: "Nominations", icon: Flame },
@@ -20,8 +21,8 @@ export default function PlatformNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-white/10 bg-[#0a0a0a] px-6">
-      <div className="max-w-7xl mx-auto flex items-center gap-1">
+    <nav className="border-b border-white/10 bg-[#0a0a0a] px-6 overflow-x-auto">
+      <div className="max-w-7xl mx-auto flex items-center gap-1 w-max lg:w-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.href === "/platform"
