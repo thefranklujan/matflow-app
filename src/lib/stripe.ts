@@ -113,9 +113,21 @@ export async function createCheckoutSession(
   return getStripe().checkout.sessions.create(sessionParams, { idempotencyKey });
 }
 
+/**
+ * Open the Customer Portal.
+ *
+ * Portal configurations are per-mode: Stripe maintains a separate set for live
+ * mode and for each sandbox. STRIPE_PORTAL_CONFIGURATION_ID lets a sandbox run
+ * pin the exact configuration it provisioned, so a lifecycle test proves plan
+ * switching against a KNOWN catalog rather than whatever the default happens to
+ * be. When it is unset — which is the case in production today — behavior is
+ * unchanged and Stripe uses the account's default configuration.
+ */
 export async function createPortalSession(customerId: string) {
+  const configuration = process.env.STRIPE_PORTAL_CONFIGURATION_ID?.trim();
   return getStripe().billingPortal.sessions.create({
     customer: customerId,
     return_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/app/billing`,
+    ...(configuration ? { configuration } : {}),
   });
 }

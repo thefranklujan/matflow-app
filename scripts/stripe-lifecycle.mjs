@@ -104,6 +104,12 @@ function planLifecycle(env, opts) {
   if (!databaseIsLocal) {
     refusals.push({ code: "PRODUCTION_DATABASE", message: "E2E_DATABASE_URL is missing or not a localhost database; the harness only mutates the isolated test database." });
   }
+  if (!present(env.STRIPE_SANDBOX_FINGERPRINT)) {
+    refusals.push({ code: "MISSING_SANDBOX_FINGERPRINT", message: "No approved sandbox fingerprint is pinned; the target account cannot be proven." });
+  }
+  if (!present(env.STRIPE_PORTAL_CONFIGURATION_ID)) {
+    refusals.push({ code: "MISSING_PORTAL_CONFIGURATION", message: "STRIPE_PORTAL_CONFIGURATION_ID is missing; plan switching could not be proven against a known catalog." });
+  }
 
   const allowed = refusals.length === 0;
   return { mode, secretKeyMode, appUrl, databaseIsLocal, stages, refusals, allowed, exitCode: allowed ? EXIT_OK : EXIT_REFUSED };
@@ -194,6 +200,8 @@ function main() {
       STRIPE_PRO_PRICE_ID: env.STRIPE_PRO_PRICE_ID,
       NEXT_PUBLIC_APP_URL: env.NEXT_PUBLIC_APP_URL,
       E2E_DATABASE_URL: env.E2E_DATABASE_URL,
+      STRIPE_SANDBOX_FINGERPRINT: env.STRIPE_SANDBOX_FINGERPRINT,
+      STRIPE_PORTAL_CONFIGURATION_ID: env.STRIPE_PORTAL_CONFIGURATION_ID,
     },
     { execute: args.execute },
   );

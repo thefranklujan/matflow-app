@@ -21,6 +21,8 @@ const SAFE: LifecycleEnv = {
   STRIPE_PRO_PRICE_ID: "price_pro_FAKE",
   NEXT_PUBLIC_APP_URL: "http://localhost:3000",
   E2E_DATABASE_URL: "postgresql://matflow:matflow@localhost:5544/matflow_test",
+  STRIPE_SANDBOX_FINGERPRINT: "0123456789abcdef0123456789abcdef",
+  STRIPE_PORTAL_CONFIGURATION_ID: "bpc_FAKE",
 };
 
 const codes = (env: LifecycleEnv): RefusalCode[] =>
@@ -150,8 +152,19 @@ describe("guards — every refusal path", () => {
   it("collects every independent problem rather than stopping at the first", () => {
     const c = codes({ NEXT_PUBLIC_APP_URL: "https://app.mymatflow.com" });
     expect(c).toEqual(
-      expect.arrayContaining(["NOT_A_TEST_KEY", "MISSING_WEBHOOK_SECRET", "MISSING_PRICE_IDS", "PRODUCTION_APP_URL", "PRODUCTION_DATABASE"]),
+      expect.arrayContaining(["NOT_A_TEST_KEY", "MISSING_WEBHOOK_SECRET", "MISSING_PRICE_IDS", "PRODUCTION_APP_URL", "PRODUCTION_DATABASE", "MISSING_SANDBOX_FINGERPRINT", "MISSING_PORTAL_CONFIGURATION"]),
     );
+  });
+
+  // The machine's default Stripe CLI profile is authenticated to a
+  // live-capable account, so an unproven target must never be mutated.
+  it("MISSING_SANDBOX_FINGERPRINT when no approved sandbox is pinned", () => {
+    expect(codes({ ...SAFE, STRIPE_SANDBOX_FINGERPRINT: undefined })).toContain("MISSING_SANDBOX_FINGERPRINT");
+    expect(codes({ ...SAFE, STRIPE_SANDBOX_FINGERPRINT: "  " })).toContain("MISSING_SANDBOX_FINGERPRINT");
+  });
+
+  it("MISSING_PORTAL_CONFIGURATION when plan switching could not be proven", () => {
+    expect(codes({ ...SAFE, STRIPE_PORTAL_CONFIGURATION_ID: undefined })).toContain("MISSING_PORTAL_CONFIGURATION");
   });
 
   it("an empty environment is refused, never allowed by default", () => {

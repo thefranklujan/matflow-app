@@ -56,7 +56,9 @@ export type RefusalCode =
   | "MISSING_WEBHOOK_SECRET"
   | "MISSING_PRICE_IDS"
   | "IDENTICAL_PRICE_IDS"
-  | "NOT_A_TEST_KEY";
+  | "NOT_A_TEST_KEY"
+  | "MISSING_SANDBOX_FINGERPRINT"
+  | "MISSING_PORTAL_CONFIGURATION";
 
 export interface LifecycleEnv {
   STRIPE_SECRET_KEY?: string;
@@ -66,6 +68,10 @@ export interface LifecycleEnv {
   NEXT_PUBLIC_APP_URL?: string;
   /** The database the harness would mutate. Must be local. */
   E2E_DATABASE_URL?: string;
+  /** One-way fingerprint of the approved sandbox account. */
+  STRIPE_SANDBOX_FINGERPRINT?: string;
+  /** Portal configuration provisioned in that sandbox. */
+  STRIPE_PORTAL_CONFIGURATION_ID?: string;
 }
 
 export interface Refusal {
@@ -155,6 +161,15 @@ export function planLifecycle(env: LifecycleEnv, opts: { execute: boolean }): Li
   }
   if (!databaseIsLocal) {
     refusals.push({ code: "PRODUCTION_DATABASE", message: "E2E_DATABASE_URL is missing or not a localhost database; the harness only mutates the isolated test database." });
+  }
+  // Identity, not intent. The machine's default Stripe CLI profile is
+  // authenticated to a live-capable account, so "I meant to be in test mode"
+  // is not a safety property: the approved sandbox must be positively pinned.
+  if (!present(env.STRIPE_SANDBOX_FINGERPRINT)) {
+    refusals.push({ code: "MISSING_SANDBOX_FINGERPRINT", message: "No approved sandbox fingerprint is pinned; the target account cannot be proven." });
+  }
+  if (!present(env.STRIPE_PORTAL_CONFIGURATION_ID)) {
+    refusals.push({ code: "MISSING_PORTAL_CONFIGURATION", message: "STRIPE_PORTAL_CONFIGURATION_ID is missing; plan switching could not be proven against a known catalog." });
   }
 
   const allowed = refusals.length === 0;

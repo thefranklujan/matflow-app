@@ -4,20 +4,59 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mocks = vi.hoisted(() => ({
   subscriptionsList: vi.fn(),
   customersCreate: vi.fn(),
+  portalSessionsCreate: vi.fn(),
 }));
 
 vi.mock("stripe", () => ({
   default: class StripeMock {
     subscriptions = { list: mocks.subscriptionsList };
     customers = { create: mocks.customersCreate };
+    billingPortal = { sessions: { create: mocks.portalSessionsCreate } };
   },
 }));
 
-import { hasLiveSubscription, ensureCustomer, isIdempotencyConflict } from "./stripe";
+import { hasLiveSubscription, ensureCustomer, isIdempotencyConflict, createPortalSession } from "./stripe";
 
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.STRIPE_SECRET_KEY = "sk_test_dummy_for_unit_tests";
+  delete process.env.STRIPE_PORTAL_CONFIGURATION_ID;
+  mocks.portalSessionsCreate.mockResolvedValue({ url: "https://portal.example/session" });
+});
+
+describe("createPortalSession — optional per-mode configuration", () => {
+  // Production has no configuration pinned today; that behavior must not change.
+  it("omits `configuration` entirely when none is set", async () => {
+    await createPortalSession("cus_1");
+    const params = mocks.portalSessionsCreate.mock.calls[0][0];
+    expect(params).not.toHaveProperty("configuration");
+    expect(params.customer).toBe("cus_1");
+    expect(params.return_url).toMatch(/\/app\/billing$/);
+  });
+
+  // A sandbox run pins the configuration it provisioned, so plan switching is
+  // proven against a KNOWN catalog rather than the account default.
+  it("passes the configuration through when one is set", async () => {
+    process.env.STRIPE_PORTAL_CONFIGURATION_ID = "bpc_FAKE";
+    await createPortalSession("cus_1");
+    expect(mocks.portalSessionsCreate.mock.calls[0][0].configuration).toBe("bpc_FAKE");
+  });
+
+  it("treats a blank configuration as absent rather than passing an empty id", async () => {
+    for (const blank of ["", "   "]) {
+      vi.clearAllMocks();
+      mocks.portalSessionsCreate.mockResolvedValue({ url: "u" });
+      process.env.STRIPE_PORTAL_CONFIGURATION_ID = blank;
+      await createPortalSession("cus_1");
+      expect(mocks.portalSessionsCreate.mock.calls[0][0]).not.toHaveProperty("configuration");
+    }
+  });
+
+  it("trims a padded configuration id", async () => {
+    process.env.STRIPE_PORTAL_CONFIGURATION_ID = "  bpc_FAKE  ";
+    await createPortalSession("cus_1");
+    expect(mocks.portalSessionsCreate.mock.calls[0][0].configuration).toBe("bpc_FAKE");
+  });
 });
 
 describe("hasLiveSubscription — no pagination blind spot", () => {

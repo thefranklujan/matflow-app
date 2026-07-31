@@ -21,7 +21,8 @@
     "test:e2e:visual": "playwright test --project=visual",
     "stripe:readiness": "node scripts/stripe-readiness.mjs",
     "stripe:readiness:test": "node scripts/stripe-readiness.mjs --config .env.stripe-test",
-    "stripe:lifecycle": "node scripts/stripe-lifecycle.mjs"
+    "stripe:lifecycle": "node scripts/stripe-lifecycle.mjs",
+    "stripe:sandbox": "node scripts/stripe-sandbox.mjs"
   },
   "dependencies": {
     "@awesome-cordova-plugins/onesignal": "^9.1.4",

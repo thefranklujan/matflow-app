@@ -25,6 +25,8 @@ const CASES: Record<string, LifecycleEnv> = {
     STRIPE_PRO_PRICE_ID: "price_pro_FAKE",
     NEXT_PUBLIC_APP_URL: "http://localhost:3000",
     E2E_DATABASE_URL: "postgresql://matflow:matflow@localhost:5544/matflow_test",
+    STRIPE_SANDBOX_FINGERPRINT: "0123456789abcdef0123456789abcdef",
+    STRIPE_PORTAL_CONFIGURATION_ID: "bpc_FAKE",
   },
   live_key: { STRIPE_SECRET_KEY: "sk_live_FAKE" },
   empty: {},
@@ -35,6 +37,8 @@ const CASES: Record<string, LifecycleEnv> = {
     STRIPE_PRO_PRICE_ID: "price_same_FAKE",
     NEXT_PUBLIC_APP_URL: "http://localhost:3000",
     E2E_DATABASE_URL: "postgresql://matflow:matflow@localhost:5544/matflow_test",
+    STRIPE_SANDBOX_FINGERPRINT: "0123456789abcdef0123456789abcdef",
+    STRIPE_PORTAL_CONFIGURATION_ID: "bpc_FAKE",
   },
   production_url: {
     STRIPE_SECRET_KEY: "sk_test_FAKE",
@@ -43,6 +47,8 @@ const CASES: Record<string, LifecycleEnv> = {
     STRIPE_PRO_PRICE_ID: "price_pro_FAKE",
     NEXT_PUBLIC_APP_URL: "https://app.mymatflow.com",
     E2E_DATABASE_URL: "postgresql://matflow:matflow@localhost:5544/matflow_test",
+    STRIPE_SANDBOX_FINGERPRINT: "0123456789abcdef0123456789abcdef",
+    STRIPE_PORTAL_CONFIGURATION_ID: "bpc_FAKE",
   },
   remote_database: {
     STRIPE_SECRET_KEY: "sk_test_FAKE",
