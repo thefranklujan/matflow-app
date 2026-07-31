@@ -35,6 +35,9 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
   const [gymSlug, setGymSlug] = useState("");
   const [timezone, setTimezone] = useState("America/Chicago");
   const [error, setError] = useState("");
+  // Server-reported field for validation/conflict errors, so the right input
+  // can be focused and marked invalid. Values are always retained.
+  const [errorField, setErrorField] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   function handleGymNameChange(value: string) {
@@ -127,6 +130,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
     }
 
     setError("");
+    setErrorField(null);
     setLoading(true);
 
     try {
@@ -149,7 +153,17 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
 
       if (!res.ok) {
         setError(data.error || "Registration failed");
+        const field = typeof data.field === "string" ? data.field : null;
+        setErrorField(field);
         setLoading(false);
+        // Send the owner back to the step that owns the failing field, focus
+        // it, and keep everything they typed (passwords are never prefilled).
+        const step1Fields = ["firstName", "lastName", "email", "phone", "password"];
+        if (field && step1Fields.includes(field)) setStep(1);
+        requestAnimationFrame(() => {
+          const target = field ? document.getElementById(FIELD_IDS[field] ?? "") : null;
+          (target ?? document.getElementById("signup-error"))?.focus?.();
+        });
         return;
       }
 
@@ -197,6 +211,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
             <div
               id="signup-error"
               role="alert"
+              tabIndex={-1}
               className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm"
             >
               {error}
@@ -308,6 +323,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                 </label>
                 <input
                   id="signup-email"
+                  aria-invalid={errorField === "email" || undefined}
                   name="email"
                   autoComplete="email"
                   inputMode="email"
@@ -344,6 +360,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                 </label>
                 <input
                   id="signup-password"
+                  aria-invalid={errorField === "password" || undefined}
                   name="new-password"
                   autoComplete="new-password"
                   type="password"
@@ -373,6 +390,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                 </label>
                 <input
                   id="signup-gym-name"
+                  aria-invalid={errorField === "gymName" || undefined}
                   name="organization"
                   autoComplete="organization"
                   type="text"
@@ -392,6 +410,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                   <span className="text-gray-400 text-sm whitespace-nowrap">app.mymatflow.com/join/</span>
                   <input
                     id="signup-gym-slug"
+                  aria-invalid={errorField === "gymSlug" || undefined}
                     name="gym-url"
                     type="text"
                     aria-describedby="signup-gym-slug-hint"
@@ -458,6 +477,18 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
     </div>
   );
 }
+
+/** Server field name -> input id, for focusing the first invalid control. */
+const FIELD_IDS: Record<string, string> = {
+  firstName: "signup-first-name",
+  lastName: "signup-last-name",
+  email: "signup-email",
+  phone: "signup-phone",
+  password: "signup-password",
+  gymName: "signup-gym-name",
+  gymSlug: "signup-gym-slug",
+  timezone: "signup-timezone",
+};
 
 export default function SignUpPage() {
   return (

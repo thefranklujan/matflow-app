@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   requireOwnerAccess: vi.fn(),
-  entitlementErrorBody: vi.fn(() => null),
+  entitlementErrorBody: vi.fn((): Record<string, unknown> | null => null),
   instructorFindFirst: vi.fn(),
   scheduleCreate: vi.fn(),
   scheduleFindMany: vi.fn(),

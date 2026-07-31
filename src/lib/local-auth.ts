@@ -5,6 +5,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { lockMemberCapacity, assertSeatAvailable } from "@/lib/member-capacity";
@@ -60,6 +61,14 @@ export async function destroySession() {
 
 // ── Register gym owner ───────────────────────────────
 
+/** Duplicate email or academy URL — carries the field for a stable 409. */
+export class DuplicateRegistrationError extends Error {
+  constructor(public readonly field: "email" | "gymSlug", message: string) {
+    super(message);
+    this.name = "DuplicateRegistrationError";
+  }
+}
+
 export async function registerGymOwner(data: {
   email: string;
   phone?: string;
@@ -76,49 +85,68 @@ export async function registerGymOwner(data: {
   const existing = await prisma.member.findFirst({
     where: { email: { equals: emailLower, mode: "insensitive" } },
   });
-  if (existing) throw new Error("An account with this email already exists");
+  if (existing) throw new DuplicateRegistrationError("email", "An account with this email already exists");
 
   // Check if slug is taken
   const slugTaken = await prisma.gym.findUnique({ where: { slug: data.gymSlug } });
-  if (slugTaken) throw new Error("This gym URL is already taken");
+  if (slugTaken) throw new DuplicateRegistrationError("gymSlug", "This gym URL is already taken");
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
   // Create gym + admin member in a transaction
-  const result = await prisma.$transaction(async (tx) => {
-    const gym = await tx.gym.create({
-      data: {
-        clerkOrgId: `owner-${Date.now()}`,
-        name: data.gymName,
-        slug: data.gymSlug,
-        timezone: data.timezone || "America/Chicago",
-        subscriptionStatus: "trialing",
-        trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        // Auto-approve self-serve owner signups. The 30-day trial already gates
-        // monetization, so a manual approval wall only froze cold prospects out
-        // of their own gym and hid new gyms from the student directory.
-        approved: true,
-      },
-    });
+  let result: { gym: { id: string; name: string; slug: string }; member: { id: string } };
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      const gym = await tx.gym.create({
+        data: {
+          // Legacy compatibility column. randomUUID is collision-safe; Date.now()
+          // collided when two academies registered in the same millisecond.
+          clerkOrgId: `owner-${randomUUID()}`,
+          name: data.gymName,
+          slug: data.gymSlug,
+          timezone: data.timezone || "America/Chicago",
+          subscriptionStatus: "trialing",
+          trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          // Auto-approve self-serve owner signups. The 30-day trial already gates
+          // monetization, so a manual approval wall only froze cold prospects out
+          // of their own gym and hid new gyms from the student directory.
+          approved: true,
+        },
+      });
 
-    const member = await tx.member.create({
-      data: {
-        gymId: gym.id,
-        clerkUserId: `owner-${Date.now()}`,
-        email: emailLower,
-        phone: data.phone || null,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        passwordHash,
-        approved: true,
-        active: true,
-        beltRank: "black",
-        stripes: 0,
-      },
-    });
+      const member = await tx.member.create({
+        data: {
+          gymId: gym.id,
+          clerkUserId: `owner-${randomUUID()}`,
+          email: emailLower,
+          phone: data.phone || null,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          passwordHash,
+          approved: true,
+          active: true,
+          beltRank: "black",
+          stripes: 0,
+        },
+      });
 
-    return { gym, member };
-  });
+      return { gym, member };
+    });
+  } catch (err) {
+    // The pre-checks above are advisory: two concurrent submissions can pass
+    // both and race to INSERT. The unique constraints are the real guard, so a
+    // P2002 becomes the same stable duplicate error instead of a raw DB error,
+    // and the transaction leaves no partial academy behind.
+    const code = (err as { code?: string })?.code;
+    if (code === "P2002") {
+      const target = String((err as { meta?: { target?: unknown } })?.meta?.target ?? "");
+      if (target.includes("slug")) {
+        throw new DuplicateRegistrationError("gymSlug", "This gym URL is already taken");
+      }
+      throw new DuplicateRegistrationError("email", "An account with this email already exists");
+    }
+    throw err;
+  }
 
   // Auto-claim any matching nominations so the new owner lands on pre-warmed
   // pipeline instead of an empty pending list. Match on case-insensitive name
