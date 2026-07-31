@@ -3,9 +3,25 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { ReconciliationConflict, reconcileSubscription } from "@/lib/subscription-reconcile";
 import type Stripe from "stripe";
 
+/**
+ * Stripe webhook receiver.
+ *
+ * Two rules govern everything below.
+ *
+ * The event is a TRIGGER, not the truth. Stripe does not guarantee ordering and
+ * describes event payloads as an eventually-consistent snapshot, so every
+ * subscription-bearing event re-reads the Subscription and writes that.
+ *
+ * A customer id is not a tenant key. Ownership is resolved to exactly one
+ * academy before any write; zero matches are acknowledged, and several matches
+ * are refused so Stripe retries rather than us corrupting more rows.
+ */
 export async function POST(request: NextRequest) {
+  // Raw body: Stripe requires it for signature verification, and any
+  // re-parsing (request.json()) breaks the HMAC.
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
 
@@ -23,11 +39,11 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       // A completed Checkout Session does NOT prove the payment succeeded.
-      // Stripe's fulfillment guidance is explicit: check payment_status, and in
-      // subscription mode the resulting subscription may be `incomplete`.
-      // Delayed payment methods complete the session before funds settle and
-      // report success later via async_payment_succeeded. So both events are
-      // handled the same way, and neither one asserts "active" on its own.
+      // Stripe's fulfillment guidance is explicit: in subscription mode the
+      // resulting subscription may be `incomplete`, and delayed payment methods
+      // complete the session before funds settle and report success later
+      // through async_payment_succeeded. Both are handled identically, and
+      // neither asserts "active" on its own.
       case "checkout.session.completed":
       case "checkout.session.async_payment_succeeded": {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -46,81 +62,43 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        // Stripe's Subscription object is the source of truth for status. The
-        // event is only the trigger to re-read it — event payloads are an
-        // eventually-consistent snapshot and are not delivered in order.
-        const sub = await getStripe().subscriptions.retrieve(session.subscription as string);
-        const status = sub.status;
-
-        // Clear the in-app trial only once the subscription actually supersedes
-        // it. Clearing on an `incomplete` subscription would strand the owner
-        // with neither a trial nor paid access.
-        const supersedesTrial = status === "active" || status === "trialing";
-
-        await prisma.gym.update({
-          where: { id: gymId },
-          data: {
-            stripeCustomerId: session.customer as string,
-            subscriptionStatus: status,
-            stripePriceId: sub.items.data[0]?.price.id || null,
-            ...(supersedesTrial ? { trialEndsAt: null } : {}),
-          },
-        });
+        const subscriptionId =
+          typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+        await reconcileSubscription(subscriptionId);
         break;
       }
 
-      case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const gymId = subscription.metadata?.gymId;
-        if (!gymId) break;
-
-        await prisma.gym.update({
-          where: { id: gymId },
-          data: {
-            subscriptionStatus: subscription.status,
-            stripePriceId: subscription.items.data[0]?.price.id || null,
-          },
-        });
-        break;
-      }
-
+      case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        const gymId = subscription.metadata?.gymId;
-        if (!gymId) break;
-
-        await prisma.gym.update({
-          where: { id: gymId },
-          data: { subscriptionStatus: "canceled" },
-        });
+        if (!subscription.id) break;
+        // Deliberately ignores the status in this payload. A stale `updated`
+        // arriving after a newer `deleted` would otherwise resurrect a dead
+        // subscription; re-reading makes arrival order irrelevant.
+        await reconcileSubscription(subscription.id);
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        const customerId = invoice.customer as string;
-        if (!customerId) break;
 
         // A failed payment does not always mean past_due. On a subscription's
         // FIRST invoice Stripe keeps the subscription `incomplete`, and an
-        // invoice may not belong to a subscription at all. Ask Stripe for the
-        // real status rather than assuming one.
+        // invoice may not belong to a subscription at all.
         const subscriptionId =
           typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id;
         if (!subscriptionId) break;
 
-        const sub = await getStripe().subscriptions.retrieve(subscriptionId);
-        await prisma.gym.updateMany({
-          where: { stripeCustomerId: customerId },
-          data: {
-            subscriptionStatus: sub.status,
-            stripePriceId: sub.items.data[0]?.price.id || null,
-          },
-        });
+        await reconcileSubscription(subscriptionId);
         break;
       }
     }
   } catch (error) {
+    if (error instanceof ReconciliationConflict) {
+      // Sanitized: the message carries no Stripe ids or customer data.
+      console.error("[StripeWebhook] refusing ambiguous write:", error.message);
+      return NextResponse.json({ error: "Ownership conflict; retry" }, { status: 500 });
+    }
     console.error("Stripe webhook error:", error);
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }

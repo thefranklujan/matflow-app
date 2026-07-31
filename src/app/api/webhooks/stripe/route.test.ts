@@ -3,8 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mocks = vi.hoisted(() => ({
   constructEvent: vi.fn(),
   subscriptionsRetrieve: vi.fn(),
+  gymFindUnique: vi.fn(),
+  gymFindMany: vi.fn(),
   gymUpdate: vi.fn(),
-  gymUpdateMany: vi.fn(),
 }));
 
 vi.mock("@/lib/stripe", () => ({
@@ -14,7 +15,7 @@ vi.mock("@/lib/stripe", () => ({
   }),
 }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { gym: { update: mocks.gymUpdate, updateMany: mocks.gymUpdateMany } },
+  prisma: { gym: { findUnique: mocks.gymFindUnique, findMany: mocks.gymFindMany, update: mocks.gymUpdate } },
 }));
 
 import { POST } from "./route";
@@ -22,22 +23,37 @@ import { POST } from "./route";
 function req(body = "{}", sig: string | null = "t=1,v1=sig") {
   const headers = new Headers();
   if (sig) headers.set("stripe-signature", sig);
-  return new Request("http://localhost/api/webhooks/stripe", {
-    method: "POST",
-    headers,
-    body,
-  }) as unknown as import("next/server").NextRequest;
+  return new Request("http://localhost/api/webhooks/stripe", { method: "POST", headers, body }) as unknown as
+    import("next/server").NextRequest;
 }
 
-function stripeEvent(type: string, object: Record<string, unknown>) {
-  return { id: `evt_${type}`, type, data: { object } };
+function stripeEvent(type: string, object: Record<string, unknown>, id = `evt_${type}`) {
+  return { id, type, data: { object } };
 }
+
+/** What Stripe would return from subscriptions.retrieve right now. */
+function stripeSubscription(over: Record<string, unknown> = {}) {
+  return {
+    id: "sub_1",
+    status: "active",
+    customer: "cus_1",
+    metadata: { gymId: "gym_1" },
+    items: { data: [{ price: { id: "price_basic" } }] },
+    ...over,
+  };
+}
+
+/** The academy that owns the subscription above. */
+function ownedByGym1() {
+  mocks.gymFindUnique.mockResolvedValue({ id: "gym_1", stripeCustomerId: "cus_1" });
+}
+
+const lastWrite = () => mocks.gymUpdate.mock.calls.at(-1)?.[0];
 
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_dummy";
   mocks.gymUpdate.mockResolvedValue({});
-  mocks.gymUpdateMany.mockResolvedValue({ count: 1 });
 });
 
 describe("Stripe webhook — signature verification", () => {
@@ -55,176 +71,212 @@ describe("Stripe webhook — signature verification", () => {
     mocks.constructEvent.mockImplementation(() => { throw new Error("bad sig"); });
     expect((await POST(req())).status).toBe(400);
     expect(mocks.gymUpdate).not.toHaveBeenCalled();
-    expect(mocks.gymUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("verification uses the RAW body exactly as received", async () => {
+    const raw = '{"id":"evt_1","spacing":  "preserved"}';
+    mocks.constructEvent.mockReturnValue(stripeEvent("unknown.type", {}));
+    await POST(req(raw));
+    expect(mocks.constructEvent).toHaveBeenCalledWith(raw, "t=1,v1=sig", "whsec_test_dummy");
   });
 });
 
-describe("Stripe webhook — subscription lifecycle transitions", () => {
-  it("checkout.session.completed activates the gym with the subscription's price", async () => {
+describe("Stripe webhook — checkout completion", () => {
+  it("activates from the subscription Stripe reports, not from the event type", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
       metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
     }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "active", items: { data: [{ price: { id: "price_basic" } }] } });
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription());
+    ownedByGym1();
+
     expect((await POST(req())).status).toBe(200);
-    expect(mocks.gymUpdate).toHaveBeenCalledWith({
+    expect(lastWrite()).toEqual({
       where: { id: "gym_1" },
-      data: { stripeCustomerId: "cus_1", subscriptionStatus: "active", stripePriceId: "price_basic", trialEndsAt: null },
+      data: { subscriptionStatus: "active", stripePriceId: "price_basic", stripeCustomerId: "cus_1", trialEndsAt: null },
     });
   });
 
   // Stripe is explicit that a completed Checkout Session does not prove the
-  // payment succeeded: in subscription mode the subscription can be
-  // `incomplete`. Marking such a gym "active" would hand out paid entitlement
-  // for an unpaid subscription.
-  it("checkout.session.completed does NOT activate when Stripe says the subscription is incomplete", async () => {
+  // payment succeeded: in subscription mode it can be `incomplete`. Marking
+  // such a gym active would hand out paid entitlement for an unpaid plan.
+  it("does NOT activate when Stripe says the subscription is incomplete", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
       metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
     }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "incomplete", items: { data: [{ price: { id: "price_basic" } }] } });
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "incomplete" }));
+    ownedByGym1();
+
     expect((await POST(req())).status).toBe(200);
-    const data = mocks.gymUpdate.mock.calls[0][0].data;
+    const data = lastWrite().data;
     expect(data.subscriptionStatus).toBe("incomplete");
-    // The in-app trial must survive: clearing it would leave the owner with
-    // neither a trial nor paid access.
+    // The in-app trial must survive, or the owner has neither trial nor access.
     expect(data).not.toHaveProperty("trialEndsAt");
   });
 
-  it("checkout.session.completed clears the trial only once the subscription supersedes it", async () => {
-    for (const [status, clears] of [["active", true], ["trialing", true], ["past_due", false], ["incomplete_expired", false]] as const) {
-      vi.clearAllMocks();
-      mocks.gymUpdate.mockResolvedValue({});
-      mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
-        metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
-      }));
-      mocks.subscriptionsRetrieve.mockResolvedValue({ status, items: { data: [{ price: { id: "price_basic" } }] } });
-      await POST(req());
-      const data = mocks.gymUpdate.mock.calls[0][0].data;
-      expect(Object.prototype.hasOwnProperty.call(data, "trialEndsAt"), status).toBe(clears);
-    }
-  });
-
-  // Delayed payment methods complete the session before funds settle and
-  // report success later through this event.
-  it("checkout.session.async_payment_succeeded is handled the same way", async () => {
+  it("async_payment_succeeded is handled on the same path (delayed payment methods)", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.async_payment_succeeded", {
       metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
     }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "active", items: { data: [{ price: { id: "price_pro" } }] } });
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ items: { data: [{ price: { id: "price_pro" } }] } }));
+    ownedByGym1();
+
     expect((await POST(req())).status).toBe(200);
-    expect(mocks.gymUpdate).toHaveBeenCalledWith({
-      where: { id: "gym_1" },
-      data: { stripeCustomerId: "cus_1", subscriptionStatus: "active", stripePriceId: "price_pro", trialEndsAt: null },
-    });
+    expect(lastWrite().data.stripePriceId).toBe("price_pro");
   });
 
-  it("a checkout session with no subscription records the customer but grants nothing", async () => {
+  it("a session with no subscription records the customer but grants nothing", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
       metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: null,
     }));
     expect((await POST(req())).status).toBe(200);
     expect(mocks.subscriptionsRetrieve).not.toHaveBeenCalled();
-    expect(mocks.gymUpdate).toHaveBeenCalledWith({
-      where: { id: "gym_1" },
-      data: { stripeCustomerId: "cus_1" },
-    });
+    expect(lastWrite()).toEqual({ where: { id: "gym_1" }, data: { stripeCustomerId: "cus_1" } });
   });
+});
 
-  it("subscription.updated writes Stripe's status and price verbatim (incl. unknown price ids)", async () => {
+describe("Stripe webhook — subscription changes re-read Stripe", () => {
+  it("subscription.updated writes Stripe's current state, ignoring the payload status", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", {
-      metadata: { gymId: "gym_1" }, status: "past_due",
-      items: { data: [{ price: { id: "price_totally_unknown" } }] },
+      id: "sub_1", status: "active", metadata: { gymId: "gym_1" },
+      items: { data: [{ price: { id: "price_STALE" } }] },
     }));
+    // Stripe's actual current state disagrees with the payload.
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "past_due", items: { data: [{ price: { id: "price_pro" } }] } }));
+    ownedByGym1();
+
     expect((await POST(req())).status).toBe(200);
-    // The unknown id is stored as-is; the entitlement layer (not the webhook)
-    // is what refuses to grant a plan for it.
-    expect(mocks.gymUpdate).toHaveBeenCalledWith({
-      where: { id: "gym_1" },
-      data: { subscriptionStatus: "past_due", stripePriceId: "price_totally_unknown" },
-    });
+    expect(lastWrite().data.subscriptionStatus).toBe("past_due");
+    expect(lastWrite().data.stripePriceId).toBe("price_pro");
   });
 
-  it("subscription.deleted cancels; payment_failed marks past_due by customer", async () => {
-    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { metadata: { gymId: "gym_1" } }));
-    await POST(req());
-    expect(mocks.gymUpdate).toHaveBeenCalledWith({ where: { id: "gym_1" }, data: { subscriptionStatus: "canceled" } });
+  it("subscription.deleted reconciles to Stripe's terminal state", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { id: "sub_1", metadata: { gymId: "gym_1" } }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "canceled" }));
+    ownedByGym1();
 
-    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "past_due", items: { data: [{ price: { id: "price_basic" } }] } });
+    expect((await POST(req())).status).toBe(200);
+    expect(lastWrite().data.subscriptionStatus).toBe("canceled");
+  });
+
+  // This is the regression the previous implementation had: a stale `updated`
+  // arriving after a newer `deleted` used to resurrect the subscription.
+  it("a STALE updated arriving after a newer deleted no longer resurrects it", async () => {
+    ownedByGym1();
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "canceled" }));
+
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { id: "sub_1", metadata: { gymId: "gym_1" } }));
     await POST(req());
-    expect(mocks.gymUpdateMany).toHaveBeenCalledWith({
-      where: { stripeCustomerId: "cus_1" },
-      data: { subscriptionStatus: "past_due", stripePriceId: "price_basic" },
-    });
+
+    // The stale event still claims "active". Stripe still says canceled.
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", {
+      id: "sub_1", status: "active", metadata: { gymId: "gym_1" }, items: { data: [{ price: { id: "price_basic" } }] },
+    }));
+    await POST(req());
+
+    expect(lastWrite().data.subscriptionStatus).toBe("canceled");
+  });
+
+  it("duplicate delivery of the same event converges on the same state", async () => {
+    ownedByGym1();
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "active" }));
+    const dup = stripeEvent("customer.subscription.updated", { id: "sub_1", metadata: { gymId: "gym_1" } }, "evt_same");
+    mocks.constructEvent.mockReturnValue(dup);
+
+    await POST(req());
+    const first = lastWrite();
+    await POST(req());
+    expect(lastWrite()).toEqual(first);
+  });
+});
+
+describe("Stripe webhook — tenant safety", () => {
+  it("payment_failed reconciles instead of assuming past_due", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "past_due" }));
+    ownedByGym1();
+
+    expect((await POST(req())).status).toBe(200);
+    expect(lastWrite().data.subscriptionStatus).toBe("past_due");
   });
 
   // On a subscription's FIRST invoice Stripe keeps the subscription
-  // `incomplete`, not `past_due`. Assuming past_due would misreport the state
-  // to the founder queue and to the owner.
+  // `incomplete`, not `past_due`.
   it("payment_failed on a first invoice records incomplete, not past_due", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "incomplete", items: { data: [{ price: { id: "price_basic" } }] } });
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ status: "incomplete" }));
+    ownedByGym1();
+
     await POST(req());
-    expect(mocks.gymUpdateMany).toHaveBeenCalledWith({
-      where: { stripeCustomerId: "cus_1" },
-      data: { subscriptionStatus: "incomplete", stripePriceId: "price_basic" },
-    });
+    expect(lastWrite().data.subscriptionStatus).toBe("incomplete");
   });
 
   it("payment_failed on an invoice with no subscription touches nothing", async () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: null }));
-    await POST(req());
-    expect(mocks.gymUpdateMany).not.toHaveBeenCalled();
+    expect((await POST(req())).status).toBe(200);
+    expect(mocks.gymUpdate).not.toHaveBeenCalled();
     expect(mocks.subscriptionsRetrieve).not.toHaveBeenCalled();
+  });
+
+  // The old implementation used updateMany by customer id, which would mutate
+  // EVERY academy sharing that customer. Now it refuses and asks for a retry.
+  it("several academies sharing one customer causes a 500 and NO write", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ metadata: {} }));
+    mocks.gymFindMany.mockResolvedValue([{ id: "gym_a" }, { id: "gym_b" }]);
+
+    expect((await POST(req())).status).toBe(500);
+    expect(mocks.gymUpdate).not.toHaveBeenCalled();
+  });
+
+  it("an unknown customer is acknowledged with 200 and no write", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", { id: "sub_1" }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription({ metadata: {} }));
+    mocks.gymFindMany.mockResolvedValue([]);
+
+    expect((await POST(req())).status).toBe(200);
+    expect(mocks.gymUpdate).not.toHaveBeenCalled();
+  });
+
+  it("metadata that disagrees with the stored customer is refused with 500", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", { id: "sub_1", metadata: { gymId: "gym_1" } }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription());
+    mocks.gymFindUnique.mockResolvedValue({ id: "gym_1", stripeCustomerId: "cus_SOMEONE_ELSE" });
+
+    expect((await POST(req())).status).toBe(500);
+    expect(mocks.gymUpdate).not.toHaveBeenCalled();
   });
 });
 
-describe("Stripe webhook — malformed and hostile payloads", () => {
-  it("events with missing/malformed gym metadata are acknowledged without writes", async () => {
+describe("Stripe webhook — malformed payloads and transient failure", () => {
+  it("checkout events with missing gym metadata are acknowledged without writes", async () => {
     for (const object of [{}, { metadata: {} }, { metadata: { gymId: undefined } }]) {
-      mocks.gymUpdate.mockClear();
-      mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", object));
-      expect((await POST(req())).status).toBe(200); // ack so Stripe stops retrying
+      vi.clearAllMocks();
+      mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", object));
+      expect((await POST(req())).status).toBe(200);
       expect(mocks.gymUpdate).not.toHaveBeenCalled();
     }
   });
 
   it("unrecognized event types are acknowledged without writes", async () => {
-    mocks.constructEvent.mockReturnValue(stripeEvent("charge.refunded", { id: "ch_1" }));
+    mocks.constructEvent.mockReturnValue(stripeEvent("payment_intent.succeeded", {}));
     expect((await POST(req())).status).toBe(200);
     expect(mocks.gymUpdate).not.toHaveBeenCalled();
   });
 
   it("a DB failure returns 500 so Stripe retries", async () => {
-    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { metadata: { gymId: "gym_1" } }));
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", { id: "sub_1", metadata: { gymId: "gym_1" } }));
+    mocks.subscriptionsRetrieve.mockResolvedValue(stripeSubscription());
+    ownedByGym1();
     mocks.gymUpdate.mockRejectedValue(new Error("db down"));
+
     expect((await POST(req())).status).toBe(500);
   });
-});
 
-describe("Stripe webhook — duplicate and out-of-order limits (current schema)", () => {
-  it("duplicate deliveries re-apply the same terminal write (idempotent OUTCOME, not tracked)", async () => {
-    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { metadata: { gymId: "gym_1" } }));
-    await POST(req());
-    await POST(req());
-    expect(mocks.gymUpdate).toHaveBeenCalledTimes(2); // same data both times — converges
-    const calls = mocks.gymUpdate.mock.calls;
-    expect(calls[0]).toEqual(calls[1]);
-  });
+  it("a Stripe read failure returns 500 so Stripe retries", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", { id: "sub_1", metadata: { gymId: "gym_1" } }));
+    mocks.subscriptionsRetrieve.mockRejectedValue(new Error("stripe down"));
 
-  it("DOCUMENTED GAP: out-of-order updated-after-deleted overwrites the newer state", async () => {
-    // Without the PACKET-2 event log the handler cannot order events: a stale
-    // "active" subscription.updated arriving AFTER deleted resurrects access.
-    // This test pins the CURRENT behavior so the gap stays visible until
-    // PACKET-2 is approved and applied.
-    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.deleted", { metadata: { gymId: "gym_1" } }));
-    await POST(req());
-    mocks.constructEvent.mockReturnValue(stripeEvent("customer.subscription.updated", {
-      metadata: { gymId: "gym_1" }, status: "active", items: { data: [{ price: { id: "price_basic" } }] },
-    }));
-    await POST(req());
-    expect(mocks.gymUpdate).toHaveBeenLastCalledWith({
-      where: { id: "gym_1" },
-      data: { subscriptionStatus: "active", stripePriceId: "price_basic" },
-    });
+    expect((await POST(req())).status).toBe(500);
+    expect(mocks.gymUpdate).not.toHaveBeenCalled();
   });
 });
