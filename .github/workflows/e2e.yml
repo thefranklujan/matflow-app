@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   playwright:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
     services:
       postgres:
         image: postgres:16
@@ -26,7 +26,7 @@ jobs:
         ports:
           - 5544:5432
         options: >-
-          --health-cmd "pg_isready -U matflow"
+          --health-cmd "pg_isready -U matflow -d matflow_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -41,7 +41,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - name: Functional E2E (desktop + mobile)
+        run: npm run test:e2e:functional
+      - name: Visual E2E (screenshot baselines)
+        # Runs even when the functional step failed, so neither category can
+        # hide the other's result.
+        if: ${{ !cancelled() }}
+        run: npm run test:e2e:visual
       - name: Upload Playwright artifacts (failures only)
         if: failure()
         uses: actions/upload-artifact@v4

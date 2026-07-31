@@ -1,5 +1,13 @@
 import { test, expect, storageStatePath, settle } from "./helpers/test";
 import { FIXTURE } from "./helpers/env";
+import { reseedFixtures } from "./helpers/reseed";
+
+// Baselines must always capture the pristine deterministic fixture state, even
+// when functional journeys have already mutated the shared database.
+test.beforeAll(async () => {
+  test.setTimeout(120_000);
+  await reseedFixtures();
+});
 
 /**
  * Small, high-value visual baseline set. Deterministic fixture data; masked

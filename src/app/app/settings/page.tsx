@@ -143,7 +143,7 @@ export default function SettingsPage() {
           <p className="text-gray-400 text-xs">Slug cannot be changed after creation.</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="set-primary" className="block text-sm font-medium text-gray-300 mb-2">Primary Color</label>
             <div className="flex items-center gap-3">

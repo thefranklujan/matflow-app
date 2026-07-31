@@ -16,7 +16,9 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:update": "playwright test --update-snapshots",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:functional": "playwright test --project=desktop --project=mobile",
+    "test:e2e:visual": "playwright test --project=visual"
   },
   "dependencies": {
     "@awesome-cordova-plugins/onesignal": "^9.1.4",

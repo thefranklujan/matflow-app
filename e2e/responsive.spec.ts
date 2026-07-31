@@ -20,8 +20,10 @@ const PAGES: { path: string; role: string | null }[] = [
   { path: "/app/schedule", role: "owner-basic" },
   { path: "/app/analytics", role: "owner-basic" },
   { path: "/app/billing", role: "owner-basic" },
+  { path: "/app/settings", role: "owner-basic" },
   { path: "/student", role: "student-member" },
   { path: "/student/schedule", role: "student-member" },
+  { path: "/student/profile", role: "student-member" },
 ];
 
 for (const { path, role } of PAGES) {

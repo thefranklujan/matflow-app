@@ -57,6 +57,8 @@ setup("prepare database, fixtures, and per-role sessions", async () => {
   await disconnect();
   fs.mkdirSync(AUTH_DIR, { recursive: true });
   fs.writeFileSync(`${AUTH_DIR}/fixture-ids.json`, JSON.stringify(ids, null, 2));
+  // NOTE: e2e/helpers/reseed.ts republishes this map whenever fixtures are
+  // reseeded mid-run (visual capture); functional specs read it per test.
 
   // 3. UI logins -> storageState per role
   fs.mkdirSync(AUTH_DIR, { recursive: true });

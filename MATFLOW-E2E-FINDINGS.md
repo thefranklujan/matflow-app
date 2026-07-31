@@ -25,12 +25,46 @@ P2 cosmetic/minor, P3 enhancement. Status: Open / Fixed / Documented exception.
 | 10 | P2 | Next.js 15.5.x dev server | `next dev` intermittently throws `Invariant: Expected clientReferenceManifest to be defined` under the E2E env; E2E therefore runs `next build && next start`. Dev-only. | Track upstream; re-test on Next upgrades. |
 | 11 | P2 | Per-gym branding | Gym `primaryColor` is user-chosen and rendered as text/accents; a dark choice can break contrast at runtime (fixture default was fine; hardcoded reds are fixed). | Add a luminance guard or auto-derive an accessible text variant when owners pick brand colors. |
 
+
+## Accessibility sweep audit (commit ec1a69e) — 2026-07-30
+
+**Result: VERIFIED, with one narrow correction shipped.**
+
+Method: mechanical diff of all 135 files in ec1a69e, plus representative
+screenshots (owner dashboard/schedule/analytics/attendance/members/billing/
+settings desktop + mobile, student dashboard/schedule/profile, platform
+dashboard, public sign-in) taken from BOTH the committed baselines and the
+Linux CI artifact.
+
+| Check | Result |
+|---|---|
+| Every changed surface is dark-background | Verified. The only `bg-white` uses are swatches/toggles/badges that carry explicit dark text (`text-black`, `text-[#ef4444]`), plus the belt-color maps — none pair `text-gray-400` with a light background. |
+| No `text-gray-400` on a light surface | Verified. The `bg-gray-500/20 text-gray-400` badge pattern is a 20%-opacity chip over the dark page, not a light surface. |
+| Disabled/placeholder/tertiary text still distinguishable | Verified in screenshots: placeholders ("Optional", "https://yourgym.com") and metadata ("Slug cannot be changed") remain visibly dimmer than body copy. |
+| Semantic hierarchy preserved | Partial by design: 500 and 600 collapsed into 400, so the two dimmest tiers are now one. `text-gray-300` (233 uses) and white headings still separate three levels. Frank may re-introduce a distinct dimmest tier that still clears 4.5:1. |
+| Status colors still communicate | Verified: green/amber/red/blue status chips and belt colors unchanged. |
+| Red change affected text only | Verified: `text-[#dc2626]` → `#ef4444`; `bg-[#dc2626]` backgrounds untouched except the unread banner (deliberate, white-on-red contrast). |
+| Label/id associations unique and valid | Verified: no duplicate ids among the introduced `signin-*` / `set-*` ids. |
+| Icon-button labels describe the real action | Verified by reading each call site (collapse/expand navigation, previous/next month, delete session, upload logo/photo). |
+| No functional change inside the commit | Verified: every added line in ec1a69e touches only className / aria-label / htmlFor / id / heading tag / underline. Zero logic, handler, or data changes. |
+| No customer-facing wording altered | Verified: the only text change is the sign-in `<p>` becoming an `<h1>` with identical copy. |
+
+**Correction shipped in this packet:** owner Settings rendered the Primary/
+Secondary color pair as a fixed `grid-cols-2` and clipped the second field at
+375 px (pre-existing, not caused by the sweep). Now `grid-cols-1 sm:grid-cols-2`,
+and `/app/settings` + `/student/profile` were added to the responsive spec so
+it cannot regress.
+
 ## Gate results
 - axe: **zero serious/critical** across landing, sign-in, privacy, support,
   7 owner pages, 4 student pages, 2 platform pages, and the open arrival sheet
   (sheet scan scoped to the dialog; the dimmed backdrop otherwise contributes
   unrelated contrast noise).
-- Suite: 182 passed / 1 skipped (cross-tenant probe is desktop-only by design) / 0 failed,
-  including visual baselines passing on a clean second run.
+- Suite: 184 passed / 1 skipped (cross-tenant probe is desktop-only by design) / 0 failed.
+  Functional (159) and visual (27) also pass independently via
+  `npm run test:e2e:functional` / `npm run test:e2e:visual`.
+- Baselines are committed for BOTH platforms: `*-visual-darwin.png` (local) and
+  `*-visual-linux.png` (CI, taken from the Ubuntu runner's own screenshots —
+  never copied from macOS).
 - The two production `npm audit` highs (sharp via next's pinned optional
   `^0.34.3`) remain the documented exception from the security packet.

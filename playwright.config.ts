@@ -53,8 +53,9 @@ export default defineConfig({
   projects: [
     { name: "setup", testMatch: /global\.setup\.ts/ },
     {
-      // Visual baselines FIRST: they capture the pristine seeded state before
-      // any mutating journey (check-ins, class creation) runs.
+      // A visual failure must never block the functional suite: desktop and
+      // mobile depend only on "setup", not on "visual". The visual spec
+      // reseeds fixtures in its own beforeAll, so it is order-independent.
       name: "visual",
       testMatch: /visual\.spec\.ts/,
       dependencies: ["setup"],
@@ -64,13 +65,13 @@ export default defineConfig({
       name: "desktop",
       testMatch: /.*\.spec\.ts/,
       testIgnore: /visual/,
-      dependencies: ["visual"],
+      dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
     {
       name: "mobile",
       testMatch: /(student-core|owner-shell)\.spec\.ts/,
-      dependencies: ["visual"],
+      dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 390, height: 844 },
