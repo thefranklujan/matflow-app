@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isValidBrandColor } from "@/lib/brand-color";
 
 export async function GET() {
   try {
@@ -45,6 +46,26 @@ export async function PATCH(request: NextRequest) {
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    // Brand colors must be storable hex before ANY write happens. The owner's
+    // chosen value is preserved as-is; display safety is derived at render time
+    // (see src/lib/brand-color.ts), never by silently rewriting their branding.
+    for (const key of ["primaryColor", "secondaryColor"] as const) {
+      if (!(key in updateData)) continue;
+      const value = updateData[key];
+      // secondaryColor is optional: null/"" clears it.
+      const isCleared = key === "secondaryColor" && (value === null || value === "");
+      if (isCleared) {
+        updateData[key] = null;
+        continue;
+      }
+      if (!isValidBrandColor(value)) {
+        return NextResponse.json(
+          { error: "Invalid color. Use a hex value like #c4b5a0.", code: "INVALID_COLOR", field: key },
+          { status: 400 },
+        );
+      }
     }
 
     await prisma.gym.update({

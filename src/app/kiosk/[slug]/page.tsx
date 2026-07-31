@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use, useCallback } from "react";
 import { Delete } from "lucide-react";
+import { accessibleAccent } from "@/lib/brand-color";
 
 interface GymInfo {
   name: string;
@@ -86,7 +87,9 @@ export default function KioskPage({ params }: { params: Promise<{ slug: string }
     }
   }
 
-  const primaryColor = gym?.primaryColor || "#c4b5a0";
+  // The academy's saved color is never mutated; this is the render-time,
+  // AA-legible version for text/icons/borders on the near-black kiosk canvas.
+  const primaryColor = accessibleAccent(gym?.primaryColor);
 
   // Belt color mapping
   const beltColors: Record<string, string> = {
