@@ -64,11 +64,68 @@ describe("Stripe webhook — subscription lifecycle transitions", () => {
     mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
       metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
     }));
-    mocks.subscriptionsRetrieve.mockResolvedValue({ items: { data: [{ price: { id: "price_basic" } }] } });
+    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "active", items: { data: [{ price: { id: "price_basic" } }] } });
     expect((await POST(req())).status).toBe(200);
     expect(mocks.gymUpdate).toHaveBeenCalledWith({
       where: { id: "gym_1" },
       data: { stripeCustomerId: "cus_1", subscriptionStatus: "active", stripePriceId: "price_basic", trialEndsAt: null },
+    });
+  });
+
+  // Stripe is explicit that a completed Checkout Session does not prove the
+  // payment succeeded: in subscription mode the subscription can be
+  // `incomplete`. Marking such a gym "active" would hand out paid entitlement
+  // for an unpaid subscription.
+  it("checkout.session.completed does NOT activate when Stripe says the subscription is incomplete", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
+      metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
+    }));
+    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "incomplete", items: { data: [{ price: { id: "price_basic" } }] } });
+    expect((await POST(req())).status).toBe(200);
+    const data = mocks.gymUpdate.mock.calls[0][0].data;
+    expect(data.subscriptionStatus).toBe("incomplete");
+    // The in-app trial must survive: clearing it would leave the owner with
+    // neither a trial nor paid access.
+    expect(data).not.toHaveProperty("trialEndsAt");
+  });
+
+  it("checkout.session.completed clears the trial only once the subscription supersedes it", async () => {
+    for (const [status, clears] of [["active", true], ["trialing", true], ["past_due", false], ["incomplete_expired", false]] as const) {
+      vi.clearAllMocks();
+      mocks.gymUpdate.mockResolvedValue({});
+      mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
+        metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
+      }));
+      mocks.subscriptionsRetrieve.mockResolvedValue({ status, items: { data: [{ price: { id: "price_basic" } }] } });
+      await POST(req());
+      const data = mocks.gymUpdate.mock.calls[0][0].data;
+      expect(Object.prototype.hasOwnProperty.call(data, "trialEndsAt"), status).toBe(clears);
+    }
+  });
+
+  // Delayed payment methods complete the session before funds settle and
+  // report success later through this event.
+  it("checkout.session.async_payment_succeeded is handled the same way", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.async_payment_succeeded", {
+      metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: "sub_1",
+    }));
+    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "active", items: { data: [{ price: { id: "price_pro" } }] } });
+    expect((await POST(req())).status).toBe(200);
+    expect(mocks.gymUpdate).toHaveBeenCalledWith({
+      where: { id: "gym_1" },
+      data: { stripeCustomerId: "cus_1", subscriptionStatus: "active", stripePriceId: "price_pro", trialEndsAt: null },
+    });
+  });
+
+  it("a checkout session with no subscription records the customer but grants nothing", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("checkout.session.completed", {
+      metadata: { gymId: "gym_1" }, customer: "cus_1", subscription: null,
+    }));
+    expect((await POST(req())).status).toBe(200);
+    expect(mocks.subscriptionsRetrieve).not.toHaveBeenCalled();
+    expect(mocks.gymUpdate).toHaveBeenCalledWith({
+      where: { id: "gym_1" },
+      data: { stripeCustomerId: "cus_1" },
     });
   });
 
@@ -91,12 +148,33 @@ describe("Stripe webhook — subscription lifecycle transitions", () => {
     await POST(req());
     expect(mocks.gymUpdate).toHaveBeenCalledWith({ where: { id: "gym_1" }, data: { subscriptionStatus: "canceled" } });
 
-    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1" }));
+    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
+    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "past_due", items: { data: [{ price: { id: "price_basic" } }] } });
     await POST(req());
     expect(mocks.gymUpdateMany).toHaveBeenCalledWith({
       where: { stripeCustomerId: "cus_1" },
-      data: { subscriptionStatus: "past_due" },
+      data: { subscriptionStatus: "past_due", stripePriceId: "price_basic" },
     });
+  });
+
+  // On a subscription's FIRST invoice Stripe keeps the subscription
+  // `incomplete`, not `past_due`. Assuming past_due would misreport the state
+  // to the founder queue and to the owner.
+  it("payment_failed on a first invoice records incomplete, not past_due", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: "sub_1" }));
+    mocks.subscriptionsRetrieve.mockResolvedValue({ status: "incomplete", items: { data: [{ price: { id: "price_basic" } }] } });
+    await POST(req());
+    expect(mocks.gymUpdateMany).toHaveBeenCalledWith({
+      where: { stripeCustomerId: "cus_1" },
+      data: { subscriptionStatus: "incomplete", stripePriceId: "price_basic" },
+    });
+  });
+
+  it("payment_failed on an invoice with no subscription touches nothing", async () => {
+    mocks.constructEvent.mockReturnValue(stripeEvent("invoice.payment_failed", { customer: "cus_1", subscription: null }));
+    await POST(req());
+    expect(mocks.gymUpdateMany).not.toHaveBeenCalled();
+    expect(mocks.subscriptionsRetrieve).not.toHaveBeenCalled();
   });
 });
 
