@@ -8,9 +8,13 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege: this workflow only reads the repository.
+permissions:
+  contents: read
+
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -20,7 +24,7 @@ jobs:
           POSTGRES_DB: matflow_test
         ports: ["5544:5432"]
         options: >-
-          --health-cmd "pg_isready -U matflow"
+          --health-cmd "pg_isready -U matflow -d matflow_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -30,9 +34,10 @@ jobs:
       DATABASE_URL: postgresql://matflow:matflow_ci_local_only@localhost:5544/matflow_test
       DIRECT_URL: postgresql://matflow:matflow_ci_local_only@localhost:5544/matflow_test
     steps:
-      - uses: actions/checkout@v4
+      # Official actions pinned to immutable commit SHAs (tag in comment).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 20
           cache: npm
@@ -64,6 +69,4 @@ jobs:
           fi
           echo "route manifest clean"
 
-      # Playwright E2E job lands with the E2E packet (next loop): it will run
-      # the isolated app against this same service container with axe checks
-      # at 375/768/1440.
+      # Playwright E2E runs in its own workflow (.github/workflows/e2e.yml).

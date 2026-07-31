@@ -20,6 +20,11 @@ async function expectNoSeriousViolations(page: Page, label: string, scope?: stri
 const SURFACES: { label: string; path: string; role: string | null }[] = [
   { label: "landing", path: "/", role: null },
   { label: "sign-in", path: "/sign-in", role: null },
+  { label: "owner sign-up", path: "/sign-up", role: null },
+  { label: "student sign-up", path: "/student/sign-up", role: null },
+  { label: "forgot password", path: "/forgot-password", role: null },
+  // Synthetic token: exercises the real form state without any emailed token.
+  { label: "reset password", path: "/reset-password?token=e2e-synthetic-token", role: null },
   { label: "privacy", path: "/privacy", role: null },
   { label: "support", path: "/support", role: null },
   { label: "owner dashboard", path: "/app", role: "owner-basic" },

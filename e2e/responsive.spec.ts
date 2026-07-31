@@ -15,6 +15,9 @@ const WIDTHS = [
 const PAGES: { path: string; role: string | null }[] = [
   { path: "/", role: null },
   { path: "/sign-in", role: null },
+  { path: "/sign-up", role: null },
+  { path: "/student/sign-up", role: null },
+  { path: "/forgot-password", role: null },
   { path: "/app", role: "owner-basic" },
   { path: "/app/members", role: "owner-basic" },
   { path: "/app/schedule", role: "owner-basic" },

@@ -45,6 +45,14 @@ export function expectCleanPage(health: PageHealth, opts: { allow404?: RegExp[] 
   expect(bad, "no failed same-origin responses").toEqual([]);
 }
 
+/**
+ * Real in-page alerts, excluding Next.js's always-present (and empty) route
+ * announcer, which also carries role="alert".
+ */
+export function alertRegion(page: Page) {
+  return page.locator('[role="alert"]:not(#__next-route-announcer__)');
+}
+
 export async function blockExternal(context: BrowserContext) {
   await context.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, (route) => route.abort());
 }

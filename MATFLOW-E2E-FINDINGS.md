@@ -20,10 +20,16 @@ P2 cosmetic/minor, P3 enhancement. Status: Open / Fixed / Documented exception.
 
 | # | Sev | Role / Page | Finding | Recommendation |
 |---|-----|-------------|---------|----------------|
-| 8 | P2 | Sign-up / student sign-up / forgot / reset forms | Same unassociated-label pattern as the old sign-in form (these pages are not in the axe gate yet). | Apply the same `htmlFor`/`id` treatment; add the pages to `e2e/a11y.spec.ts` SURFACES. |
-| 9 | P3 | Owner /app/schedule | Add-Class form gives no inline validation feedback. | Small validation message region. |
-| 10 | P2 | Next.js 15.5.x dev server | `next dev` intermittently throws `Invariant: Expected clientReferenceManifest to be defined` under the E2E env; E2E therefore runs `next build && next start`. Dev-only. | Track upstream; re-test on Next upgrades. |
-| 11 | P2 | Per-gym branding | Gym `primaryColor` is user-chosen and rendered as text/accents; a dark choice can break contrast at runtime (fixture default was fine; hardcoded reds are fixed). | Add a luminance guard or auto-derive an accessible text variant when owners pick brand colors. |
+| 10 | P2 | Next.js 15.5.x dev server | `next dev` intermittently throws `Invariant: Expected clientReferenceManifest to be defined` under the E2E env; E2E therefore runs `next build && next start`. Dev-only, not independently resolved. | Track upstream; re-test on Next upgrades. |
+
+## Closed 2026-07-31 (hardening sprint)
+
+| # | Sev | Finding | Root cause | Fix + evidence |
+|---|-----|---------|-----------|----------------|
+| 8 | P2 | Sign-up / student sign-up / forgot / reset forms had unassociated labels and were outside the axe gate. | Labels were rendered as plain `<label>` siblings with no `for`/`id`; no page had a semantic `h1`; in-text links were color-only. | All 15 labels wired with unique `htmlFor`/`id`; `autocomplete` (given-name/family-name/email/new-password) and `inputMode` added; error regions carry `role="alert"` with `aria-describedby` from the inputs; success/status panels use `role="status" aria-live="polite"`; each page has an `h1`; in-text links underlined. Evidence: `e2e/auth-forms.spec.ts` (10 tests incl. label wiring, unique ids, accessible names, announced errors, retained values, autocomplete) + axe extended to all four surfaces — **zero serious/critical**. No password-visibility toggles exist in these forms, so that requirement was N/A. |
+| 9 | P3 | Owner schedule Add-Class gave no inline validation feedback and could surface a generic server error. | The route only checked presence and `typeof dayOfWeek === "number"`; anything else fell through to a 500. The client ignored non-OK responses entirely. | New `src/lib/schedule-validation.ts` (pure, server-authoritative): day 0–6 integer, strict `HH:mm`, start≠end (midnight-crossing still allowed), trimmed/length-bounded classType/instructor/topic/locationSlug, slug charset, bounded instructorId. Route validates **before any DB work** and returns stable 400 `{error, code, field}`; instructor ids are re-checked against the authenticated academy. Client renders a `role="alert"` region, keeps entered values, blocks duplicate submits, and clears stale errors. Evidence: 33 unit tests (`schedule-validation.test.ts` 20, route contract 13) + 2 E2E (inline error with retained values; four invalid API bodies create zero rows). |
+| 11 | P2 | Owner-selected academy color rendered directly on the kiosk could fail contrast. | The kiosk used `gym.primaryColor` raw for text, icons, borders, and spinner strokes over `#080808`. | New `src/lib/brand-color.ts`: hex normalization (3- and 6-digit), WCAG relative luminance, contrast ratio, `readableTextColor`, and `accessibleAccent` which blends away from the background until it clears 4.5:1 — **preserving the owner's saved color**, deriving safety at render time only. `PATCH /api/admin/settings` now rejects invalid `primaryColor`/`secondaryColor` with a stable 400 `INVALID_COLOR` **before any Prisma write** (empty/null still clears secondaryColor). Evidence: 16 unit tests covering black, white, MatFlow tan, saturated red, bright green, dark-navy and beige academy fixtures, invalid values, shorthand, near-threshold pairs, and custom backgrounds. |
+| — | **P0 (new, found by this sprint's coverage)** | `/student/sign-up` was unreachable: it 307-redirected anonymous visitors to `/sign-in` in production, breaking the entire student acquisition funnel that the landing page links to twice. | The page sits under `src/app/student/`, whose portal `layout.tsx` calls `redirect("/sign-in")` when there is no session. Next.js composes parent layouts, so the guard applied to the public sign-up page. | Authenticated student routes moved into a `(portal)` route group (`src/app/student/(portal)/…`), leaving `sign-up` outside the guarded layout. Route-group parentheses do not change URLs — every `/student/*` URL is byte-identical, confirmed in the build manifest. Evidence: new regression test asserting an anonymous visitor reaches `/student/sign-up` with the form visible, plus the pre-existing 10-page student portal suite still green. |
 
 
 ## Accessibility sweep audit (commit ec1a69e) — 2026-07-30
@@ -60,9 +66,11 @@ it cannot regress.
   7 owner pages, 4 student pages, 2 platform pages, and the open arrival sheet
   (sheet scan scoped to the dialog; the dimmed backdrop otherwise contributes
   unrelated contrast noise).
-- Suite: 184 passed / 1 skipped (cross-tenant probe is desktop-only by design) / 0 failed.
-  Functional (159) and visual (27) also pass independently via
-  `npm run test:e2e:functional` / `npm run test:e2e:visual`.
+- Suite (2026-07-31): `npm test` **219 passed**; `npm run test:e2e:functional`
+  **179 passed / 1 skipped**; `npm run test:e2e:visual` **26 passed**;
+  `npm run test:e2e` **204 passed / 1 skipped**; `npm run lint` 0/0;
+  `npm run build` clean. `npm audit --omit=dev`: 0 critical, 2 high (documented
+  sharp exception, unchanged); full audit 19, no regression.
 - Baselines are committed for BOTH platforms: `*-visual-darwin.png` (local) and
   `*-visual-linux.png` (CI, taken from the Ubuntu runner's own screenshots —
   never copied from macOS).

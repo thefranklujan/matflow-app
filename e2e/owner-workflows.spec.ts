@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { test, expect, storageStatePath, watchPage, expectCleanPage } from "./helpers/test";
+import { test, expect, storageStatePath, watchPage, expectCleanPage, alertRegion } from "./helpers/test";
 import { FIXTURE } from "./helpers/env";
 
 /** Deep owner workflows: members, schedule, attendance, analytics linkage. */
@@ -47,6 +47,48 @@ test.describe("schedule and attendance (Basic owner)", () => {
     // 18:00 America/Chicago renders as a 6 PM slot (any common format).
     const body = await page.evaluate(() => document.body.innerText);
     expect(body).toMatch(/6:00\s*PM|18:00/);
+  });
+
+  test("invalid class submission shows an announced inline error and keeps the values", async ({ page }) => {
+    await page.goto("/app/schedule");
+    await page.getByRole("button", { name: /add class/i }).click();
+    const form = page.locator("form");
+    await expect(form).toBeVisible();
+
+    // Make start and end identical: a zero-length class the server rejects.
+    const start = form.locator('input[type="time"]').first();
+    const end = form.locator('input[type="time"]').nth(1);
+    const startValue = await start.inputValue();
+    await end.fill(startValue);
+    await form.getByRole("button", { name: /add to schedule/i }).click();
+
+    const alert = alertRegion(page).first();
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText(/different from the start time/i);
+    // The form stays open with the entered values intact.
+    await expect(form).toBeVisible();
+    await expect(end).toHaveValue(startValue);
+  });
+
+  test("server rejects invalid schedule input without creating anything", async ({ page }) => {
+    const before = await page.request.get("/api/admin/schedule");
+    const beforeCount = (await before.json()).length;
+
+    for (const body of [
+      { dayOfWeek: 9, startTime: "18:00", endTime: "19:00", classType: "gi", instructor: "X" },
+      { dayOfWeek: 1, startTime: "6pm", endTime: "19:00", classType: "gi", instructor: "X" },
+      { dayOfWeek: 1, startTime: "18:00", endTime: "18:00", classType: "gi", instructor: "X" },
+      { dayOfWeek: 1, startTime: "18:00", endTime: "19:00", classType: "   ", instructor: "X" },
+    ]) {
+      const res = await page.request.post("/api/admin/schedule", { data: body });
+      expect(res.status(), JSON.stringify(body)).toBe(400);
+      const payload = await res.json();
+      expect(typeof payload.code).toBe("string");
+      expect(typeof payload.error).toBe("string");
+    }
+
+    const after = await page.request.get("/api/admin/schedule");
+    expect((await after.json()).length, "no rows created by invalid input").toBe(beforeCount);
   });
 
   test("owner can create a class through the UI", async ({ page }) => {
