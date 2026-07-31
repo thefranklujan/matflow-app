@@ -207,14 +207,15 @@ Open with their data: members added, classes scheduled, check-ins recorded.
 
 ## 12. Protected actions still required (Frank only)
 
+Everything Stripe-related lives in **[MATFLOW-STRIPE-LAUNCH-GATE.md](MATFLOW-STRIPE-LAUNCH-GATE.md)**
+section 14, which is the single list of what Frank must supply. It is not
+repeated here.
+
+Outside Stripe:
+
 | Action | Status |
 |---|---|
-| Confirm production Stripe price IDs (`STRIPE_BASIC_PRICE_ID`, `STRIPE_PRO_PRICE_ID`) | Access Needed |
-| Configure Customer Portal plan switching | Access Needed |
-| Complete Stripe test-mode lifecycle (checkout → active → past_due → cancel → resubscribe) | Access Needed |
 | Read-only production subscription-status count | Access Needed |
-| PACKET-1 decision (legacy `"cancelled"` backfill) | Access Needed |
-| Webhook idempotency / event-table migration approval | Access Needed |
 | Read-only orphan-academy audit (academies with zero members) | Access Needed |
 
 ---
@@ -226,6 +227,10 @@ Open with their data: members added, classes scheduled, check-ins recorded.
 | **Founder-led no-card trials** | **GO** | Registration is validated, atomic, and race-safe; the trial is set automatically; activation is measurable; the founder queue shows who needs help. No payment path is touched. |
 | **Founder-assisted paid subscriptions** | **CONDITIONAL GO** | Checkout is duplicate-safe and entitlement-enforced, but production price IDs and the full test-mode lifecycle are unverified. Only sell with Frank personally watching the first subscriptions end to end. |
 | **Unattended paid self-service** | **NO-GO** | Requires the completed Stripe test-mode lifecycle, portal plan-switch configuration, webhook idempotency, and trial-to-paid instrumentation. |
+
+Reasoning and evidence for all three: **[MATFLOW-STRIPE-LAUNCH-GATE.md](MATFLOW-STRIPE-LAUNCH-GATE.md)**.
+Nothing in this repository has ever contacted Stripe, so no Stripe-side claim
+is Verified.
 
 ---
 
