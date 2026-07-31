@@ -112,6 +112,7 @@ export default function ScheduleClient({
   const [adminInstructor, setAdminInstructor] = useState("");
   const [adminTopic, setAdminTopic] = useState("");
   const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const [adminError, setAdminError] = useState("");
   const manualInstructor = adminInstructorId === "__manual__";
 
   async function reloadSchedule() {
@@ -124,33 +125,64 @@ export default function ScheduleClient({
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    if (adminSubmitting) return; // no duplicate submissions
+    setAdminError("");
+
     // Resolve the instructor name from the roster pick, or the typed name.
     const selected = instructors.find((i) => i.id === adminInstructorId);
     const instructorName = manualInstructor ? adminInstructor.trim() : selected?.name || "";
     const instructorId = manualInstructor ? null : adminInstructorId;
-    if (!instructorName) return;
+
+    // Mirror the server rules so the common mistakes are caught inline. The
+    // server stays authoritative — this only saves a round trip.
+    if (!instructorName) {
+      setAdminError("Add an instructor for this class.");
+      return;
+    }
+    if (!adminClassType.trim()) {
+      setAdminError("Pick a class type.");
+      return;
+    }
+    if (adminStart === adminEnd) {
+      setAdminError("End time must be different from the start time.");
+      return;
+    }
 
     setAdminSubmitting(true);
-    const res = await fetch("/api/admin/schedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        dayOfWeek: adminDay,
-        startTime: adminStart,
-        endTime: adminEnd,
-        classType: adminClassType,
-        instructor: instructorName,
-        instructorId,
-        topic: adminTopic || null,
-      }),
-    });
-    if (res.ok) {
-      setAdminInstructor("");
-      setAdminTopic("");
-      setShowAdminForm(false);
-      await reloadSchedule();
+    try {
+      const res = await fetch("/api/admin/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dayOfWeek: adminDay,
+          startTime: adminStart,
+          endTime: adminEnd,
+          classType: adminClassType,
+          instructor: instructorName,
+          instructorId,
+          topic: adminTopic || null,
+        }),
+      });
+      if (res.ok) {
+        setAdminInstructor("");
+        setAdminTopic("");
+        setAdminError("");
+        setShowAdminForm(false);
+        await reloadSchedule();
+      } else {
+        // Surface the server's safe validation message; keep what was typed.
+        const data = await res.json().catch(() => ({}));
+        setAdminError(
+          typeof data?.error === "string" && data.error
+            ? data.error
+            : "Could not add the class. Check the details and try again.",
+        );
+      }
+    } catch {
+      setAdminError("Network problem. Check your connection and try again.");
+    } finally {
+      setAdminSubmitting(false);
     }
-    setAdminSubmitting(false);
   }
 
   async function handleDeleteEntry(id: string) {
@@ -294,7 +326,7 @@ export default function ScheduleClient({
         <h1 className="text-2xl font-bold text-white">Schedule</h1>
         {isAdmin && (
           <button
-            onClick={() => setShowAdminForm(!showAdminForm)}
+            onClick={() => { setAdminError(""); setShowAdminForm(!showAdminForm); }}
             className="bg-brand-accent text-brand-black font-bold px-4 py-2 rounded-lg hover:bg-brand-accent/90 transition text-sm"
           >
             {showAdminForm ? "Cancel" : "+ Add Class"}
@@ -306,6 +338,14 @@ export default function ScheduleClient({
         <div className="bg-brand-dark border border-brand-gray rounded-lg p-6 mb-6">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">New Schedule Entry</h2>
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {adminError && (
+              <div
+                role="alert"
+                className="md:col-span-3 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm"
+              >
+                {adminError}
+              </div>
+            )}
             <div>
               <label className="block text-sm text-gray-400 mb-1">Day</label>
               <select aria-label="Day of week" value={adminDay} onChange={(e) => setAdminDay(Number(e.target.value))} className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm">
@@ -314,11 +354,11 @@ export default function ScheduleClient({
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Start Time</label>
-              <input type="time" value={adminStart} onChange={(e) => setAdminStart(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+              <input aria-label="Start time" type="time" value={adminStart} onChange={(e) => setAdminStart(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">End Time</label>
-              <input type="time" value={adminEnd} onChange={(e) => setAdminEnd(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
+              <input aria-label="End time" type="time" value={adminEnd} onChange={(e) => setAdminEnd(e.target.value)} required className="w-full bg-brand-gray border border-brand-gray rounded-lg px-3 py-2 text-white text-sm" />
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">Class Type</label>
