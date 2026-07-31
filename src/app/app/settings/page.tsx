@@ -8,6 +8,9 @@ import GymLocationCard from "@/components/admin/GymLocationCard";
 interface GymSettings {
   name: string;
   slug: string;
+  description: string | null;
+  city: string | null;
+  state: string | null;
   logo: string | null;
   primaryColor: string;
   secondaryColor: string | null;
@@ -184,6 +187,46 @@ export default function SettingsPage() {
                 placeholder="Optional"
               />
             </div>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="set-description" className="block text-sm font-medium text-gray-300 mb-2">
+            Description
+          </label>
+          <textarea
+            id="set-description"
+            value={settings.description || ""}
+            onChange={(e) => setSettings({ ...settings, description: e.target.value || null })}
+            rows={3}
+            className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
+            placeholder="What makes your academy worth training at?"
+          />
+          <p className="text-gray-400 text-xs mt-1">Shown to students browsing academies.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="set-city" className="block text-sm font-medium text-gray-300 mb-2">City</label>
+            <input
+              id="set-city"
+              type="text"
+              value={settings.city || ""}
+              onChange={(e) => setSettings({ ...settings, city: e.target.value || null })}
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
+              placeholder="Houston"
+            />
+          </div>
+          <div>
+            <label htmlFor="set-state" className="block text-sm font-medium text-gray-300 mb-2">State</label>
+            <input
+              id="set-state"
+              type="text"
+              value={settings.state || ""}
+              onChange={(e) => setSettings({ ...settings, state: e.target.value || null })}
+              className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white focus:outline-none focus:border-brand-accent transition"
+              placeholder="TX"
+            />
           </div>
         </div>
 
