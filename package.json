@@ -18,7 +18,10 @@
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:report": "playwright show-report",
     "test:e2e:functional": "playwright test --project=desktop --project=mobile",
-    "test:e2e:visual": "playwright test --project=visual"
+    "test:e2e:visual": "playwright test --project=visual",
+    "stripe:readiness": "node scripts/stripe-readiness.mjs",
+    "stripe:readiness:test": "node scripts/stripe-readiness.mjs --config .env.stripe-test",
+    "stripe:lifecycle": "node scripts/stripe-lifecycle.mjs"
   },
   "dependencies": {
     "@awesome-cordova-plugins/onesignal": "^9.1.4",

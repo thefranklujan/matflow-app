@@ -65,3 +65,9 @@ app-store-screenshots/
 /playwright-report/
 /test-results/
 /e2e/.auth/
+
+# Committable template: names and placeholders only, never values
+!.env.stripe-test.example
+
+# Stripe test-mode object manifest (never committed)
+.stripe-test-objects.json

@@ -1,0 +1,142 @@
+[
+  {
+    "order": 1,
+    "id": "preflight_readiness",
+    "kind": "read",
+    "title": "Run the readiness preflight",
+    "proves": "Configuration is complete, test-mode, and non-production before anything else happens."
+  },
+  {
+    "order": 2,
+    "id": "confirm_test_mode_credentials",
+    "kind": "read",
+    "title": "Confirm the key is test mode at Stripe",
+    "proves": "The key Stripe actually accepts is a test key, not merely a test-shaped string."
+  },
+  {
+    "order": 3,
+    "id": "resolve_configured_prices",
+    "kind": "read",
+    "title": "Retrieve the Basic and Pro prices",
+    "proves": "Both configured price IDs exist, are active, and are recurring monthly."
+  },
+  {
+    "order": 4,
+    "id": "verify_price_allowlist",
+    "kind": "assert",
+    "title": "Match prices against the server allow-list",
+    "proves": "The prices the server will accept as paid are exactly the prices being tested ($49 / $99)."
+  },
+  {
+    "order": 5,
+    "id": "provision_test_academy",
+    "kind": "mutate",
+    "title": "Register a disposable academy",
+    "proves": "A clean tenant exists in the isolated test database with a 30-day no-card trial."
+  },
+  {
+    "order": 6,
+    "id": "ensure_stripe_customer",
+    "kind": "mutate",
+    "title": "Create the gym's Stripe customer",
+    "proves": "ensureCustomer() creates exactly one customer carrying the gymId in metadata."
+  },
+  {
+    "order": 7,
+    "id": "assert_customer_idempotent",
+    "kind": "assert",
+    "title": "Re-run customer creation concurrently",
+    "proves": "The server-owned idempotency key prevents a second customer for the same gym."
+  },
+  {
+    "order": 8,
+    "id": "open_basic_checkout_session",
+    "kind": "mutate",
+    "title": "Open a Basic subscription Checkout Session",
+    "proves": "Checkout is created in subscription mode against the Basic price."
+  },
+  {
+    "order": 9,
+    "id": "complete_checkout_with_test_card",
+    "kind": "mutate",
+    "title": "Complete checkout with a Stripe test card",
+    "proves": "A test-mode subscription can actually be paid for end to end."
+  },
+  {
+    "order": 10,
+    "id": "deliver_checkout_completed_webhook",
+    "kind": "mutate",
+    "title": "Deliver checkout.session.completed",
+    "proves": "The signed webhook reaches the app and is verified against the signing secret."
+  },
+  {
+    "order": 11,
+    "id": "assert_subscription_active_basic",
+    "kind": "assert",
+    "title": "Assert stored status is active on Basic",
+    "proves": "The Gym row reflects Stripe: status active, Basic price persisted."
+  },
+  {
+    "order": 12,
+    "id": "assert_basic_entitlement_enforced",
+    "kind": "assert",
+    "title": "Assert the 100-member Basic limit is server-enforced",
+    "proves": "Entitlement is enforced on the server, not merely displayed in the UI."
+  },
+  {
+    "order": 13,
+    "id": "refuse_duplicate_checkout",
+    "kind": "assert",
+    "title": "Attempt a second checkout for the same gym",
+    "proves": "A gym with a live subscription is routed to the portal and cannot double-subscribe."
+  },
+  {
+    "order": 14,
+    "id": "replay_webhook_assert_idempotent",
+    "kind": "assert",
+    "title": "Replay the same webhook event id",
+    "proves": "Reprocessing an already-seen event changes nothing (duplicate delivery is safe)."
+  },
+  {
+    "order": 15,
+    "id": "switch_plan_basic_to_pro",
+    "kind": "mutate",
+    "title": "Switch Basic → Pro via the Customer Portal",
+    "proves": "Plan switching is configured in the portal and emits customer.subscription.updated."
+  },
+  {
+    "order": 16,
+    "id": "assert_pro_entitlement",
+    "kind": "assert",
+    "title": "Assert unlimited members on Pro",
+    "proves": "The stored price changed and the member cap is lifted server-side."
+  },
+  {
+    "order": 17,
+    "id": "force_payment_failure_past_due",
+    "kind": "mutate",
+    "title": "Force a payment failure to past_due",
+    "proves": "invoice.payment_failed is handled and the stored status becomes past_due."
+  },
+  {
+    "order": 18,
+    "id": "cancel_subscription",
+    "kind": "mutate",
+    "title": "Cancel the subscription",
+    "proves": "customer.subscription.deleted is handled and the stored status becomes canceled."
+  },
+  {
+    "order": 19,
+    "id": "assert_entitlement_revoked_after_cancel",
+    "kind": "assert",
+    "title": "Assert paid entitlement is revoked",
+    "proves": "A canceled academy loses paid capability rather than coasting on stale state."
+  },
+  {
+    "order": 20,
+    "id": "resubscribe_and_record_manifest",
+    "kind": "mutate",
+    "title": "Resubscribe, then write the object manifest",
+    "proves": "A churned academy can return, and every created test object is recorded for cleanup."
+  }
+]
