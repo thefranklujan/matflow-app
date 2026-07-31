@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const publicPaths = ["/", "/sign-in", "/sign-up", "/join", "/dropin", "/kiosk", "/student/sign-up", "/privacy", "/support", "/forgot-password", "/reset-password", "/app-store", "/app-store-ipad", "/native-web-only", "/api/auth", "/api/webhooks", "/api/leads", "/api/kiosk", "/api/dropin", "/api/track", "/api/unsubscribe", "/unsubscribe"];
+const publicPaths = ["/", "/sign-in", "/sign-up", "/join", "/dropin", "/kiosk", "/student/sign-up", "/onboarding", "/api/onboarding", "/privacy", "/support", "/forgot-password", "/reset-password", "/app-store", "/app-store-ipad", "/native-web-only", "/api/auth", "/api/webhooks", "/api/leads", "/api/kiosk", "/api/dropin", "/api/track", "/api/unsubscribe", "/unsubscribe"];
 
 // The iOS/Android app is a free STUDENT-only companion. These owner/admin and
 // commerce surfaces must never render inside the native shell (App Store 3.1.1 /

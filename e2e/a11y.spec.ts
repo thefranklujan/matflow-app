@@ -39,6 +39,7 @@ const SURFACES: { label: string; path: string; role: string | null }[] = [
   { label: "student training", path: "/student/training", role: "student-member" },
   { label: "student profile", path: "/student/profile", role: "student-member" },
   { label: "platform dashboard", path: "/platform", role: "platform" },
+  { label: "platform sales queue", path: "/platform/sales", role: "platform" },
   { label: "platform academy detail", path: "/platform/gyms", role: "platform" },
 ];
 
