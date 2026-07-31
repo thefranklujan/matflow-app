@@ -47,7 +47,7 @@ export default function StudentSignUpPage() {
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="MatFlow" className="mx-auto mb-4 h-16 w-auto" />
-          <p className="text-gray-400">Student Companion App</p>
+          <h1 className="text-gray-400 text-base font-normal">Student Companion App</h1>
           <p className="text-gray-400 text-xs mt-2 uppercase tracking-wider">Create your student account</p>
         </div>
 
@@ -56,15 +56,24 @@ export default function StudentSignUpPage() {
           className="bg-[#111] border border-white/10 rounded-xl p-8 space-y-5"
         >
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+            <div
+              id="student-signup-error"
+              role="alert"
+              className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm"
+            >
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">First Name</label>
+              <label htmlFor="student-first-name" className="block text-sm font-medium text-gray-300 mb-1.5">
+                First Name
+              </label>
               <input
+                id="student-first-name"
+                name="given-name"
+                autoComplete="given-name"
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -74,8 +83,13 @@ export default function StudentSignUpPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Last Name</label>
+              <label htmlFor="student-last-name" className="block text-sm font-medium text-gray-300 mb-1.5">
+                Last Name
+              </label>
               <input
+                id="student-last-name"
+                name="family-name"
+                autoComplete="family-name"
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -87,9 +101,16 @@ export default function StudentSignUpPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+            <label htmlFor="student-email" className="block text-sm font-medium text-gray-300 mb-1.5">
+              Email
+            </label>
             <input
+              id="student-email"
+              name="email"
+              autoComplete="email"
+              inputMode="email"
               type="email"
+              aria-describedby={error ? "student-signup-error" : undefined}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#dc2626] transition"
@@ -99,9 +120,15 @@ export default function StudentSignUpPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+            <label htmlFor="student-password" className="block text-sm font-medium text-gray-300 mb-1.5">
+              Password
+            </label>
             <input
+              id="student-password"
+              name="new-password"
+              autoComplete="new-password"
               type="password"
+              aria-describedby={error ? "student-signup-error" : undefined}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#dc2626] transition"
@@ -121,7 +148,7 @@ export default function StudentSignUpPage() {
 
           <p className="text-center text-gray-400 text-sm">
             Already have an account?{" "}
-            <Link href="/sign-in" className="text-[#ef4444] hover:underline">
+            <Link href="/sign-in" className="text-[#ef4444] underline">
               Sign in
             </Link>
           </p>

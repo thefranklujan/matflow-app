@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import NominateForm from "../../student/nominate/NominateForm";
+import NominateForm from "../../student/(portal)/nominate/NominateForm";
 
 export default async function MemberNominatePage() {
   const { memberId } = await requireMember();

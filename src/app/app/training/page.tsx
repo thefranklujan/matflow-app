@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import TrainingLogClient from "../../student/training/TrainingLogClient";
+import TrainingLogClient from "../../student/(portal)/training/TrainingLogClient";
 
 export default async function MemberTrainingLogPage() {
   const { memberId } = await requireMember();
