@@ -130,6 +130,19 @@ export async function registerGymOwner(data: {
         },
       });
 
+      // The audit record is part of the SAME transaction: an academy that
+      // exists always has its gym_created row, and a failure of any of the
+      // three writes rolls back all of them. (logActivity() is deliberately
+      // fire-and-forget and returns void, so it cannot be awaited here.)
+      await tx.activityLog.create({
+        data: {
+          gymId: gym.id,
+          action: "gym_created",
+          actorName: `${data.firstName} ${data.lastName}`,
+          targetName: data.gymName,
+        },
+      });
+
       return { gym, member };
     });
   } catch (err) {

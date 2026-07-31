@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import { SYNTHETIC_GYM_IDS } from "@/lib/founder-metrics";
-import { RECENT_ATTENDANCE_DAYS, buildSalesQueueRow, type SalesQueueInput } from "@/lib/sales-queue";
+import { OWNER_MARKER_PREFIX, RECENT_ATTENDANCE_DAYS, buildSalesQueueRow, type SalesQueueInput } from "@/lib/sales-queue";
 import SalesQueueClient from "./SalesQueueClient";
 
 /**
@@ -30,12 +30,13 @@ export default async function SalesQueuePage() {
       subscriptionStatus: true,
       stripePriceId: true,
       trialEndsAt: true,
-      // The academy owner is the FIRST member by createdAt — never an
-      // arbitrary member. When this comes back empty the owner is Unknown.
+      // Owners are identified ONLY by the registration marker. Take a few so
+      // ambiguity (more than one marked owner) is detectable; clerkUserId is
+      // used for resolution here on the server and never sent to the browser.
       members: {
-        orderBy: { createdAt: "asc" },
-        take: 1,
-        select: { firstName: true, lastName: true, email: true, phone: true },
+        where: { clerkUserId: { startsWith: OWNER_MARKER_PREFIX } },
+        take: 5,
+        select: { clerkUserId: true, firstName: true, lastName: true, email: true, phone: true },
       },
       _count: {
         select: {
@@ -50,7 +51,33 @@ export default async function SalesQueuePage() {
 
   const gymIds = gyms.map((g) => g.id);
 
-  const [recentAttendance, totalAttendance, latestActivity] = await Promise.all([
+  // Latest activity per academy: a grouped max avoids both the old global
+  // take:500 window (which one busy academy could consume) and an N+1 query.
+  let latestByGym = new Map<string, { action: string; createdAt: Date }>();
+  let activityUnavailable = false;
+  const loadLatestActivity = async () => {
+    const maxima = await prisma.activityLog.groupBy({
+      by: ["gymId"],
+      where: { gymId: { in: gymIds } },
+      _max: { createdAt: true },
+    });
+    const pairs = maxima.filter((m) => m._max.createdAt !== null);
+    if (pairs.length === 0) return;
+    // Fetch only the rows AT each academy's maximum timestamp, then pick one
+    // deterministically when several share the same instant.
+    const rows = await prisma.activityLog.findMany({
+      where: { OR: pairs.map((m) => ({ gymId: m.gymId, createdAt: m._max.createdAt as Date })) },
+      select: { gymId: true, action: true, createdAt: true, id: true },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+    });
+    const next = new Map<string, { action: string; createdAt: Date }>();
+    for (const row of rows) {
+      if (!next.has(row.gymId)) next.set(row.gymId, { action: row.action, createdAt: row.createdAt });
+    }
+    latestByGym = next;
+  };
+
+  const [recentAttendance, totalAttendance] = await Promise.all([
     prisma.attendance.groupBy({
       by: ["gymId"],
       where: { gymId: { in: gymIds }, classDate: { gte: recentSince } },
@@ -63,22 +90,18 @@ export default async function SalesQueuePage() {
       where: { gymId: { in: gymIds } },
       _count: { _all: true },
     }),
-    prisma.activityLog.findMany({
-      where: { gymId: { in: gymIds } },
-      orderBy: { createdAt: "desc" },
-      select: { gymId: true, action: true, createdAt: true },
-      take: 500,
-    }),
   ]);
+
+  try {
+    await loadLatestActivity();
+  } catch (err) {
+    // Never fabricate "no activity" from a failed read.
+    console.error("sales queue: latest activity unavailable", { name: (err as { name?: string })?.name });
+    activityUnavailable = true;
+  }
 
   const recentByGym = new Map(recentAttendance.map((r) => [r.gymId, r._count._all]));
   const totalByGym = new Map(totalAttendance.map((r) => [r.gymId, r._count._all]));
-  const lastActivityByGym = new Map<string, { action: string; createdAt: Date }>();
-  for (const entry of latestActivity) {
-    if (!lastActivityByGym.has(entry.gymId)) {
-      lastActivityByGym.set(entry.gymId, { action: entry.action, createdAt: entry.createdAt });
-    }
-  }
 
   const rows = gyms.map((gym) => {
     const input: SalesQueueInput = {
@@ -89,7 +112,7 @@ export default async function SalesQueuePage() {
       subscriptionStatus: gym.subscriptionStatus,
       stripePriceId: gym.stripePriceId,
       trialEndsAt: gym.trialEndsAt,
-      owner: gym.members[0] ?? null,
+      ownerCandidates: gym.members,
       facts: {
         description: gym.description,
         city: gym.city,
@@ -100,7 +123,8 @@ export default async function SalesQueuePage() {
         attendanceCount: totalByGym.get(gym.id) ?? 0,
       },
       recentAttendanceCount: recentByGym.get(gym.id) ?? 0,
-      lastActivity: lastActivityByGym.get(gym.id) ?? null,
+      lastActivity: latestByGym.get(gym.id) ?? null,
+      lastActivityUnavailable: activityUnavailable,
     };
     return buildSalesQueueRow(input, now);
   });

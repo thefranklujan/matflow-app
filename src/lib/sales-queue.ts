@@ -6,8 +6,10 @@
  *
  * Truth rules enforced here:
  * - Synthetic platform gyms are excluded by the caller (SYNTHETIC_GYM_IDS).
- * - The owner is the FIRST member of the academy by createdAt. If that cannot
- *   be identified, the owner is Unknown — never an arbitrary member.
+ * - The owner is identified ONLY by the compatibility marker written at
+ *   registration (clerkUserId starting with "owner-"). "Earliest member" is
+ *   not a role and is wrong for legacy/imported academies, so it is never a
+ *   fallback. Zero markers or more than one marker both yield Unknown.
  * - A subscription whose price is not on the server allow-list is a
  *   reconciliation issue, not revenue.
  */
@@ -22,6 +24,8 @@ export const RECENT_ATTENDANCE_DAYS = 30;
 
 export type SalesPriority =
   | "billing_issue"
+  | "trial_expired"
+  | "subscription_canceled"
   | "trial_ending_now"
   | "trial_ending_soon"
   | "stuck_unactivated"
@@ -31,6 +35,8 @@ export type SalesPriority =
 
 export const PRIORITY_ORDER: SalesPriority[] = [
   "billing_issue",
+  "trial_expired",
+  "subscription_canceled",
   "trial_ending_now",
   "trial_ending_soon",
   "stuck_unactivated",
@@ -41,6 +47,8 @@ export const PRIORITY_ORDER: SalesPriority[] = [
 
 export const PRIORITY_LABELS: Record<SalesPriority, string> = {
   billing_issue: "Billing needs attention",
+  trial_expired: "Trial expired",
+  subscription_canceled: "Subscription canceled",
   trial_ending_now: "Trial ends in 0-3 days",
   trial_ending_soon: "Trial ends in 4-7 days",
   stuck_unactivated: `Unactivated after ${STUCK_AFTER_DAYS} days`,
@@ -51,6 +59,8 @@ export const PRIORITY_LABELS: Record<SalesPriority, string> = {
 
 export const PRIORITY_ACTIONS: Record<SalesPriority, string> = {
   billing_issue: "Contact the owner about payment before access lapses.",
+  trial_expired: "Trial already ended: convert, extend deliberately, or close it out.",
+  subscription_canceled: "Run the cancellation interview and decide on win-back.",
   trial_ending_now: "Call today: convert the trial or extend deliberately.",
   trial_ending_soon: "Book the conversion conversation this week.",
   stuck_unactivated: "Offer a setup call — they signed up but never configured.",
@@ -59,12 +69,26 @@ export const PRIORITY_ACTIONS: Record<SalesPriority, string> = {
   none: "No action needed.",
 };
 
-/** Owner identity, or an explicit Unknown. */
+/** Owner identity, or an explicit Unknown with the reason. */
+export type OwnerResolution = "identified" | "no_marked_owner" | "ambiguous";
+
 export interface OwnerIdentity {
   name: string | null;
   email: string | null;
   phone: string | null;
   known: boolean;
+  resolution: OwnerResolution;
+}
+
+/** The compatibility marker registration writes for a self-serve owner. */
+export const OWNER_MARKER_PREFIX = "owner-";
+
+export interface OwnerCandidate {
+  clerkUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 export interface SalesQueueInput {
@@ -75,11 +99,20 @@ export interface SalesQueueInput {
   subscriptionStatus: string;
   stripePriceId: string | null;
   trialEndsAt: Date | null;
-  /** First member by createdAt, or null when it cannot be identified. */
-  owner: { firstName: string | null; lastName: string | null; email: string | null; phone: string | null } | null;
+  /**
+   * Members carrying the owner marker. Query enough of them to detect
+   * ambiguity — exactly one is required to name an owner.
+   */
+  ownerCandidates: OwnerCandidate[];
   facts: ActivationFacts;
   recentAttendanceCount: number;
+  /**
+   * Latest activity for THIS academy, or null when there is genuinely none.
+   * `lastActivityUnavailable` distinguishes "we could not read it" from
+   * "there is none" so the UI never fabricates silence.
+   */
   lastActivity: { action: string; createdAt: Date } | null;
+  lastActivityUnavailable?: boolean;
 }
 
 export interface SalesQueueRow {
@@ -105,20 +138,32 @@ export interface SalesQueueRow {
   recentAttendanceCount: number;
   lastActivityAction: string | null;
   lastActivityAt: Date | null;
+  lastActivityUnavailable: boolean;
   priority: SalesPriority;
   recommendedAction: string;
 }
 
-function identifyOwner(owner: SalesQueueInput["owner"]): OwnerIdentity {
-  if (!owner || (!owner.email && !owner.firstName && !owner.lastName)) {
-    return { name: null, email: null, phone: null, known: false };
-  }
+export function identifyOwner(candidates: OwnerCandidate[]): OwnerIdentity {
+  const marked = candidates.filter((c) => c.clerkUserId?.startsWith(OWNER_MARKER_PREFIX));
+  const unknown = (resolution: OwnerResolution): OwnerIdentity => ({
+    name: null,
+    email: null,
+    phone: null,
+    known: false,
+    resolution,
+  });
+  if (marked.length === 0) return unknown("no_marked_owner");
+  if (marked.length > 1) return unknown("ambiguous");
+
+  const owner = marked[0];
   const name = [owner.firstName, owner.lastName].filter(Boolean).join(" ").trim();
+  if (!name && !owner.email) return unknown("no_marked_owner");
   return {
     name: name || null,
     email: owner.email,
     phone: owner.phone,
-    known: Boolean(owner.email || name),
+    known: true,
+    resolution: "identified",
   };
 }
 
@@ -136,9 +181,14 @@ export function buildSalesQueueRow(input: SalesQueueInput, now: Date): SalesQueu
   let priority: SalesPriority = "none";
   if (BILLING_TROUBLE.has(input.subscriptionStatus) || needsPriceReconciliation) {
     priority = "billing_issue";
-  } else if (input.subscriptionStatus === "trialing" && daysLeft !== null && daysLeft <= 3) {
+  } else if (input.subscriptionStatus === "canceled" || input.subscriptionStatus === "cancelled") {
+    priority = "subscription_canceled";
+  } else if (input.subscriptionStatus === "trialing" && daysLeft !== null && daysLeft < 0) {
+    // A negative day count is an EXPIRED trial, never an upcoming one.
+    priority = "trial_expired";
+  } else if (input.subscriptionStatus === "trialing" && daysLeft !== null && daysLeft >= 0 && daysLeft <= 3) {
     priority = "trial_ending_now";
-  } else if (input.subscriptionStatus === "trialing" && daysLeft !== null && daysLeft <= 7) {
+  } else if (input.subscriptionStatus === "trialing" && daysLeft !== null && daysLeft >= 4 && daysLeft <= 7) {
     priority = "trial_ending_soon";
   } else if (!activation.isActivated && ageDays >= STUCK_AFTER_DAYS) {
     priority = "stuck_unactivated";
@@ -154,7 +204,7 @@ export function buildSalesQueueRow(input: SalesQueueInput, now: Date): SalesQueu
     gymSlug: input.gymSlug,
     createdAt: input.createdAt,
     ageDays,
-    owner: identifyOwner(input.owner),
+    owner: identifyOwner(input.ownerCandidates),
     subscriptionStatus: input.subscriptionStatus,
     plan,
     needsPriceReconciliation,
@@ -169,6 +219,7 @@ export function buildSalesQueueRow(input: SalesQueueInput, now: Date): SalesQueu
     recentAttendanceCount: input.recentAttendanceCount,
     lastActivityAction: input.lastActivity?.action ?? null,
     lastActivityAt: input.lastActivity?.createdAt ?? null,
+    lastActivityUnavailable: input.lastActivityUnavailable === true,
     priority,
     recommendedAction: PRIORITY_ACTIONS[priority],
   };

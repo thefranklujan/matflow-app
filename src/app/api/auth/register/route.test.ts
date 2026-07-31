@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => {
   return {
     registerGymOwner: vi.fn(),
     createSession: vi.fn(),
-    logActivity: vi.fn(),
     sendWelcomeEmail: vi.fn(),
     notifyFrank: vi.fn(),
     DuplicateRegistrationError,
@@ -29,7 +28,6 @@ vi.mock("@/lib/email", () => ({
   sendWelcomeEmail: mocks.sendWelcomeEmail,
   notifyFrankNewGymPending: mocks.notifyFrank,
 }));
-vi.mock("@/lib/activity-log", () => ({ logActivity: mocks.logActivity }));
 
 import { POST } from "./route";
 
@@ -67,7 +65,6 @@ beforeEach(() => {
     gym: { id: "gym_new", name: valid.gymName, slug: valid.gymSlug },
     member: { id: "mem_new" },
   });
-  mocks.logActivity.mockResolvedValue(undefined);
   mocks.sendWelcomeEmail.mockResolvedValue(undefined);
   mocks.notifyFrank.mockResolvedValue(undefined);
 });
@@ -80,10 +77,10 @@ describe("POST /api/auth/register — success contract", () => {
 
     expect(mocks.registerGymOwner).toHaveBeenCalledTimes(1);
     expect(mocks.createSession).toHaveBeenCalledTimes(1);
-    expect(mocks.logActivity).toHaveBeenCalledTimes(1);
-    expect(mocks.logActivity).toHaveBeenCalledWith(
-      expect.objectContaining({ gymId: "gym_new", action: "gym_created" }),
-    );
+    // gym_created is written inside registerGymOwner's transaction — see
+    // src/lib/local-auth.registration.test.ts. The route must NOT write it
+    // separately (the old route-level `await logActivity()` awaited a void
+    // return and guaranteed nothing).
     // The session is bound to the newly created academy and owner membership.
     expect(mocks.createSession).toHaveBeenCalledWith(
       expect.objectContaining({ gymId: "gym_new", memberId: "mem_new", role: "admin" }),
@@ -104,21 +101,32 @@ describe("POST /api/auth/register — success contract", () => {
     expect(res.status).toBe(201);
   });
 
-  it("still succeeds when activity logging fails", async () => {
-    mocks.logActivity.mockRejectedValue(new Error("log table gone"));
-    const res = await POST(post(valid));
-    expect(res.status).toBe(201);
-  });
-
-  it("records gym_created BEFORE returning success", async () => {
+  it("returns 201 only after the registration transaction resolves", async () => {
     const order: string[] = [];
-    mocks.logActivity.mockImplementation(async () => {
-      order.push("log");
+    mocks.registerGymOwner.mockImplementation(async () => {
+      await new Promise((r) => setTimeout(r, 10));
+      order.push("transaction");
+      return { gym: { id: "gym_new", name: valid.gymName, slug: valid.gymSlug }, member: { id: "mem_new" } };
     });
     const res = await POST(post(valid));
     order.push("respond");
     expect(res.status).toBe(201);
-    expect(order).toEqual(["log", "respond"]);
+    expect(order).toEqual(["transaction", "respond"]);
+  });
+
+  it("a session failure still reports success and directs the owner to sign in", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mocks.createSession.mockRejectedValue(new Error("cookie store unavailable"));
+    const res = await POST(post(valid));
+    // The academy is committed: never imply it can be created again.
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.code).toBe("SESSION_NOT_CREATED");
+    expect(body.signInRequired).toBe(true);
+    expect(body.error).toMatch(/sign in/i);
+    expect(body.gym.slug).toBe(valid.gymSlug);
+    spy.mockRestore();
   });
 });
 
@@ -170,9 +178,8 @@ describe("POST /api/auth/register — rejections", () => {
     const dupSlug = await POST(post(valid));
     expect(dupSlug.status).toBe(409);
     expect(await dupSlug.json()).toMatchObject({ code: "SLUG_TAKEN", field: "gymSlug" });
-    // No session and no activity for a rejected registration.
+    // No session for a rejected registration.
     expect(mocks.createSession).not.toHaveBeenCalled();
-    expect(mocks.logActivity).not.toHaveBeenCalled();
   });
 
   it("never exposes a raw database error", async () => {
@@ -200,7 +207,6 @@ describe("POST /api/auth/register — rejections", () => {
     expect(statuses).toEqual([201, 409]);
     // Exactly one academy and one session.
     expect(mocks.createSession).toHaveBeenCalledTimes(1);
-    expect(mocks.logActivity).toHaveBeenCalledTimes(1);
   });
 
   it("never logs the password or the full payload", async () => {

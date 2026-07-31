@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { registerGymOwner, createSession, DuplicateRegistrationError } from "@/lib/local-auth";
 import { sendWelcomeEmail, notifyFrankNewGymPending } from "@/lib/email";
-import { logActivity } from "@/lib/activity-log";
 import { validateOwnerRegistration } from "@/lib/owner-registration";
 
 export async function POST(request: NextRequest) {
@@ -77,27 +76,32 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await createSession({
-    userId: `owner-${result.member.id}`,
-    email: input.email,
-    name: `${input.firstName} ${input.lastName}`,
-    role: "admin",
-    gymId: result.gym.id,
-    memberId: result.member.id,
-  });
-
-  // The activity record is part of the success contract — the founder queue and
-  // the activity feed both read it — so it is awaited before we answer 201. A
-  // logging failure still must not invalidate a real academy.
+  // The academy, owner membership, and gym_created row are already committed.
+  // If the session cookie cannot be written we must NOT imply the registration
+  // can be retried — the account exists. Tell the owner to sign in instead.
   try {
-    await logActivity({
+    await createSession({
+      userId: `owner-${result.member.id}`,
+      email: input.email,
+      name: `${input.firstName} ${input.lastName}`,
+      role: "admin",
       gymId: result.gym.id,
-      action: "gym_created",
-      actorName: `${input.firstName} ${input.lastName}`,
-      targetName: input.gymName,
+      memberId: result.member.id,
     });
   } catch (err) {
-    console.error("gym_created activity log failed", { name: (err as { name?: string })?.name });
+    console.error("session creation failed after successful registration", {
+      name: (err as { name?: string })?.name,
+    });
+    return NextResponse.json(
+      {
+        success: true,
+        gym: result.gym,
+        code: "SESSION_NOT_CREATED",
+        signInRequired: true,
+        error: "Your academy was created. Please sign in to continue.",
+      },
+      { status: 201 },
+    );
   }
 
   // Notifications are best-effort: a mail failure must never invalidate an

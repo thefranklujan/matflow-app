@@ -16,6 +16,8 @@ import {
 
 const PRIORITY_TONE: Record<SalesPriority, string> = {
   billing_issue: "bg-red-500/15 text-red-400",
+  trial_expired: "bg-red-500/15 text-red-300",
+  subscription_canceled: "bg-gray-500/20 text-gray-300",
   trial_ending_now: "bg-orange-500/15 text-orange-300",
   trial_ending_soon: "bg-yellow-500/15 text-yellow-300",
   stuck_unactivated: "bg-blue-500/15 text-blue-300",
@@ -210,7 +212,9 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
                           <p className="text-gray-400 text-xs">{row.owner.email ?? "-"}</p>
                         </>
                       ) : (
-                        <span className="text-gray-400">Unknown</span>
+                        <span className="text-gray-400">
+                          {row.owner.resolution === "ambiguous" ? "Unknown (multiple owners marked)" : "Unknown"}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -233,7 +237,9 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
                     </td>
                     <td className="px-4 py-3 text-gray-300">{row.recentAttendanceCount}</td>
                     <td className="px-4 py-3 text-gray-300">
-                      {row.lastActivityAt ? (
+                      {row.lastActivityUnavailable ? (
+                        <span className="text-yellow-400">Unavailable</span>
+                      ) : row.lastActivityAt ? (
                         <>
                           <span className="capitalize">{row.lastActivityAction?.replace(/_/g, " ")}</span>
                           <p className="text-gray-400 text-xs">{new Date(row.lastActivityAt).toLocaleDateString()}</p>
@@ -261,7 +267,11 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1 truncate">
-                  {row.owner.known ? `${row.owner.name ?? ""} ${row.owner.email ?? ""}`.trim() : "Owner unknown"}
+                  {row.owner.known
+                    ? `${row.owner.name ?? ""} ${row.owner.email ?? ""}`.trim()
+                    : row.owner.resolution === "ambiguous"
+                      ? "Owner unknown (multiple marked)"
+                      : "Owner unknown"}
                 </p>
                 <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-xs">
                   <dt className="text-gray-400">Billing</dt>
@@ -292,7 +302,8 @@ export default function SalesQueueClient({ rows, recentDays }: { rows: SalesQueu
           <div><dt className="inline text-gray-300">Setup:</dt> <dd className="inline">profile complete, first member beyond the owner, an active instructor, an active class.</dd></div>
           <div><dt className="inline text-gray-300">Live:</dt> <dd className="inline">at least one attendance record exists. Setup and live usage are tracked separately.</dd></div>
           <div><dt className="inline text-gray-300">Plan:</dt> <dd className="inline">only server allow-listed Basic/Pro prices count. An active subscription with any other price is a reconciliation issue, never revenue.</dd></div>
-          <div><dt className="inline text-gray-300">Owner:</dt> <dd className="inline">the first member of the academy by creation date. If that is not identifiable it reads Unknown — no member is ever guessed.</dd></div>
+          <div><dt className="inline text-gray-300">Owner:</dt> <dd className="inline">the single member carrying the registration owner marker. Zero or several marked owners both read Unknown — earliest member, belt rank, and email order are never used as fallbacks.</dd></div>
+          <div><dt className="inline text-gray-300">Last activity:</dt> <dd className="inline">the newest activity record for that academy. If the lookup fails it reads Unavailable, never a false &quot;None&quot;.</dd></div>
         </dl>
         <h3 className="text-sm font-semibold text-white mt-4 mb-2">Not available here</h3>
         <ul className="text-xs text-gray-400 space-y-1">

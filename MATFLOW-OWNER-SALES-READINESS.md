@@ -84,14 +84,14 @@ Founder queue at `/platform/sales` (platform-admin only), per real academy:
 | Field | Status |
 |---|---|
 | Academy name, slug, created date, age in days | Verified |
-| Owner name/email/phone (first member by creation date) or **Unknown** | Verified — never guesses an arbitrary member |
+| Owner name/email/phone from the single member carrying the registration owner marker, else **Unknown** | Verified — zero or multiple marked owners both read Unknown; earliest member is never a fallback |
 | Subscription status and trial days remaining | Verified |
 | Allow-listed plan, or reconciliation flag | Verified |
 | Setup milestones completed (n/4) and activation yes/no | Verified |
 | Live usage yes/no | Verified |
 | Active members / instructors / classes | Verified |
 | Check-ins in the last 30 days (period stated in the UI) | Verified |
-| Latest ActivityLog action and timestamp | Verified |
+| Latest ActivityLog action and timestamp per academy, or an explicit Unavailable when the lookup fails | Verified |
 | Priority and recommended founder action | Verified |
 
 Platform dashboard also reports: real academies, allow-listed paid count,
@@ -100,12 +100,14 @@ trials, active members, activated academies, 7/30-day check-ins.
 
 ### Priority ladder (in order)
 1. Payment or billing reconciliation issue
-2. Trial ending in 0–3 days
-3. Trial ending in 4–7 days
-4. Unactivated after 3 days
-5. Activated without live attendance
-6. Active paid academy
-7. No immediate action
+2. Trial expired (negative days — never shown as upcoming)
+3. Subscription canceled (never "no action needed")
+4. Trial ending in 0–3 days
+5. Trial ending in 4–7 days
+6. Unactivated after 3 days
+7. Activated without live attendance
+8. Active paid academy
+9. No immediate action
 
 ---
 
