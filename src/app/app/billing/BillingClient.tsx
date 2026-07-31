@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth, type EntitlementInfo } from "@/lib/auth-context";
+import BillingReturnNotice from "./BillingReturnNotice";
 import { CreditCard, CheckCircle, AlertTriangle, Clock, XCircle, HelpCircle } from "lucide-react";
 
 const PLANS = [
@@ -191,7 +192,7 @@ function StatusBanner({
 }
 
 export default function BillingClient() {
-  const { billing, entitlement } = useAuth();
+  const { billing, entitlement, refresh } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -253,6 +254,13 @@ export default function BillingClient() {
         <h1 className="text-2xl font-bold text-white">Billing</h1>
       </div>
       <p className="text-gray-400 mb-6">Manage your gym&apos;s subscription and billing.</p>
+
+      {/* Truthful post-Checkout state. Never claims payment from the query string. */}
+      <BillingReturnNotice
+        status={billing?.subscriptionStatus ?? null}
+        refresh={refresh}
+        onOpenPortal={handlePortal}
+      />
 
       <StatusBanner status={status} trialEndsAt={billing?.trialEndsAt || null} entitlement={entitlement} />
 
