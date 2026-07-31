@@ -225,14 +225,16 @@ Outside Stripe:
 | Motion | Verdict | Reasoning |
 |---|---|---|
 | **Founder-led no-card trials** | **GO** | Registration is validated, atomic, and race-safe; the trial is set automatically; activation is measurable; the founder queue shows who needs help. No payment path is touched. |
-| **Founder-assisted paid sandbox verification** | **READY TO RUN** | Sandbox tooling, identity guard, catalog rules, and portal support are built and unit-tested. Blocked only on the `MatFlow Billing QA` sandbox being created and the CLI authenticated to it. |
+| **Founder-assisted paid sandbox verification** | **BLOCKED — not verified** | All twenty lifecycle stages are Blocked (passed 0, failed 0, blocked 20). The `MatFlow Billing QA` sandbox has not been created and the Stripe CLI has not been authenticated to it. Re-checked 31 July 2026. |
 | **Founder-assisted live paid launch** | **CONDITIONAL GO** | Only with Frank personally watching each of the first subscriptions end to end, and only after the sandbox lifecycle has actually run green. It has not run at all yet. |
 | **Unattended paid self-service** | **NO-GO** | Stays NO-GO even after a clean sandbox run, until the eight production approvals are separately granted. |
 
 Reasoning, evidence, and the exact remaining steps:
 **[MATFLOW-STRIPE-LAUNCH-GATE.md](MATFLOW-STRIPE-LAUNCH-GATE.md)**.
 Nothing in this repository has ever contacted Stripe, so no Stripe-side claim
-is Verified.
+is Verified. Sandbox verification was **attempted and safely stopped** on
+31 July 2026: the required Stripe browser authentication had not been done, so
+no mutation was possible and none was attempted.
 
 ---
 

@@ -12,10 +12,16 @@ been created, modified, or read. Every Stripe-side claim below is therefore
 A passing unit test proves our code behaves correctly against a *mock*; it is
 never evidence that Stripe behaves as we assumed.
 
-The tooling to run that lifecycle now exists (section 15) and is blocked on one
+The tooling to run that lifecycle exists (section 16) and is blocked on one
 thing only: the dedicated **MatFlow Billing QA** sandbox does not exist yet, and
 creating it plus authenticating the Stripe CLI to it both require Frank at a
 browser. Section 14 is the exact list.
+
+**Checked again on 31 July 2026.** The Stripe CLI configuration on this machine
+was last modified 20 July and still contains only its original profile, which
+holds a **live-mode key**. No `stripe login` has been run since, and no sandbox
+profile exists. `.env.stripe-test` has now been created from the template and
+is waiting on values. Nothing was mutated.
 
 Stripe documentation reviewed: **31 July 2026**. Every external claim links to
 the official page it came from.
@@ -31,7 +37,7 @@ Four separate motions, because they carry very different risk.
 | Motion | Verdict | Blocking reason |
 |---|---|---|
 | **Founder-led no-card trials** | **GO** | No payment path is touched. Registration is atomic and race-safe; the 30-day trial is set in-app, not by Stripe. |
-| **Founder-assisted paid sandbox verification** | **READY TO RUN** | Tooling, guards, catalog rules, and portal support are built and unit-tested. Blocked only on the sandbox existing and being pinned — items 1–4 of section 14. |
+| **Founder-assisted paid sandbox verification** | **BLOCKED — not verified** | Passed 0, failed 0, blocked 20. Tooling, guards, catalog rules, and portal support are built and unit-tested, so the only missing input is the sandbox itself — items 1–2 of section 14, both of which need Frank at a browser. |
 | **Founder-assisted live paid launch** | **CONDITIONAL GO** | Only with Frank personally watching each of the first subscriptions end to end, and only after the sandbox lifecycle has actually run green. Today it has not run at all. |
 | **Unattended paid self-service** | **NO-GO** | Unchanged, and stays NO-GO even after a clean sandbox run until the eight production approvals in section 17 are separately granted. |
 
@@ -405,27 +411,42 @@ prevention, plan switching, payment failure, cancellation, and resubscription.
 
 ## 15. Lifecycle stage evidence
 
-Twenty stages are defined in `src/lib/stripe-lifecycle-stages.json`. **Every one
-of them is currently `Blocked`**, for the single reason that the sandbox does
-not exist.
+Twenty stages are defined in `src/lib/stripe-lifecycle-stages.json`. **All twenty
+remain `Blocked`**, for the single reason that the sandbox does not exist.
 
 No stage has an alias, a Stripe observable, a local observable, or a cleanup
-result, because no stage has run. That table will be filled in from the run
-manifest after an actual execution, and not before. Anything else would be
-fabricated evidence.
+result, because no stage has run. This table is filled in from the run manifest
+after an actual execution and not before; anything else would be fabricated
+evidence.
 
-| Stage group | Stages | Status | Reason |
-|---|---|---|---|
-| Preflight and catalog validation (1–4) | 4 | **Blocked** | No pinned sandbox |
-| Tenant and customer setup (5–7) | 3 | **Blocked** | No pinned sandbox |
-| Checkout and activation (8–12) | 5 | **Blocked** | No pinned sandbox |
-| Duplicate prevention and idempotency (13–14) | 2 | **Blocked** | No pinned sandbox |
-| Plan switching (15–16) | 2 | **Blocked** | No pinned sandbox |
-| Failure, cancellation, recovery (17–20) | 4 | **Blocked** | No pinned sandbox |
+| Stage group | Stages | Status | Alias | Stripe observed | Local observed | Cleanup | Remaining risk |
+|---|---|---|---|---|---|---|---|
+| Preflight and catalog validation (1–4) | 4 | **Blocked** | — | — | — | — | Sandbox not created or pinned |
+| Tenant and customer setup (5–7) | 3 | **Blocked** | — | — | — | — | Same |
+| Checkout and activation (8–12) | 5 | **Blocked** | — | — | — | — | Same |
+| Duplicate prevention and idempotency (13–14) | 2 | **Blocked** | — | — | — | — | Same |
+| Plan switching (15–16) | 2 | **Blocked** | — | — | — | — | Same |
+| Failure, cancellation, recovery (17–20) | 4 | **Blocked** | — | — | — | — | Same |
+
+**Passed 0 · Failed 0 · Blocked 20.**
 
 The manifest treats `partial`, `manual`, `blocked`, and `skipped` as failures
-for the purpose of the overall verdict, so a run cannot be summarized as
-verified unless every stage genuinely passed.
+for the overall verdict, so a run cannot be summarized as verified unless every
+stage genuinely passed.
+
+### What has been proven locally, without Stripe
+
+These are the only lifecycle-adjacent claims with real evidence today. All were
+exercised against the actual CLI scripts, not mocks of them.
+
+| Behavior | Evidence |
+|---|---|
+| A live-mode key is refused with exit 87, before any network call | Run directly against the scripts |
+| `.env.production` is refused with exit 88 without being read | Run directly |
+| A file that is not mode 600 is refused | Run directly |
+| An unpinned or mismatched sandbox is refused with exit 89 | Unit-tested; fails closed when unpinned |
+| A freshly copied template is refused, naming every unfilled key | Run directly; see section 19 |
+| The CLI scripts agree with the TypeScript modules across the whole matrix | `src/lib/stripe-cli-parity.test.ts`, 28 cases |
 
 ---
 
@@ -506,3 +527,34 @@ Checkout means the payment succeeded; it now reports a bounded processing state
 and waits for server-derived truth.
 
 None of these touched `prisma/schema.prisma`, and no migration was created.
+
+---
+
+## 19. Fail-open found and closed (31 July 2026)
+
+Exercising the tooling with a real `.env.stripe-test` surfaced a defect that
+only appears in the normal first-run state.
+
+`.env.stripe-test` is created by copying `.env.stripe-test.example`, so a file
+full of `REPLACE_ME` placeholders is the ordinary intermediate state, not an
+exotic one. Those placeholders are non-empty strings, and `sk_test_REPLACE_ME`
+is even shaped like a valid test key. The gate therefore treated the whole
+template as configured: `npm run stripe:lifecycle` **exited 0 and printed "Dry
+run"**, as though the run were ready to go. The sandbox runner only caught it by
+making a doomed API call and reporting `StripeAuthenticationError`, which
+describes the symptom rather than the cause.
+
+For tooling whose entire purpose is to fail closed, reporting ready on an
+unconfigured file is the wrong failure direction.
+
+Placeholders are now treated as absent everywhere: in key classification, price
+resolution, app-URL classification, and database-locality checks. A copied
+template is refused with a single `UNFILLED_PLACEHOLDER` line naming every key
+still to be filled, and the sandbox runner refuses before opening a connection.
+Key names are printed because they are not secrets; values never are.
+
+Two of the three fixes were caught by the parity test rather than by hand: the
+CLI copies of `classifySecretKey` and `isLocalDatabaseUrl` did not route through
+the placeholder-aware check, so the CLI still accepted a placeholder key and a
+placeholder database URL after the TypeScript side had been corrected. That is
+the drift the parity test exists to catch, and it caught it.
