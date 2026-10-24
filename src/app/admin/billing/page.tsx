@@ -6,7 +6,7 @@ const PLANS = [
   {
     name: "Basic",
     price: "$49/mo",
-    description: "Up to 100 members",
+    description: "Up to 100 active members, including your own owner account",
     features: [
       "Member management",
       "Attendance tracking",
@@ -86,7 +86,7 @@ export default function BillingPage() {
           >
             {plan.popular && (
               <span className="text-xs font-bold text-brand-accent uppercase tracking-wider mb-2 block">
-                Most Popular
+                For academies over 100 members
               </span>
             )}
             <h2 className="text-xl font-bold text-white">{plan.name}</h2>

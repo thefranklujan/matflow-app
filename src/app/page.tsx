@@ -70,8 +70,8 @@ export default async function HomePage() {
         </h1>
         <p className="text-lg sm:text-xl text-gray-400 mb-3">{MATFLOW.tagline}</p>
         <p className="text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed">
-          The platform for Jiu Jitsu academies. Manage members, schedule classes,
-          track attendance, and grow your gym.
+          Run your BJJ classes and keep students connected. Scheduling,
+          attendance, academy progress, and a free student app.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
@@ -82,14 +82,15 @@ export default async function HomePage() {
             </div>
             <h2 className="text-lg font-semibold text-white mb-1">Academy owners</h2>
             <p className="mb-5 flex-1 text-sm text-gray-400 leading-relaxed">
-              Run your gym from one place. Members, schedule, attendance, belt
-              tracking, and announcements.
+              Members, schedule, attendance, belt progress, waivers and
+              announcements. Keep your current dues-payment setup. 30 days free,
+              no card; then Basic $49/mo or Pro $99/mo.
             </p>
             <Link
               href="/sign-up"
               className="w-full rounded-lg bg-brand-accent px-6 py-3 text-center text-sm font-bold uppercase tracking-wider text-brand-black transition hover:bg-brand-accent/90"
             >
-              Start free trial
+              Start 30-day trial
             </Link>
             <Link
               href="/sign-in"

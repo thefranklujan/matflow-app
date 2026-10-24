@@ -38,6 +38,8 @@ const SURFACES: { label: string; path: string; role: string | null }[] = [
   { label: "student schedule", path: "/student/schedule", role: "student-member" },
   { label: "student training", path: "/student/training", role: "student-member" },
   { label: "student profile", path: "/student/profile", role: "student-member" },
+  { label: "student academy", path: "/student/academy", role: "student-member" },
+  { label: "student academy (no membership)", path: "/student/academy", role: "student-solo" },
   { label: "platform dashboard", path: "/platform", role: "platform" },
   { label: "platform sales queue", path: "/platform/sales", role: "platform" },
   { label: "platform academy detail", path: "/platform/gyms", role: "platform" },

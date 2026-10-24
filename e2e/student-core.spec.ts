@@ -4,7 +4,7 @@ import { test, expect, storageStatePath, watchPage, expectCleanPage, expectNoHor
 
 const STUDENT_PAGES = [
   "", "schedule", "training", "gyms", "requests", "notifications",
-  "profile", "community", "leaderboard", "clock",
+  "profile", "community", "leaderboard", "clock", "academy",
 ];
 
 test.describe("student pages (member-linked student)", () => {

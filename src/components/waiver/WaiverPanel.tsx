@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 
 type Status = "none_required" | "unsigned" | "previous_version_signed" | "current_signed";
 
@@ -29,6 +29,9 @@ export default function WaiverPanel({ endpoint, compact = false }: { endpoint: s
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The student shell renders page content in both a desktop and a mobile
+  // tree, so element ids must be unique per instance.
+  const nameId = useId();
 
   const load = useCallback(async () => {
     setLoadError(false);
@@ -134,11 +137,11 @@ export default function WaiverPanel({ endpoint, compact = false }: { endpoint: s
           <span className="text-gray-300 text-sm">I have read and agree to version {data.template.version} of this waiver</span>
         </label>
         <div>
-          <label htmlFor={`waiver-name-${data.template.id}`} className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor={nameId} className="block text-sm font-medium text-gray-300 mb-1">
             Type your full name to sign
           </label>
           <input
-            id={`waiver-name-${data.template.id}`}
+            id={nameId}
             type="text"
             autoComplete="name"
             value={signedName}

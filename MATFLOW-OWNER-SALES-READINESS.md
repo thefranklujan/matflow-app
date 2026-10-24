@@ -4,7 +4,9 @@ Living document for selling MatFlow to academy owners. Every claim carries a
 status label: **Verified** (proven by code and tests in this repository),
 **Partial**, **Missing**, **Planned**, **Unknown**, or **Access Needed**.
 
-Last updated: 2026-07-31.
+Last updated: 2026-10-24 (academy readiness branch `codex/matflow-academy-readiness`; labels marked *local* are proven by this branch's tests against a disposable database, not in production).
+
+> **Traction: none.** MatFlow has zero academy customers and zero revenue (Frank, 2026-10-24). Earlier notes describing a paying academy are stale; never use them as traction, revenue or testimonial material.
 
 ---
 
@@ -15,19 +17,27 @@ Last updated: 2026-07-31.
 | Student product | Free for students, iOS/Android + web | Verified |
 | Owner product | Web SaaS (owner billing and dashboard are unavailable in the native student app) | Verified |
 | Trial | 30 days, no card required | Verified — set at registration, `trialEndsAt` = +30 days |
-| Basic | $49/month, up to 100 active members | Verified — server-enforced member limit |
+| Basic | $49/month, up to 100 active members **including the owner's own account** | Verified — server-enforced; the count is every active Member row, owner included. Never say "100 students plus staff". |
 | Pro | $99/month, unlimited active members | Verified |
 | Annual plan | Not offered | Verified (deliberate) |
 | Free forever for new academies | Not offered | Verified (deliberate) |
 
-**Not sold promises** (do not imply these in a call): commerce/pro-shop as a
-headline capability, academy member-payment processing, multi-location, and
-guaranteed priority support.
+**Not sold promises** (do not imply these in a call): commerce/pro-shop or
+inventory/orders, academy member-dues collection (owners keep their current
+dues arrangement), multi-location, custom academy-branded app-store apps,
+turnkey kiosk check-in (no code-issuance writer exists), automated class
+reminders (built and tested locally with push mocked; not verified against
+the real push provider), and guaranteed priority support.
 
 ### What Basic includes
-Member management, instructors, class scheduling and attendance, belt
-progression, announcements and waivers, video library, invite links, student
-app access for members.
+Member management, instructors, class scheduling and attendance, academy-
+verified belt progression with history, announcements, versioned waivers
+(members re-sign when the wording changes), video library, invite links, and
+the free student app: each member's **My Academy** view shows the academy's
+next classes, announcements, their verified progress, the current waiver to
+sign, and published videos, and lets them mark a class they plan to attend
+(a plan, not attendance). Owners can export their academy's records (Settings
+→ Your data; format in docs/ACADEMY-EXPORT.md).
 
 ### What Pro adds
 Unlimited active members, lead pipeline, drop-ins, events, competitions,
@@ -133,7 +143,7 @@ trials, active members, activated academies, 7/30-day check-ins.
 4. Add one real member or send the invite link (milestone 2).
 5. Add the instructor who teaches most (milestone 3).
 6. Build this week's schedule (milestone 4).
-7. Show the kiosk/check-in flow and take one real check-in (live usage).
+7. Record one real attendance from the owner Attendance page (live usage). Do not demo the kiosk.
 8. Show the student app so they can tell members what to download.
 9. State the trial end date out loud and put the conversion call on the calendar.
 10. Log the call outcome; confirm the queue now shows them activated.
@@ -148,11 +158,14 @@ Demonstrate only what exists:
 3. Members roster and invite link.
 4. Schedule creation with inline validation.
 5. Attendance: record a class, then show it on the dashboard and analytics.
-6. Student experience: free app, schedule, training log, arrival check-in.
+6. Student experience: free app, **My Academy** (next classes, verified
+   progress, waiver sign/re-sign, videos), training log, arrival check-in.
+   Use only labeled synthetic data.
 7. Billing page: trial status, Basic vs Pro, upgrade path.
 
-Do **not** demo: commerce as a primary value, member payment processing,
-multi-location, or priority support.
+Do **not** demo: commerce, member payment processing, kiosk check-in,
+automated reminders as a delivered feature, multi-location, custom apps, or
+priority support.
 
 ---
 
@@ -191,7 +204,9 @@ Open with their data: members added, classes scheduled, check-ins recorded.
 4. What did you use instead?
 5. What single thing would have kept you?
 6. Offer: pause, downgrade, or a clean exit with data export expectations set
-   honestly (export tooling status: **Missing**).
+   honestly (export: **Verified local** — owner self-export while the plan is
+   active; after cancellation, support runs the assisted export in
+   docs/ACADEMY-EXPORT.md. No restore/import exists).
 
 ---
 

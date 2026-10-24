@@ -233,7 +233,7 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                   >
                     <Building2 className="h-6 w-6 text-brand-accent mb-2" />
                     <div className="text-white font-semibold mb-1">Academy Owner</div>
-                    <div className="text-gray-400 text-xs">Run your gym, manage members, track classes and revenue.</div>
+                    <div className="text-gray-400 text-xs">Run your academy: members, classes, attendance and belt progress.</div>
                   </button>
                 )}
                 <button

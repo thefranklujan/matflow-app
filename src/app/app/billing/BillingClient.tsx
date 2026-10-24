@@ -11,7 +11,7 @@ const PLANS = [
     name: "Basic",
     price: "$49",
     period: "/mo",
-    description: "Up to 100 active members",
+    description: "Up to 100 active members, including your own owner account",
     features: [
       "Member management",
       "Instructors",
@@ -286,7 +286,7 @@ export default function BillingClient() {
             >
               {plan.popular && (
                 <span className="text-xs font-bold text-brand-accent uppercase tracking-wider mb-2 block">
-                  Most Popular
+                  For academies over 100 members
                 </span>
               )}
               {isCurrent && (
