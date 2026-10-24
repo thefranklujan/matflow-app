@@ -4,6 +4,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/push";
+import { editWaiverTemplate, studentWaiverUrl } from "@/lib/waiver";
+
+/**
+ * Ask every active student-linked member to review a new waiver version.
+ * Records an inbox row and a push attempt per student; acceptance by the push
+ * provider is not proof of delivery or of reading. Deep link opens the
+ * student academy view of THIS gym's current waiver.
+ */
+async function notifyWaiverRevision(gymId: string, title: string, revised: boolean) {
+  const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
+  const members = await prisma.member.findMany({
+    where: { gymId, active: true, approved: true, studentId: { not: null } },
+    select: { studentId: true },
+  });
+  const externalIds = members
+    .map((m) => (m.studentId ? `student-${m.studentId}` : null))
+    .filter((x): x is string => Boolean(x));
+  await notify({
+    externalIds,
+    kind: "waiver_required",
+    title: `${gym?.name || "Your gym"} needs your signature`,
+    body: revised ? `Updated waiver: ${title}. Tap to review and sign.` : `New waiver: ${title}. Tap to review and sign.`,
+    url: studentWaiverUrl(gymId),
+    gymId,
+  });
+}
 
 export async function GET() {
   try {
@@ -38,41 +64,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Title and content required" }, { status: 400 });
     }
 
-    // Version is monotonic per gym so signatures can record which version was signed.
-    const latest = await prisma.waiverTemplate.findFirst({
-      where: { gymId },
-      orderBy: { version: "desc" },
-      select: { version: true },
-    });
-    const nextVersion = (latest?.version ?? 0) + 1;
-
-    // Only one active waiver at a time.
-    await prisma.waiverTemplate.updateMany({
-      where: { gymId, active: true },
-      data: { active: false },
-    });
-
-    const template = await prisma.waiverTemplate.create({
-      data: { gymId, title, content, active: true, version: nextVersion },
+    // Version is monotonic per gym so signatures can record which version was
+    // signed. Deactivate + create are one transaction so the gym never has
+    // zero or two active waivers mid-replace.
+    const template = await prisma.$transaction(async (tx) => {
+      const latest = await tx.waiverTemplate.findFirst({
+        where: { gymId },
+        orderBy: { version: "desc" },
+        select: { version: true },
+      });
+      await tx.waiverTemplate.updateMany({ where: { gymId, active: true }, data: { active: false } });
+      return tx.waiverTemplate.create({
+        data: { gymId, title, content, active: true, version: (latest?.version ?? 0) + 1 },
+      });
     });
 
-    // Push every active member — they need to re-sign the new waiver.
-    const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
-    const members = await prisma.member.findMany({
-      where: { gymId, active: true, approved: true, studentId: { not: null } },
-      select: { studentId: true },
-    });
-    const externalIds = members
-      .map((m) => (m.studentId ? `student-${m.studentId}` : null))
-      .filter((x): x is string => Boolean(x));
-    notify({
-      externalIds,
-      kind: "waiver_required",
-      title: `${gym?.name || "Your gym"} needs your signature`,
-      body: `New waiver: ${title}. Tap to review and sign.`,
-      url: "/members/waiver",
-      gymId,
-    });
+    notifyWaiverRevision(gymId, title, false).catch(() => {});
 
     return NextResponse.json(template, { status: 201 });
   } catch {
@@ -98,28 +105,20 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Missing waiver id" }, { status: 400 });
     }
 
-    const existing = await prisma.waiverTemplate.findFirst({ where: { id, gymId } });
-    if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
     if (!title || !content) {
       return NextResponse.json({ error: "Title and content required" }, { status: 400 });
     }
 
-    const contentChanged = content !== existing.content;
-    const data: { title: string; content: string; version?: number } = { title, content };
-
-    if (contentChanged) {
-      const latest = await prisma.waiverTemplate.findFirst({
-        where: { gymId },
-        orderBy: { version: "desc" },
-        select: { version: true },
-      });
-      data.version = (latest?.version ?? existing.version) + 1;
+    // Under the same lock signers take, so a signature can never pair the
+    // old snapshot with the new version (or vice versa).
+    const edited = await editWaiverTemplate({ gymId, id, title, content });
+    if (!edited) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-
-    const updated = await prisma.waiverTemplate.update({ where: { id }, data });
-    return NextResponse.json(updated);
+    if (edited.contentChanged && edited.template.active) {
+      notifyWaiverRevision(gymId, title, true).catch(() => {});
+    }
+    return NextResponse.json(edited.template);
   } catch {
     return NextResponse.json({ error: "Failed to update waiver" }, { status: 500 });
   }

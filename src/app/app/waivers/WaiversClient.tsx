@@ -7,6 +7,8 @@ interface Signature {
   id: string;
   signedName: string;
   signedAt: string;
+  version: number;
+  memberId: string | null;
   member: { firstName: string; lastName: string; email: string } | null;
   dropIn: { firstName: string; lastName: string } | null;
 }
@@ -35,7 +37,15 @@ function signerName(sig: Signature) {
   return sig.signedName;
 }
 
-export default function WaiversClient({ templates, totalMembers }: { templates: Template[]; totalMembers: number }) {
+export default function WaiversClient({
+  templates,
+  totalMembers,
+  counts,
+}: {
+  templates: Template[];
+  totalMembers: number;
+  counts: { signed: number; previousVersionOnly: number; pending: number } | null;
+}) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("Liability Waiver & Release of Claims");
@@ -191,9 +201,16 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
                 </button>
               </div>
               <p className="text-gray-400 text-sm mb-4 whitespace-pre-line line-clamp-3">{activeTemplate.content}</p>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-brand-accent font-medium">{activeTemplate.signatures.length} / {totalMembers} signed</span>
-                <span className="text-gray-400">Version {activeTemplate.version}</span>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <span className="text-brand-accent font-medium">
+                  {counts?.signed ?? 0} / {totalMembers} active members signed version {activeTemplate.version}
+                </span>
+                <span className="text-gray-300">{counts?.pending ?? totalMembers} still need to sign</span>
+                {(counts?.previousVersionOnly ?? 0) > 0 && (
+                  <span className="text-amber-300">
+                    {counts?.previousVersionOnly} signed an earlier version only
+                  </span>
+                )}
               </div>
 
               {activeTemplate.signatures.length > 0 && (
@@ -206,7 +223,10 @@ export default function WaiversClient({ templates, totalMembers }: { templates: 
                           {signerName(sig)}
                           {sig.dropIn && <span className="text-gray-400 text-xs ml-2">drop-in</span>}
                         </span>
-                        <span className="text-gray-400">{new Date(sig.signedAt).toLocaleDateString()}</span>
+                        <span className="text-gray-400">
+                          v{sig.version}
+                          {sig.version !== activeTemplate.version && " (earlier version)"} · {new Date(sig.signedAt).toLocaleDateString()}
+                        </span>
                       </div>
                     ))}
                   </div>

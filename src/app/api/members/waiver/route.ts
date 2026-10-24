@@ -2,76 +2,53 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireMember } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
+import { signCurrentWaiver, waiverStatusFor, WaiverError } from "@/lib/waiver";
 
-// GET: Get active waiver template + member's signature status
+// GET: the gym's current required waiver + this member's status for its
+// CURRENT version (see src/lib/waiver.ts for the contract).
 export async function GET() {
+  let ctx: { gymId: string; memberId: string };
   try {
-    const { gymId, memberId } = await requireMember();
-
-    const template = await prisma.waiverTemplate.findFirst({
-      where: { gymId, active: true },
-    });
-
-    if (!template) {
-      return NextResponse.json({ template: null, signed: false });
-    }
-
-    const signature = await prisma.waiverSignature.findFirst({
-      where: { memberId, templateId: template.id },
-    });
-
-    return NextResponse.json({
-      template: { id: template.id, title: template.title, content: template.content },
-      signed: !!signature,
-      signedAt: signature?.signedAt || null,
-    });
+    ctx = await requireMember();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  try {
+    return NextResponse.json(await waiverStatusFor(ctx.gymId, ctx.memberId));
+  } catch {
+    return NextResponse.json({ error: "Failed to load waiver" }, { status: 500 });
+  }
 }
 
-// POST: Sign the waiver
+// POST: sign the version the member was shown. A stale version gets 409 with
+// code WAIVER_UPDATED; a repeat of the same version is idempotent.
 export async function POST(request: NextRequest) {
+  let ctx: { gymId: string; memberId: string };
   try {
-    const { gymId, memberId } = await requireMember();
-    const { templateId, signedName } = await request.json();
-
-    if (!templateId || !signedName) {
-      return NextResponse.json({ error: "Template ID and signed name required" }, { status: 400 });
-    }
-
-    const template = await prisma.waiverTemplate.findFirst({
-      where: { id: templateId, gymId },
-    });
-    if (!template) {
-      return NextResponse.json({ error: "Waiver not found" }, { status: 404 });
-    }
-
-    // Check if already signed
-    const existing = await prisma.waiverSignature.findFirst({
-      where: { memberId, templateId },
-    });
-    if (existing) {
-      return NextResponse.json({ error: "Already signed" }, { status: 400 });
-    }
-
-    const signature = await prisma.waiverSignature.create({
-      data: {
-        gymId,
-        memberId,
-        templateId,
-        version: template.version,
-        signedName,
-        waiverContentSnapshot: template.content,
-      },
-    });
-
-    logActivity({ gymId, action: "waiver_signed", actorId: memberId, actorName: signedName, targetId: templateId, targetName: template.title });
-
-    return NextResponse.json({ success: true, signedAt: signature.signedAt }, { status: 201 });
+    ctx = await requireMember();
   } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const result = await signCurrentWaiver({
+      gymId: ctx.gymId,
+      memberId: ctx.memberId,
+      templateId: body.templateId,
+      version: body.version,
+      signedName: body.signedName,
+    });
+    if (!result.alreadySigned) {
+      logActivity({ gymId: ctx.gymId, action: "waiver_signed", actorId: ctx.memberId, actorName: String(body.signedName).trim(), targetId: body.templateId, meta: { version: result.version } });
+    }
+    return NextResponse.json({ success: true, ...result }, { status: result.alreadySigned ? 200 : 201 });
+  } catch (err) {
+    if (err instanceof WaiverError) {
+      const current = err.status === 409 ? await waiverStatusFor(ctx.gymId, ctx.memberId).catch(() => null) : null;
+      return NextResponse.json({ error: err.message, code: err.code, current }, { status: err.status });
+    }
     return NextResponse.json({ error: "Failed to sign waiver" }, { status: 500 });
   }
 }
