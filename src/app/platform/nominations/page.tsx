@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
 import NominationsClient from "./NominationsClient";
+import { findNominationReviewMatches } from "@/lib/nomination-claim";
 
 export default async function NominationsPage() {
   const [nominations, activeGyms] = await Promise.all([
@@ -20,6 +21,12 @@ export default async function NominationsPage() {
     }),
   ]);
 
+  // Read-only: same-name academies that joined MatFlow. A name match is a
+  // review prompt for the founder, never an automatic claim.
+  const reviewMatches = await findNominationReviewMatches(
+    nominations.filter((n) => n.status !== "claimed"),
+  );
+
   const rows = nominations.map((n) => ({
     id: n.id,
     gymName: n.gymName,
@@ -30,6 +37,7 @@ export default async function NominationsPage() {
     notes: n.notes,
     status: n.status,
     createdAt: n.createdAt.toISOString(),
+    reviewMatches: reviewMatches.get(n.id) ?? [],
     student: {
       id: n.student.id,
       firstName: n.student.firstName,

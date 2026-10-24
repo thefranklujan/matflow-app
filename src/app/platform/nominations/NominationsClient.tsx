@@ -14,6 +14,7 @@ interface NominationRow {
   notes: string | null;
   status: string;
   createdAt: string;
+  reviewMatches: Array<{ gymId: string; gymName: string; location: "match" | "unknown" | "conflict" }>;
   student: { id: string; firstName: string; lastName: string; email: string };
 }
 
@@ -70,6 +71,15 @@ export default function NominationsClient({
       .sort((a, b) => b.rows.length - a.rows.length);
   }, [rows]);
 
+  async function postClaim(targetGymId: string, nominationIds: string[], allowLocationMismatch: boolean) {
+    const res = await fetch("/api/platform/nominations/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ targetGymId, nominationIds, allowLocationMismatch }),
+    });
+    return { res, data: await res.json().catch(() => ({})) };
+  }
+
   async function claim(groupKey: string, groupName: string) {
     const targetGymId = selected[groupKey] || suggestMatch(groupName, activeGyms);
     if (!targetGymId) {
@@ -79,18 +89,25 @@ export default function NominationsClient({
     const target = activeGyms.find((g) => g.id === targetGymId);
     const count = groups.find((g) => g.key === groupKey)?.rows.length ?? 0;
     const confirmed = confirm(
-      `Claim "${groupName}" for ${target?.name}?\n\n${count} student${count === 1 ? " who" : "s who"} nominated will get a pending join request to ${target?.name}.\n\nThe nominated card will disappear from Find Your Gym.`
+      `Claim "${groupName}" for ${target?.name}?\n\n${count} student${count === 1 ? " who" : "s who"} nominated will get a pending join request to ${target?.name}. The owner still approves each one.\n\nThe student community, its members and posts are kept as they are.`
     );
     if (!confirmed) return;
     setBusyKey(groupKey);
     setFlash(null);
     try {
-      const res = await fetch("/api/platform/nominations/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groupName, targetGymId }),
-      });
-      const data = await res.json();
+      const nominationIds = groups.find((g) => g.key === groupKey)?.rows.map((r) => r.id) ?? [];
+      let { res, data } = await postClaim(targetGymId, nominationIds, false);
+      if (res.status === 409 && data.code === "LOCATION_MISMATCH") {
+        const override = confirm(
+          `${data.error}\n\nOnly continue if you have confirmed with the owner that this is the same academy.`
+        );
+        if (!override) {
+          setFlash({ key: groupKey, kind: "err", msg: "Not claimed: location differs. Nothing changed." });
+          setBusyKey(null);
+          return;
+        }
+        ({ res, data } = await postClaim(targetGymId, nominationIds, true));
+      }
       if (!res.ok) {
         setFlash({ key: groupKey, kind: "err", msg: data.error || "Claim failed" });
         setBusyKey(null);
@@ -99,7 +116,9 @@ export default function NominationsClient({
       setFlash({
         key: groupKey,
         kind: "ok",
-        msg: `Claimed for ${target?.name}. ${data.joinRequestsCreated} join request${data.joinRequestsCreated === 1 ? "" : "s"} created.`,
+        msg: `Claimed for ${target?.name}. ${data.joinRequestsCreated} join request${data.joinRequestsCreated === 1 ? "" : "s"} created${
+          data.skippedRejected ? `, ${data.skippedRejected} previously rejected left as is` : ""
+        }${data.alreadyMembers ? `, ${data.alreadyMembers} already members` : ""}. Community kept.`,
       });
       setBusyKey(null);
       router.refresh();
@@ -125,7 +144,8 @@ export default function NominationsClient({
           {groups.map((group) => {
             const count = group.rows.length;
             const first = group.rows[0];
-            const suggestion = suggestMatch(group.name, activeGyms);
+            const exact = group.rows.flatMap((r) => r.reviewMatches);
+            const suggestion = exact.find((m) => m.location !== "conflict")?.gymId ?? suggestMatch(group.name, activeGyms);
             const currentSelection = selected[group.key] || suggestion || "";
             return (
               <div key={group.key} className="bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden">
@@ -146,9 +166,17 @@ export default function NominationsClient({
                     {(first.city || first.state) && (
                       <p className="text-gray-400 text-xs mt-1">{formatLocation(first.city, first.state)}</p>
                     )}
+                    {exact.length > 0 && (
+                      <p role="status" className="text-amber-300 text-xs mt-2">
+                        Pending review: {Array.from(new Set(exact.map((m) => m.gymName))).join(", ")} joined MatFlow with this
+                        name{exact.some((m) => m.location === "conflict") ? " but lists a different location" : ""}. A
+                        matching name is not proof of ownership; confirm with the owner before claiming.
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <select
+                      aria-label={`Academy to link ${group.name} to`}
                       value={currentSelection}
                       onChange={(e) =>
                         setSelected((s) => ({ ...s, [group.key]: e.target.value }))

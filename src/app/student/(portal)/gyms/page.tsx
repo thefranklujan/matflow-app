@@ -47,7 +47,10 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
   ]);
 
   // Build a unified list. Active gyms (real Gym rows) take priority.
-  // Nomination groups whose name doesn't match an active gym get the "Not Active" badge.
+  // Student communities are always listed — hiding one because an academy
+  // with the same name joined would orphan its members' posts (a name match
+  // is not proof of ownership). A same-name community is labeled "pending
+  // review" until the founder links it.
   const activeNames = new Set(activeGyms.map((g) => g.name.toLowerCase().trim()));
   type Card = {
     key: string;
@@ -58,6 +61,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
     isActive: boolean;
     href: string | null;
     memberCount?: number;
+    pendingReview?: boolean;
   };
   const cards: Card[] = [
     ...activeGyms.map((g) => ({
@@ -70,7 +74,6 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
       href: `/student/gyms/${g.slug}`,
     })),
     ...nominationGroups
-      .filter((n) => !activeNames.has(n.name.toLowerCase().trim()))
       .map((n) => ({
         key: `nom-${n.id}`,
         name: n.name,
@@ -79,6 +82,7 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
         isActive: false,
         href: null,
         memberCount: n.memberCount,
+        pendingReview: activeNames.has(n.name.toLowerCase().trim()),
       })),
   ];
 
@@ -183,11 +187,13 @@ export default async function GymDiscoveryPage({ searchParams }: { searchParams:
                           </div>
                         </div>
                         <span className="bg-yellow-500/20 text-yellow-400 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded shrink-0">
-                          Not Active
+                          {card.pendingReview ? "Pending review" : "Not Active"}
                         </span>
                       </div>
                       <p className="text-gray-400 text-xs">
                         {card.memberCount ?? 0} student{(card.memberCount ?? 0) === 1 ? "" : "s"} nominating.
+                        {card.pendingReview &&
+                          " An academy with this name joined MatFlow. This student community stays as it is until MatFlow confirms they are the same academy."}
                       </p>
                     </Link>
                   );

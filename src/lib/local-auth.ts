@@ -161,55 +161,12 @@ export async function registerGymOwner(data: {
     throw err;
   }
 
-  // Auto-claim any matching nominations so the new owner lands on pre-warmed
-  // pipeline instead of an empty pending list. Match on case-insensitive name
-  // equality with their newly-created Gym name. Students who nominated get
-  // pending JoinRequest records against the real gym; the nominations flip
-  // to status "claimed" so they drop off the Find-Your-Gym suggested list.
-  try {
-    const nominations = await prisma.gymNomination.findMany({
-      where: {
-        gymName: { equals: result.gym.name, mode: "insensitive" },
-        status: { not: "claimed" },
-      },
-    });
-
-    if (nominations.length > 0) {
-      for (const n of nominations) {
-        const existingMember = await prisma.member.findFirst({
-          where: { gymId: result.gym.id, studentId: n.studentId },
-        });
-        if (existingMember) continue;
-
-        const existingReq = await prisma.joinRequest.findUnique({
-          where: { studentId_gymId: { studentId: n.studentId, gymId: result.gym.id } },
-        });
-        if (!existingReq) {
-          await prisma.joinRequest.create({
-            data: {
-              studentId: n.studentId,
-              gymId: result.gym.id,
-              status: "pending",
-              message: `Auto-created from nomination when ${result.gym.name} joined MatFlow`,
-            },
-          });
-        }
-      }
-
-      await prisma.gymNomination.updateMany({
-        where: { gymName: { equals: result.gym.name, mode: "insensitive" } },
-        data: { status: "claimed" },
-      });
-
-      // Drop the matching GymGroup(s) so the "Not Active" card disappears
-      await prisma.gymGroup.deleteMany({
-        where: { name: { equals: result.gym.name, mode: "insensitive" } },
-      });
-    }
-  } catch (err) {
-    // Never block gym creation on nomination cleanup
-    console.error("[registerGymOwner] auto-claim failed:", err);
-  }
+  // Nominations are deliberately NOT claimed here. A same-name community is
+  // not proof that this owner runs that academy: the old auto-claim marked
+  // every same-name nomination claimed and cascade-deleted the community's
+  // members, posts, comments, likes and reports. Matches now surface as
+  // "pending review" on /platform/nominations (src/lib/nomination-claim.ts),
+  // where the founder claims explicit nominations without deleting anything.
 
   return {
     gym: { id: result.gym.id, name: result.gym.name, slug: result.gym.slug },
