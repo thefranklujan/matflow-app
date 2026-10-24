@@ -13,7 +13,10 @@ type Params = { params: Promise<{ gymId: string }> };
  * active, approved membership in this gym; the class must be an active
  * schedule of THIS gym and an upcoming occurrence (src/lib/class-commitment.ts).
  */
-async function resolve(req: NextRequest, gymId: string) {
+async function resolve(
+  req: NextRequest,
+  gymId: string,
+): Promise<{ error: NextResponse } | { memberId: string; identity: ReturnType<typeof occurrenceIdentity> }> {
   const auth = await requireStudentMembershipForGym(gymId);
   if (!auth.ok) return { error: NextResponse.json({ error: auth.error }, { status: auth.status }) };
   const body = await req.json().catch(() => ({}));

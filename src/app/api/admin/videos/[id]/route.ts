@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
+import { safeHttpUrl } from "@/lib/safe-url";
 
 export async function PUT(
   req: NextRequest,
@@ -12,6 +13,11 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
     const { title, embedUrl, description, classType, classDate, published } = body;
+
+    // Video links are rendered as hrefs/iframes for students: http(s) only.
+    if (embedUrl !== undefined && !safeHttpUrl(embedUrl)) {
+      return NextResponse.json({ error: "Video link must start with http:// or https://", code: "INVALID_URL" }, { status: 400 });
+    }
 
     // Verify ownership
     const existing = await prisma.video.findFirst({ where: { id, gymId } });

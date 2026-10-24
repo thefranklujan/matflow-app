@@ -214,8 +214,8 @@ describe.skipIf(!db)("Packet D — reminders (real Postgres)", () => {
     expect((await studentCommit.POST(req({ scheduleId: c.id, date: dateKey }), p(g.id))).status).toBe(201); // idempotent
     const rows = await prisma.scheduleCommitment.findMany({ where: { memberId: s.member.id } });
     expect(rows).toHaveLength(1);
-    expect(rows[0].classType).toBe("BJJ@18:00");
-    expect(rows[0].classDate.toISOString()).toBe(`${dateKey}T00:00:00.000Z`);
+    expect(rows[0]!.classType).toBe("BJJ@18:00");
+    expect(rows[0]!.classDate.toISOString()).toBe(`${dateKey}T00:00:00.000Z`);
 
     expect((await studentCommit.POST(req({ scheduleId: foreign.id, date: dateKey }), p(g.id))).status).toBe(400);
     expect((await studentCommit.POST(req({ scheduleId: foreign.id, date: dateKey }), p(otherGym.id))).status).toBe(403);

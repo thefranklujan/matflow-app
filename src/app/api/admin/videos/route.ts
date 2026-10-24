@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
+import { safeHttpUrl } from "@/lib/safe-url";
 
 export async function GET() {
   try {
@@ -29,6 +30,11 @@ export async function POST(req: NextRequest) {
     if (!title || !embedUrl || !classType || !classDate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+    // Video links are rendered as hrefs/iframes for students: http(s) only.
+    if (embedUrl !== undefined && !safeHttpUrl(embedUrl)) {
+      return NextResponse.json({ error: "Video link must start with http:// or https://", code: "INVALID_URL" }, { status: 400 });
+    }
+
 
     const video = await prisma.video.create({
       data: {

@@ -9,6 +9,7 @@ import { studentMemberships } from "@/lib/student-membership";
 import { upcomingOccurrences } from "@/lib/class-window";
 import { commitmentDateKey, resolveCommitment } from "@/lib/class-commitment";
 import WaiverPanel from "@/components/waiver/WaiverPanel";
+import { safeHttpUrl } from "@/lib/safe-url";
 import AcademyClassList, { type AcademyClassItem } from "@/components/student/AcademyClassList";
 
 function beltLabel(belt: string, stripes: number) {
@@ -228,21 +229,29 @@ export default async function StudentAcademyPage({
             <p className="text-gray-400 text-sm">Your academy has not published any videos yet.</p>
           ) : (
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {videos.map((v) => (
-                <li key={v.id}>
-                  <a
-                    href={v.embedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-white/10 rounded-lg p-3 hover:border-[#dc2626]"
-                  >
+              {videos.map((v) => {
+                const href = safeHttpUrl(v.embedUrl);
+                const inner = (
+                  <>
                     <p className="text-white text-sm font-medium truncate">{v.title}</p>
                     <p className="text-gray-400 text-xs">
                       {v.classType} · {v.classDate.toLocaleDateString("en-US", { timeZone: "UTC" })}
+                      {!href && " · link unavailable"}
                     </p>
-                  </a>
-                </li>
-              ))}
+                  </>
+                );
+                return (
+                  <li key={v.id}>
+                    {href ? (
+                      <a href={href} target="_blank" rel="noopener noreferrer" className="block border border-white/10 rounded-lg p-3 hover:border-[#dc2626]">
+                        {inner}
+                      </a>
+                    ) : (
+                      <div className="border border-white/10 rounded-lg p-3">{inner}</div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
