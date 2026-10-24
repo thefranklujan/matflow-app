@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import NotificationSettings from "@/components/NotificationSettings";
 import DeleteAccountSection from "@/components/DeleteAccountSection";
 import GymLocationCard from "@/components/admin/GymLocationCard";
+import AcademyExportCard from "@/components/AcademyExportCard";
 
 interface GymSettings {
   name: string;
@@ -294,6 +295,11 @@ export default function SettingsPage() {
       <div className="mt-10">
         <h2 className="text-xl font-bold text-white mb-4">Notifications</h2>
         <NotificationSettings />
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-white mb-4">Your data</h2>
+        <AcademyExportCard />
       </div>
 
       <div className="mt-10">
