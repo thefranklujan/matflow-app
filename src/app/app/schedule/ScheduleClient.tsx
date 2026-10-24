@@ -253,7 +253,8 @@ export default function ScheduleClient({
     setBusy(rowKey);
     const committed = isCommitted(date, classItem);
     const body = JSON.stringify({
-      classDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString(),
+      // Academy-local calendar date, not a browser-timezone instant.
+      classDate: dateKey(date),
       classType: ck,
       locationSlug: classItem.locationSlug,
     });
@@ -264,7 +265,7 @@ export default function ScheduleClient({
         body,
       });
       if (res.ok) {
-        const isoDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
+        const isoDate = `${k}T00:00:00.000Z`; // canonical academy-local date
         if (committed) {
           setCommitments((prev) =>
             prev.filter((c) => !(c.classDate.slice(0, 10) === k && c.classType === ck))

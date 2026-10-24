@@ -125,7 +125,7 @@ interface NotifyOptions {
 // the web app, giving real deep-link behavior (tap push → opens inbox page).
 const PUSH_URL_BASE = process.env.PUSH_URL_BASE || "https://app.mymatflow.com";
 
-function absolutize(url: string | undefined): string | undefined {
+export function absolutize(url: string | undefined): string | undefined {
   if (!url) return undefined;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   return `${PUSH_URL_BASE}${url.startsWith("/") ? "" : "/"}${url}`;

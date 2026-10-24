@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { normalizeClassDate } from "@/lib/class-commitment";
+
+/** Store every commitment at the canonical academy-local date (UTC midnight). */
+async function canonicalDate(gymId: string, raw: unknown): Promise<Date | null> {
+  const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { timezone: true } });
+  return normalizeClassDate(raw, gym?.timezone || "America/Chicago");
+}
 
 export async function POST(request: NextRequest) {
   try {
     const { gymId, memberId } = await requireMember();
 
-    const { classDate, classType, locationSlug } = await request.json();
+    const { classDate: rawDate, classType, locationSlug } = await request.json();
+    const classDate = await canonicalDate(gymId, rawDate);
     if (!classDate || !classType || !locationSlug) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,7 +24,7 @@ export async function POST(request: NextRequest) {
         gymId_memberId_classDate_classType: {
           gymId,
           memberId,
-          classDate: new Date(classDate),
+          classDate,
           classType,
         },
       },
@@ -24,7 +32,7 @@ export async function POST(request: NextRequest) {
       create: {
         gymId,
         memberId,
-        classDate: new Date(classDate),
+        classDate,
         classType,
         locationSlug,
       },
@@ -40,14 +48,23 @@ export async function DELETE(request: NextRequest) {
   try {
     const { gymId, memberId } = await requireMember();
 
-    const { classDate, classType } = await request.json();
+    const { classDate: rawDate, classType } = await request.json();
+    const classDate = await canonicalDate(gymId, rawDate);
+    if (!classDate || !classType) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
 
+    // Remove the canonical row and any legacy browser-local-midnight row for
+    // the same academy-local date (within ±14h of it).
     await prisma.scheduleCommitment.deleteMany({
       where: {
         gymId,
         memberId,
-        classDate: new Date(classDate),
         classType,
+        classDate: {
+          gte: new Date(classDate.getTime() - 14 * 3600_000),
+          lte: new Date(classDate.getTime() + 14 * 3600_000),
+        },
       },
     });
 

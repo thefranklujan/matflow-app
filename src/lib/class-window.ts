@@ -146,3 +146,59 @@ export function eligibleClassesNow(slots: ScheduleSlot[], now: Date, timeZone: s
     .filter((occ): occ is EligibleOccurrence => occ !== null)
     .sort((a, b) => Math.abs(a.minutesFromStart) - Math.abs(b.minutesFromStart));
 }
+
+export interface UpcomingOccurrence {
+  scheduleId: string;
+  classType: string;
+  instructor: string;
+  locationSlug: string;
+  startTime: string;
+  endTime: string;
+  /** Academy-local calendar date at UTC midnight (same convention as above). */
+  classDate: Date;
+  /** "YYYY-MM-DD" of the academy-local date. */
+  dateKey: string;
+}
+
+function ymd(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Scheduled occurrences that have not started yet, from "now" through the
+ * next `days` academy-local days, in start order. Dated occurrences (not
+ * weekday templates) are what students commit to and what reminders target.
+ */
+export function upcomingOccurrences(
+  slots: ScheduleSlot[],
+  now: Date,
+  timeZone: string,
+  days = 7,
+): UpcomingOccurrence[] {
+  const local = gymLocalNow(now, timeZone);
+  const out: Array<UpcomingOccurrence & { sortKey: number }> = [];
+  for (let delta = 0; delta < days; delta++) {
+    const dow = (local.dayOfWeek + delta) % 7;
+    for (const slot of slots) {
+      if (slot.dayOfWeek !== dow) continue;
+      const start = parseHHMM(slot.startTime);
+      if (start === null || parseHHMM(slot.endTime) === null) continue;
+      if (delta === 0 && start <= local.minutes) continue;
+      const classDate = localDateUtcMidnight(local, delta);
+      out.push({
+        scheduleId: slot.id,
+        classType: slot.classType,
+        instructor: slot.instructor,
+        locationSlug: slot.locationSlug,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        classDate,
+        dateKey: ymd(classDate),
+        sortKey: delta * 1440 + start,
+      });
+    }
+  }
+  return out
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map(({ sortKey: _sortKey, ...occ }) => occ);
+}
