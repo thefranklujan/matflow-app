@@ -193,9 +193,13 @@ export default function StudentProfilePage() {
                 </div>
               )}
             </div>
+            <p className="text-xs text-gray-400">
+              Personal rank, reported by you. Academies record their own verified rank, shown under{" "}
+              <a href="/student/academy" className="underline text-gray-300">My Academy</a>; neither changes the other.
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Belt</label>
+                <label className="block text-sm text-gray-400 mb-1">Personal belt</label>
                 <select aria-label="Belt"
                   value={profile.beltRank}
                   onChange={(e) => setProfile({ ...profile, beltRank: e.target.value })}

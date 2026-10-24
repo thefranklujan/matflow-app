@@ -26,22 +26,23 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Create belt progress record
-    const beltProgress = await prisma.beltProgress.create({
-      data: {
-        memberId: id,
-        beltRank,
-        stripes,
-        note: note || null,
-        awardedBy: "admin",
-        gymId,
-      },
-    });
-
-    // Update the member's current belt and stripes
-    await prisma.member.update({
-      where: { id },
-      data: { beltRank, stripes },
+    // Academy-verified rank lives on THIS membership and its history. The
+    // student's personal (self-reported) profile rank and other academies'
+    // memberships are deliberately untouched. History row + current rank are
+    // one transaction so they can never disagree.
+    const beltProgress = await prisma.$transaction(async (tx) => {
+      const row = await tx.beltProgress.create({
+        data: {
+          memberId: id,
+          beltRank,
+          stripes,
+          note: note || null,
+          awardedBy: "admin",
+          gymId,
+        },
+      });
+      await tx.member.update({ where: { id }, data: { beltRank, stripes } });
+      return row;
     });
 
     const gym = await prisma.gym.findUnique({ where: { id: gymId }, select: { name: true } });
@@ -57,7 +58,8 @@ export async function POST(
         stripes > 0
           ? `${beltRank.charAt(0).toUpperCase() + beltRank.slice(1)} belt, ${stripes} stripe${stripes === 1 ? "" : "s"}${gym?.name ? ` at ${gym.name}` : ""}.`
           : `${beltRank.charAt(0).toUpperCase() + beltRank.slice(1)} belt${gym?.name ? ` at ${gym.name}` : ""}.`,
-      url: "/student/profile",
+      // Lands on the academy view that shows the changed verified rank.
+      url: `/student/academy?gym=${encodeURIComponent(gymId)}#progress`,
       gymId,
     });
     logActivity({ gymId, action: "belt_promotion", actorName: "Admin", targetId: id, targetName: `${existing.firstName} ${existing.lastName}`, meta: { beltRank, stripes } });

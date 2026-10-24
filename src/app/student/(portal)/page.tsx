@@ -24,8 +24,10 @@ export default async function StudentDashboardPage() {
   const myHomeGym = studentRecord?.homeGym || null;
 
   const [memberships, requests, activeGyms, nominatedGroups] = await Promise.all([
+    // Only current memberships: a revoked or pending one must not keep
+    // surfacing that academy's private classes, videos or announcements.
     prisma.member.findMany({
-      where: { studentId },
+      where: { studentId, active: true, approved: true },
       include: { gym: { select: { id: true, name: true, slug: true, city: true, state: true, logo: true } } },
       orderBy: { createdAt: "desc" },
     }),
@@ -181,7 +183,7 @@ export default async function StudentDashboardPage() {
           include: { gym: { select: { name: true } } },
         }),
         prisma.video.findMany({
-          where: { gymId: { in: gymIds } },
+          where: { gymId: { in: gymIds }, published: true },
           orderBy: { createdAt: "desc" },
           take: 4,
           include: { gym: { select: { name: true } } },
@@ -298,8 +300,8 @@ export default async function StudentDashboardPage() {
                       {m.gym.city && <p className="text-gray-400 text-xs">{m.gym.city}{m.gym.state ? `, ${m.gym.state}` : ""}</p>}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 capitalize">{m.beltRank} belt {m.stripes > 0 && `(${m.stripes})`}</p>
-                  <p className="text-[#ef4444] text-xs font-medium mt-2 group-hover:underline">Open Gym &rarr;</p>
+                  <p className="text-xs text-gray-400 capitalize">{m.beltRank} belt {m.stripes > 0 && `(${m.stripes})`} · verified by academy</p>
+                  <p className="text-[#ef4444] text-xs font-medium mt-2 group-hover:underline">Open academy &rarr;</p>
                 </button>
               </form>
             ))}
