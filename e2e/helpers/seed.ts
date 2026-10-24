@@ -180,6 +180,12 @@ export async function seed() {
     },
   });
   await prisma.attendance.deleteMany({ where: { gymId: { in: gymIds } } });
+  // Readiness specs add promotions, class plans and a same-name community;
+  // clear them so every run starts from the same fixture state.
+  await prisma.beltProgress.deleteMany({ where: { gymId: { in: gymIds } } });
+  await prisma.scheduleCommitment.deleteMany({ where: { gymId: { in: gymIds } } });
+  await prisma.gymNomination.deleteMany({ where: { studentId: { in: [studentMember.id, studentSolo.id] } } });
+  await prisma.gymGroup.deleteMany({ where: { id: { in: ["e2e-trial-bjj"] } } });
   await prisma.classSchedule.deleteMany({ where: { gymId: { in: gymIds } } });
   await prisma.announcement.deleteMany({ where: { gymId: { in: gymIds } } });
   await prisma.waiverSignature.deleteMany({ where: { gymId: { in: gymIds } } });
