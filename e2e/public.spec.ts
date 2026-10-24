@@ -5,7 +5,7 @@ import { FIXTURE } from "./helpers/env";
 test.describe("public surface", () => {
   test("landing renders the owner/student split with no errors", async ({ page, health }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /start free trial/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /start 30-day trial/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /create student account/i }).first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
     expectCleanPage(health);
