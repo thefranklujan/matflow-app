@@ -20,9 +20,9 @@
  * No Stripe id, key, or account identifier is ever printed. Reports use the
  * aliases recorded in the git-ignored manifest.
  *
- * IMPORTANT: as of this commit the mutating paths below have NEVER been run —
- * the approved sandbox does not exist yet. Treat every result as unproven
- * until an actual run says otherwise.
+ * Results count only from an actual run's report
+ * (test-results-stripe/lifecycle-report.json); nothing here is evidence by
+ * itself.
  */
 
 import fs from "node:fs";
@@ -324,23 +324,85 @@ async function cmdProvisionCatalog(env) {
 }
 
 /**
- * Run the lifecycle.
+ * Run the 20-stage lifecycle (e2e-stripe/lifecycle.spec.ts) against the
+ * pinned sandbox.
  *
- * Not implemented as an unattended script on purpose. The lifecycle needs a
- * running local app, `stripe listen` forwarding, and browser interaction for
- * hosted Checkout and the Customer Portal — none of which can be assembled
- * safely without the sandbox existing first. Exiting non-zero here guarantees
- * a green run can never be mistaken for a completed lifecycle.
+ * Order of operations, each one fail-closed:
+ *   1. openSandbox(): live key refused (87), pinned fingerprint required (89).
+ *   2. The isolated Stripe CLI profile (STRIPE_CLI_CONFIG) must be logged in
+ *      to the SAME pinned sandbox, so `stripe listen` cannot forward events
+ *      from any other account (89 otherwise). The machine's default CLI
+ *      profile is never used.
+ *   3. `stripe listen --print-secret` supplies the signing secret, then
+ *      `stripe listen --forward-to` relays signed events to the local app.
+ *   4. Playwright boots the app with the sandbox env and runs the stages; the
+ *      alias-only report is written under test-results-stripe/.
  */
 async function cmdExecute(env) {
   await openSandbox(env);
-  console.error(
-    "\nGuards passed, but the mutating lifecycle stages are not implemented yet.\n" +
-      `They are blocked on the "${APPROVED_SANDBOX_NAME}" sandbox existing and being pinned.\n` +
-      "See MATFLOW-STRIPE-LAUNCH-GATE.md for the exact remaining steps.\n" +
-      "No stage may be reported as Verified until an actual run says so.",
+  const { spawn, execFileSync } = await import("node:child_process");
+
+  const cliConfig = env.STRIPE_CLI_CONFIG?.trim();
+  if (!cliConfig || !fs.existsSync(cliConfig)) {
+    console.error("STRIPE_CLI_CONFIG must point at the isolated Stripe CLI profile logged in to the sandbox.");
+    return EXIT_REFUSED;
+  }
+  const cliAccount = /account_id\s*=\s*'([^']+)'/.exec(fs.readFileSync(cliConfig, "utf8"))?.[1];
+  if (!cliAccount || fingerprintAccount(cliAccount) !== env.STRIPE_SANDBOX_FINGERPRINT?.trim()) {
+    console.error(`The Stripe CLI profile is not logged in to the pinned "${APPROVED_SANDBOX_NAME}" sandbox. Refusing.`);
+    return EXIT_SANDBOX_MISMATCH;
+  }
+  for (const k of ["STRIPE_BASIC_PRICE_ID", "STRIPE_PRO_PRICE_ID", "E2E_DATABASE_URL"]) {
+    if (!env[k] || isPlaceholder(env[k])) {
+      console.error(`${k} is not set. Run --provision-sandbox-catalog first.`);
+      return EXIT_REFUSED;
+    }
+  }
+
+  const port = env.STRIPE_LIFECYCLE_PORT || "4311";
+  const webhookSecret = execFileSync("stripe", ["listen", "--print-secret", "--config", cliConfig], { encoding: "utf8" }).trim();
+  if (!webhookSecret.startsWith("whsec_")) {
+    console.error("Could not obtain the stripe listen signing secret.");
+    return EXIT_REFUSED;
+  }
+
+  const listen = spawn(
+    "stripe",
+    ["listen", "--config", cliConfig, "--forward-to", `localhost:${port}/api/webhooks/stripe`],
+    { stdio: ["ignore", "pipe", "pipe"] },
   );
-  return EXIT_REFUSED;
+  const listenLog = fs.createWriteStream(path.join(REPO_ROOT, "test-results-stripe-listen.log"), { mode: 0o600 });
+  listen.stdout.pipe(listenLog);
+  listen.stderr.pipe(listenLog);
+  await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("stripe listen did not become ready")), 30_000);
+    listen.stderr.on("data", (d) => {
+      if (String(d).includes("Ready!")) {
+        clearTimeout(t);
+        resolve();
+      }
+    });
+    listen.on("exit", () => reject(new Error("stripe listen exited")));
+  });
+  console.log("  stripe listen is forwarding sandbox events to the local app.");
+
+  const code = await new Promise((resolve) => {
+    const pw = spawn("npx", ["playwright", "test", "-c", "playwright.stripe.config.ts"], {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        ...env,
+        STRIPE_WEBHOOK_SECRET: webhookSecret,
+        STRIPE_LIFECYCLE_PORT: port,
+        STRIPE_LIFECYCLE_REPORT: path.join(REPO_ROOT, "test-results-stripe", "lifecycle-report.json"),
+      },
+    });
+    pw.on("exit", (c) => resolve(c ?? 1));
+  });
+  listen.kill();
+  console.log("\n  Alias-only report: test-results-stripe/lifecycle-report.json");
+  return code === 0 ? EXIT_OK : EXIT_REFUSED;
 }
 
 /* ---------------------------------- main --------------------------------- */

@@ -71,3 +71,5 @@ app-store-screenshots/
 
 # Stripe test-mode object manifest (never committed)
 .stripe-test-objects.json
+/test-results-stripe/
+test-results-stripe-listen.log

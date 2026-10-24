@@ -30,7 +30,7 @@ test.describe("student academy view", () => {
   test("C3: Open academy reaches that academy's page and Back returns home", async ({ page }) => {
     const health = watchPage(page);
     await page.goto("/student");
-    await page.getByRole("button", { name: /E2E Basic BJJ.*Open academy/s }).filter({ visible: true }).click();
+    await page.getByRole("button", { name: /E2E Basic BJJ[\s\S]*Open academy/ }).filter({ visible: true }).click();
     await expect(page).toHaveURL(new RegExp(`/student/academy\\?gym=${ids().gyms.basic}`));
     await expect(page.getByRole("heading", { level: 1, name: "E2E Basic BJJ" }).filter({ visible: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Next classes/i }).filter({ visible: true })).toBeVisible();
