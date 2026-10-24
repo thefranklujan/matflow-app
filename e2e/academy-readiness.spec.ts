@@ -180,3 +180,25 @@ test.describe("owner export", () => {
     await ctx.close();
   });
 });
+
+test.describe("native student shell", () => {
+  test("C7: native app reaches the academy view but never owner billing or paid setup", async ({ browser }) => {
+    const ctx = await browser.newContext({
+      storageState: storageStatePath("student-member"),
+      userAgent: "Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 MatFlowNative",
+    });
+    const page = await ctx.newPage();
+    await page.goto(`/student/academy?gym=${ids().gyms.basic}`);
+    await expect(page.getByRole("heading", { level: 1, name: "E2E Basic BJJ" }).filter({ visible: true })).toBeVisible();
+    await expect(page.getByText(/\$49|\$99|Start 30-day trial/i)).toHaveCount(0);
+    for (const p of ["/app/billing", "/app/settings", "/api/admin/export"]) {
+      await page.goto(p);
+      if (p.startsWith("/api")) continue;
+      // Middleware sends native owner routes to /native-web-only, which in
+      // turn returns a signed-in student to the student portal.
+      await expect(page).toHaveURL(/\/(native-web-only|student)/);
+      await expect(page.getByText(/\$49|\$99|Start 30-day trial|Manage Subscription/i)).toHaveCount(0);
+    }
+    await ctx.close();
+  });
+});
