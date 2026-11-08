@@ -90,6 +90,7 @@ async function upsertMember(opts: {
   studentId?: string | null;
   createdAt?: Date;
   beltRank?: string;
+  isOwner?: boolean;
 }) {
   const { gymId, email, ...rest } = opts;
   return prisma.member.upsert({
@@ -117,13 +118,13 @@ export async function seed() {
   const locked = await upsertGym("locked");
   const gymIds = [trial.id, basic.id, pro.id, locked.id];
 
-  // ---- Owners (must be the FIRST member of each gym => role admin) ---------
+  // ---- Owners (isOwner => role admin; ownership is never derived from age) ---
   // A fixed old createdAt keeps them first even after re-seeding adds members.
   const OLD = new Date("2026-01-01T00:00:00.000Z");
-  const ownerTrial = await upsertMember({ gymId: trial.id, email: FIXTURE.emails.ownerTrial, firstName: "Tina", lastName: "Trial", passwordHash, createdAt: OLD, beltRank: "black" });
-  const ownerBasic = await upsertMember({ gymId: basic.id, email: FIXTURE.emails.ownerBasic, firstName: "Boris", lastName: "Basic", passwordHash, createdAt: OLD, beltRank: "black" });
-  const ownerPro = await upsertMember({ gymId: pro.id, email: FIXTURE.emails.ownerPro, firstName: "Paula", lastName: "Pro", passwordHash, createdAt: OLD, beltRank: "black" });
-  await upsertMember({ gymId: locked.id, email: FIXTURE.emails.ownerLocked, firstName: "Lena", lastName: "Locked", passwordHash, createdAt: OLD, beltRank: "black" });
+  const ownerTrial = await upsertMember({ gymId: trial.id, email: FIXTURE.emails.ownerTrial, firstName: "Tina", lastName: "Trial", passwordHash, createdAt: OLD, beltRank: "black", isOwner: true });
+  const ownerBasic = await upsertMember({ gymId: basic.id, email: FIXTURE.emails.ownerBasic, firstName: "Boris", lastName: "Basic", passwordHash, createdAt: OLD, beltRank: "black", isOwner: true });
+  const ownerPro = await upsertMember({ gymId: pro.id, email: FIXTURE.emails.ownerPro, firstName: "Paula", lastName: "Pro", passwordHash, createdAt: OLD, beltRank: "black", isOwner: true });
+  await upsertMember({ gymId: locked.id, email: FIXTURE.emails.ownerLocked, firstName: "Lena", lastName: "Locked", passwordHash, createdAt: OLD, beltRank: "black", isOwner: true });
 
   // ---- Students -------------------------------------------------------------
   const studentMember = await prisma.student.upsert({

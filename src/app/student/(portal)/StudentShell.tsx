@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy, Timer, Bell } from "lucide-react";
+import { Home, Search, Inbox, User, ChevronLeft, ChevronRight, LogOut, ClipboardList, Megaphone, Users, CalendarDays, MoreHorizontal, X, Trophy, Timer, Bell, FileSignature } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ShareMatFlow from "@/components/student/ShareMatFlow";
 import QuickLogFAB from "@/components/student/QuickLogFAB";
@@ -20,6 +20,7 @@ const NAV = [
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
   { href: "/student/nominate", label: "Nominate Gym", icon: Megaphone },
   { href: "/student/requests", label: "My Requests", icon: Inbox },
+  { href: "/student/waiver", label: "Waiver", icon: FileSignature },
 ];
 
 // Mobile bottom tab bar: only 4 primary items. Everything else goes into "More".
@@ -36,6 +37,7 @@ const MOBILE_MORE = [
   { href: "/student/gyms", label: "Find Gyms", icon: Search },
   { href: "/student/nominate", label: "Nominate Gym", icon: Megaphone },
   { href: "/student/requests", label: "My Requests", icon: Inbox },
+  { href: "/student/waiver", label: "Waiver", icon: FileSignature },
   { href: "/student/profile", label: "Profile", icon: User },
 ];
 

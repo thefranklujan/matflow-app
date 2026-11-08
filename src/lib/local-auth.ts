@@ -9,7 +9,7 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { lockMemberCapacity, assertSeatAvailable } from "@/lib/member-capacity";
-import { isGymOwner } from "@/lib/gym-owner";
+import { isGymOwner, hasOwnerMarker } from "@/lib/gym-owner";
 
 const COOKIE_NAME = "matflow-session";
 
@@ -124,6 +124,7 @@ export async function registerGymOwner(data: {
         data: {
           gymId: gym.id,
           clerkUserId: `owner-${randomUUID()}`,
+          isOwner: true,
           email: emailLower,
           phone: data.phone || null,
           firstName: data.firstName,
@@ -443,35 +444,48 @@ export async function authenticateUser(
   email: string,
   password: string
 ): Promise<SessionUser | null> {
-  // Try Student first (direct sign-ups go here)
-  const studentSession = await authenticateStudent(email, password);
-  if (studentSession) return studentSession;
-
-  // Find member by email (could be in any gym). Case-insensitive — older
-  // records were stored with whatever case the user typed at signup, and the
-  // login form may pass either. authenticateStudent already lowercases.
-  // Member.email is unique only per gym, so one address can match several
-  // rows. Try every row in a fixed order (platform admin first, then oldest)
-  // and sign in to the first whose password matches: a stray row with the
-  // same email (for example one created through the old join-link takeover)
-  // can neither win the lookup nor lock the real owner out.
+  // One address can belong to several identities: a Student, and Member rows
+  // in several gyms (Member.email is unique only per gym). The order is fixed
+  // so a stray identity with the same address can neither win nor lock the
+  // real holder out (audit M6, Codex round 1 finding 3):
+  //   1. privileged Member rows (platform admin, then gym owner), oldest first;
+  //   2. the Student identity;
+  //   3. every other Member row, oldest first.
+  // The first identity whose password matches signs in. Password recovery
+  // (forgot/reset-password) updates every identity with the address, so the
+  // two paths agree.
   const emailLower = email.trim().toLowerCase();
   const candidates = await prisma.member.findMany({
     where: { email: { equals: emailLower, mode: "insensitive" }, passwordHash: { not: null } },
     orderBy: [{ isPlatformAdmin: "desc" }, { createdAt: "asc" }],
     take: 20,
   });
+  const privileged = candidates.filter((c) => c.isPlatformAdmin || c.isOwner || hasOwnerMarker(c.clerkUserId));
+  const others = candidates.filter((c) => !privileged.includes(c));
+
+  const matches = async (c: (typeof candidates)[number]) =>
+    !!c.passwordHash && (await bcrypt.compare(password, c.passwordHash));
 
   let member: (typeof candidates)[number] | null = null;
-  for (const c of candidates) {
-    if (c.passwordHash && (await bcrypt.compare(password, c.passwordHash))) {
+  for (const c of privileged) {
+    if (await matches(c)) {
       member = c;
       break;
     }
   }
+  if (!member) {
+    const studentSession = await authenticateStudent(email, password);
+    if (studentSession) return studentSession;
+    for (const c of others) {
+      if (await matches(c)) {
+        member = c;
+        break;
+      }
+    }
+  }
   if (!member) return null;
 
-  // Role: the gym's owner (registration marker, not row age) is admin.
+  // Role: the gym's owner (marker or explicit flag, never row age) is admin.
   const isAdmin = await isGymOwner(member);
 
   return {

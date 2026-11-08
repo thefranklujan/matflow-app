@@ -79,7 +79,9 @@ export function middleware(request: NextRequest) {
   // The legacy /members portal read across every academy (audit H1). It is
   // deleted; old links and bookmarks land in the student app.
   if (matchesPrefix(pathname, ["/members"])) {
-    return NextResponse.redirect(new URL("/student", request.url));
+    // Waiver links from old notifications land on the student waiver page.
+    const target = matchesPrefix(pathname, ["/members/waiver"]) ? "/student/waiver" : "/student";
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   if (matchesPrefix(pathname, WEB_COMMERCE_PREFIXES)) {

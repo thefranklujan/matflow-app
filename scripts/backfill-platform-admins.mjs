@@ -14,6 +14,8 @@
  * typed into a transcript):
  *   node scripts/backfill-platform-admins.mjs                        # dry run: report only
  *   node scripts/backfill-platform-admins.mjs --apply --ids=<id,id>  # flag exactly these rows
+ *   node scripts/backfill-platform-admins.mjs --apply --owner-ids=<id,id>  # mark legacy owners
+ * (--ids and --owner-ids may be combined in one --apply run.)
  *
  * --apply never flags by email. It writes only the Member ids passed in --ids,
  * and only when each one is a candidate in this run's report (a listed address,
@@ -29,8 +31,10 @@
  *     admin address may have been created by an attacker through C3;
  *   - any Student row with the same email. Under C1 anyone could register one;
  *     a Student row also makes login land in /student instead of /platform.
- * It also counts gyms with no owner-marked member (they use the legacy owner
- * fallback in src/lib/gym-owner.ts).
+ * It also lists every gym with NO owner (no "owner-"/"demo-owner-" marker and
+ * no Member.isOwner). Ownership is never derived from row age, so such a gym
+ * has no admin after the deploy until --owner-ids names its owner from this
+ * report (Codex round 1, finding 1). Candidates exclude self-join rows.
  *
  * Writes nothing without --apply. Never prints password hashes.
  */
@@ -39,7 +43,15 @@ import { PrismaClient } from "@prisma/client";
 const APPLY = process.argv.includes("--apply");
 const idsArg = process.argv.find((a) => a.startsWith("--ids="));
 const IDS = idsArg ? idsArg.slice("--ids=".length).split(",").map((s) => s.trim()).filter(Boolean) : [];
+const ownerArg = process.argv.find((a) => a.startsWith("--owner-ids="));
+const OWNER_IDS = ownerArg ? ownerArg.slice("--owner-ids=".length).split(",").map((s) => s.trim()).filter(Boolean) : [];
 const SELF_JOIN = ["member-", "student-", "dropin-"];
+
+/** Customer emails are masked: this report is read in agent transcripts. */
+function mask(email) {
+  const [local, domain] = String(email).split("@");
+  return `${(local || "").slice(0, 2)}***@${domain || "?"}`;
+}
 
 function fail(msg) {
   console.error(`backfill-platform-admins: ${msg}`);
@@ -50,7 +62,9 @@ const url = process.env.DATABASE_URL;
 if (!url) fail("DATABASE_URL is not set");
 const raw = process.env.PLATFORM_ADMIN_EMAILS;
 if (!raw || !raw.trim()) fail("PLATFORM_ADMIN_EMAILS is not set (no fallback list on purpose)");
-if (APPLY && IDS.length === 0) fail("--apply needs --ids=<memberId,...> chosen from a dry run; it never flags by email");
+if (APPLY && IDS.length === 0 && OWNER_IDS.length === 0) {
+  fail("--apply needs --ids=<memberId,...> and/or --owner-ids=<memberId,...> chosen from a dry run; it never flags by email or age");
+}
 
 let target;
 try {
@@ -94,25 +108,51 @@ async function main() {
     }
   }
 
-  const gyms = await prisma.gym.findMany({ select: { id: true } });
-  let unmarked = 0;
+  const gyms = await prisma.gym.findMany({ select: { id: true, name: true, createdAt: true } });
+  const ownerCandidates = [];
+  const ownerless = [];
   for (const g of gyms) {
-    const marked = await prisma.member.count({
-      where: { gymId: g.id, OR: [{ clerkUserId: { startsWith: "owner-" } }, { clerkUserId: { startsWith: "demo-owner-" } }] },
+    const owned = await prisma.member.count({
+      where: {
+        gymId: g.id,
+        OR: [{ isOwner: true }, { clerkUserId: { startsWith: "owner-" } }, { clerkUserId: { startsWith: "demo-owner-" } }],
+      },
     });
-    if (marked === 0) unmarked++;
+    if (owned > 0) continue;
+    ownerless.push(g);
+    const rows = await prisma.member.findMany({
+      where: { gymId: g.id, NOT: SELF_JOIN.map((p) => ({ clerkUserId: { startsWith: p } })) },
+      select: { id: true, email: true, clerkUserId: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    });
+    console.log(`\nGym WITHOUT an owner: "${g.name}" (${g.id}, created ${g.createdAt.toISOString()})`);
+    if (rows.length === 0) console.log("  no non-self-join rows: nobody can be named owner from this data");
+    for (const r of rows) {
+      console.log(`  candidate ${r.id}  ${mask(r.email)}  ${r.clerkUserId.slice(0, 8)}…  row created ${r.createdAt.toISOString()}`);
+      ownerCandidates.push(r.id);
+    }
   }
-  console.log(`\nGyms without an owner-marked member (legacy owner fallback): ${unmarked} of ${gyms.length}`);
+  console.log(`\nGyms without an owner: ${ownerless.length} of ${gyms.length}. They have no admin after the deploy until --owner-ids names one.`);
 
   if (!APPLY) {
-    console.log(`\nDry run: ${toFlag.length} candidate row(s): ${toFlag.join(",") || "none"}`);
+    console.log(`\nDry run: ${toFlag.length} platform-admin candidate row(s): ${toFlag.join(",") || "none"}`);
     console.log("Confirm each gym above is Frank's, then: --apply --ids=<the confirmed ids>");
+    console.log("For each ownerless gym, confirm its owner, then: --apply --owner-ids=<one id per gym>");
     return;
   }
   const notCandidates = IDS.filter((id) => !toFlag.includes(id));
-  if (notCandidates.length) fail(`refusing: not candidates in this run: ${notCandidates.join(",")}`);
-  const res = await prisma.member.updateMany({ where: { id: { in: IDS } }, data: { isPlatformAdmin: true } });
-  console.log(`\nFlagged ${res.count} Member row(s).`);
+  if (notCandidates.length) fail(`refusing: not platform-admin candidates in this run: ${notCandidates.join(",")}`);
+  const notOwnerCandidates = OWNER_IDS.filter((id) => !ownerCandidates.includes(id));
+  if (notOwnerCandidates.length) fail(`refusing: not owner candidates in this run: ${notOwnerCandidates.join(",")}`);
+  if (IDS.length) {
+    const res = await prisma.member.updateMany({ where: { id: { in: IDS } }, data: { isPlatformAdmin: true } });
+    console.log(`\nFlagged ${res.count} Member row(s) as platform admin.`);
+  }
+  if (OWNER_IDS.length) {
+    const res = await prisma.member.updateMany({ where: { id: { in: OWNER_IDS } }, data: { isOwner: true } });
+    console.log(`Marked ${res.count} Member row(s) as academy owner.`);
+  }
 }
 
 main()

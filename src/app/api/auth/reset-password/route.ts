@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { MIN_PASSWORD } from "@/lib/owner-registration";
+import { identitiesForEmail, identitiesFingerprint } from "@/lib/password-recovery";
 
 /**
  * Verifies a reset token and updates the account password. The token is
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     let payload: {
       sub?: string;
-      kind?: "student" | "member";
+      kind?: "student" | "member" | "email";
       hp?: string;
       purpose?: string;
     };
@@ -46,6 +47,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
+    // Current links: reset every identity that uses the address.
+    if (payload.kind === "email") {
+      const ids = await identitiesForEmail(payload.sub);
+      if (identitiesFingerprint(ids) !== payload.hp) {
+        return NextResponse.json(
+          { error: "This reset link has already been used" },
+          { status: 401 }
+        );
+      }
+      const newHash = await bcrypt.hash(password, 10);
+      const memberIds = ids.members.filter((m) => m.passwordHash).map((m) => m.id);
+      await prisma.$transaction([
+        ...(ids.student
+          ? [
+              prisma.student.update({ where: { id: ids.student.id }, data: { passwordHash: newHash } }),
+              prisma.member.updateMany({ where: { studentId: ids.student.id }, data: { passwordHash: newHash } }),
+            ]
+          : []),
+        prisma.member.updateMany({ where: { id: { in: memberIds } }, data: { passwordHash: newHash } }),
+      ]);
+      return NextResponse.json({ success: true });
+    }
+
+    // Links issued before the Phase 0 hotfix (one identity each).
     if (payload.kind === "student") {
       const student = await prisma.student.findUnique({
         where: { id: payload.sub },

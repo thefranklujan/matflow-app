@@ -2,9 +2,9 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
-import { prisma } from "@/lib/prisma";
 import { sendPasswordReset } from "@/lib/email";
 import { JWT_SECRET } from "@/lib/jwt-secret";
+import { identitiesForEmail, hasPasswordIdentity, identitiesFingerprint, recoveryName } from "@/lib/password-recovery";
 
 /**
  * Email-based password reset. Issues a 1-hour signed token that encodes the
@@ -22,48 +22,17 @@ export async function POST(request: NextRequest) {
     }
 
     const emailLower = email.trim().toLowerCase();
-    console.log("[forgot-password] request for", emailLower);
 
-    // Look up both sides: a Student account or a (gym-owner) Member account.
-    // Case-insensitive — older records were stored with whatever case the user
-    // typed at signup, so a strict equals on the lowercased value would miss them.
-    const [student, member] = await Promise.all([
-      prisma.student.findFirst({
-        where: { email: { equals: emailLower, mode: "insensitive" } },
-        select: { id: true, firstName: true, email: true, passwordHash: true },
-      }),
-      prisma.member.findFirst({
-        where: { email: { equals: emailLower, mode: "insensitive" } },
-        select: { id: true, firstName: true, email: true, passwordHash: true },
-      }),
-    ]);
+    // Every identity using the address (Student and Member rows in any gym).
+    // The link resets all of them, so recovery and login agree (see
+    // src/lib/password-recovery.ts). No PII is logged.
+    const ids = await identitiesForEmail(emailLower);
 
-    console.log("[forgot-password] found", {
-      email: emailLower,
-      studentFound: !!student,
-      memberFound: !!member,
-      studentHasHash: !!student?.passwordHash,
-      memberHasHash: !!member?.passwordHash,
-    });
-
-    // Prefer Student (direct signup path). Fall back to Member (gym owner).
-    const target =
-      student
-        ? { kind: "student" as const, id: student.id, name: student.firstName, email: student.email, passwordHash: student.passwordHash }
-        : member?.passwordHash
-        ? { kind: "member" as const, id: member.id, name: member.firstName, email: member.email, passwordHash: member.passwordHash }
-        : null;
-
-    if (!target || !target.passwordHash) {
-      console.log("[forgot-password] no target found, returning success anyway");
-    }
-
-    if (target && target.passwordHash) {
-      console.log("[forgot-password] sending reset email to", target.email, "kind=", target.kind);
+    if (hasPasswordIdentity(ids)) {
       const token = await new SignJWT({
-        sub: target.id,
-        kind: target.kind,
-        hp: target.passwordHash.slice(0, 20), // hash prefix — invalidates when password changes
+        sub: emailLower,
+        kind: "email",
+        hp: identitiesFingerprint(ids), // invalidates when any password for the address changes
         purpose: "password-reset",
       })
         .setProtectedHeader({ alg: "HS256" })
@@ -80,7 +49,7 @@ export async function POST(request: NextRequest) {
       // function before the Resend HTTP request finishes, so the email never
       // actually leaves. send() already swallows its own errors so this won't
       // throw and reveal whether the email existed.
-      await sendPasswordReset(target.email, target.name, resetUrl);
+      await sendPasswordReset(emailLower, recoveryName(ids), resetUrl);
     }
 
     // Constant-time-ish response — don't leak whether the email exists

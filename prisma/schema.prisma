@@ -176,6 +176,9 @@ model Member {
   /// Platform (MatFlow staff) access. Granted only by a server-side write
   /// (scripts/backfill-platform-admins.mjs); never derived from an email.
   isPlatformAdmin     Boolean              @default(false)
+  /// The academy owner. Set at registration and, for rows that predate the
+  /// "owner-" clerkUserId marker, only by the reviewed backfill. Never by age.
+  isOwner             Boolean              @default(false)
   checkinCode         String?
   locationSlug        String?
   createdAt           DateTime             @default(now())

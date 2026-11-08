@@ -15,3 +15,9 @@
 -- Then run: node scripts/backfill-platform-admins.mjs  (dry run first, then --apply --ids=...)
 
 ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "isPlatformAdmin" BOOLEAN NOT NULL DEFAULT false;
+
+-- Owner identity (Codex round 1, finding 1): the owner is the row with the
+-- "owner-" registration marker or this flag, never the oldest row. Legacy
+-- gyms without a marked row get the flag from the reviewed backfill
+-- (--owner-ids); until then they have no admin (fail closed).
+ALTER TABLE "Member" ADD COLUMN IF NOT EXISTS "isOwner" BOOLEAN NOT NULL DEFAULT false;

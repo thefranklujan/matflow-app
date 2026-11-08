@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
-import { isGymOwner } from "@/lib/gym-owner";
+import { isGymOwner, OWNER_WHERE } from "@/lib/gym-owner";
 
 /**
  * In-app account deletion, required by Apple App Store Guideline 5.1.1(v).
@@ -47,6 +47,21 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+    }
+  }
+
+  // A student identity linked to an owner row would delete that owner row in
+  // the deleteMany below, so it gets the same refusal.
+  if (session.studentId) {
+    const ownedGym = await prisma.member.findFirst({
+      where: { studentId: session.studentId, ...OWNER_WHERE },
+      select: { gym: { select: { name: true } } },
+    });
+    if (ownedGym) {
+      return NextResponse.json(
+        { error: `You own ${ownedGym.gym.name}. Please contact support@mymatflow.com to transfer ownership or close the gym first.` },
+        { status: 400 }
+      );
     }
   }
 
