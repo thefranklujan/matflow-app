@@ -36,6 +36,12 @@
  * has no admin after the deploy until --owner-ids names its owner from this
  * report (Codex round 1, finding 1). Candidates exclude self-join rows.
  *
+ * It lists every address shared by a Student and a privileged Member row
+ * (owner or platform admin) that is not that Student's own membership. Login
+ * refuses such addresses as ambiguous after the deploy (Codex round 2,
+ * finding 2), so each one is reconciled by hand before release: delete the
+ * impostor identity, or ask the person which account is theirs.
+ *
  * Writes nothing without --apply. Never prints password hashes.
  */
 import { PrismaClient } from "@prisma/client";
@@ -134,6 +140,23 @@ async function main() {
     }
   }
   console.log(`\nGyms without an owner: ${ownerless.length} of ${gyms.length}. They have no admin after the deploy until --owner-ids names one.`);
+
+  const privileged = await prisma.member.findMany({
+    where: { OR: [{ isOwner: true }, { isPlatformAdmin: true }, { clerkUserId: { startsWith: "owner-" } }, { clerkUserId: { startsWith: "demo-owner-" } }] },
+    select: { id: true, gymId: true, email: true, studentId: true },
+  });
+  let collisions = 0;
+  for (const m of privileged) {
+    const s = await prisma.student.findFirst({
+      where: { email: { equals: m.email, mode: "insensitive" } },
+      select: { id: true, createdAt: true },
+    });
+    if (s && s.id !== m.studentId) {
+      collisions++;
+      console.log(`  COLLISION ${mask(m.email)}: privileged member ${m.id} (gym ${m.gymId}) and unrelated Student ${s.id} (created ${s.createdAt.toISOString()})`);
+    }
+  }
+  console.log(`Addresses shared by a privileged Member and an unrelated Student: ${collisions}. Login refuses them as ambiguous until reconciled by hand.`);
 
   if (!APPLY) {
     console.log(`\nDry run: ${toFlag.length} platform-admin candidate row(s): ${toFlag.join(",") || "none"}`);

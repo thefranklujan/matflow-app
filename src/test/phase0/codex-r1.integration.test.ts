@@ -118,8 +118,25 @@ describe.skipIf(!dbConfigured)("Codex round 1, finding 3: recovery and login agr
     const shadow = await db().student.findUnique({ where: { email: owner.email } });
     expect(await bcrypt.compare("attacker-password", shadow!.passwordHash)).toBe(false);
 
-    await login(req("/api/auth/login", { body: { email: owner.email, password: "Owner-New-Passw0rd" } }));
+    // Both identities now share the password, and they are unrelated: login
+    // prefers neither (Codex round 2, finding 2) and sends the holder to support.
+    const res2 = await login(req("/api/auth/login", { body: { email: owner.email, password: "Owner-New-Passw0rd" } }));
+    expect(res2.status).toBe(409);
+    expect((await res2.json()).code).toBe("AMBIGUOUS_IDENTITY");
+    expect(sessionClaims()).toBeNull();
+  });
+
+  it("without a reset, the owner's own password still opens only the owner identity", async () => {
+    const gym = await makeGym();
+    const owner = await makeOwner(gym.id);
+    await db().student.create({ data: { email: owner.email, firstName: "Sha", lastName: "Dow", passwordHash: await bcrypt.hash("attacker-password", 4) } });
+    await login(req("/api/auth/login", { body: { email: owner.email, password: PASSWORD } }));
     expect(sessionClaims()).toMatchObject({ memberId: owner.id, role: "admin", userType: "member" });
+    jar.clear();
+    // And the shadow's password opens only the shadow, never the owner.
+    await login(req("/api/auth/login", { body: { email: owner.email, password: "attacker-password" } }));
+    expect(sessionClaims()).toMatchObject({ userType: "student" });
+    expect(sessionClaims()?.memberId).not.toBe(owner.id);
   });
 
   it("a password-less Member row does not suppress recovery for the owner row", async () => {

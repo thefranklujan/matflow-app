@@ -9,8 +9,13 @@
  *
  * The token carries a fingerprint of every current password hash for the
  * address: any password change for any of them invalidates outstanding links.
+ * reset-password re-reads and compares the fingerprint and writes the new
+ * hashes in ONE transaction under the per-address identity lock, so two
+ * concurrent uses of the same link cannot both succeed (Codex round 2,
+ * finding 3).
  */
 import { createHash } from "crypto";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hasOwnerMarker } from "@/lib/gym-owner";
 
@@ -19,14 +24,17 @@ export interface EmailIdentities {
   members: { id: string; firstName: string; email: string; passwordHash: string | null; isPlatformAdmin: boolean; isOwner: boolean; clerkUserId: string }[];
 }
 
-export async function identitiesForEmail(emailLower: string): Promise<EmailIdentities> {
+export async function identitiesForEmail(
+  emailLower: string,
+  client: PrismaClient | Prisma.TransactionClient = prisma,
+): Promise<EmailIdentities> {
   const insensitive = { equals: emailLower, mode: "insensitive" as const };
   const [student, members] = await Promise.all([
-    prisma.student.findFirst({
+    client.student.findFirst({
       where: { email: insensitive },
       select: { id: true, firstName: true, email: true, passwordHash: true },
     }),
-    prisma.member.findMany({
+    client.member.findMany({
       where: { email: insensitive },
       select: { id: true, firstName: true, email: true, passwordHash: true, isPlatformAdmin: true, isOwner: true, clerkUserId: true },
       orderBy: { createdAt: "asc" },

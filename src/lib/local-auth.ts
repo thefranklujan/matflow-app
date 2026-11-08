@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { lockMemberCapacity, assertSeatAvailable } from "@/lib/member-capacity";
 import { isGymOwner, hasOwnerMarker } from "@/lib/gym-owner";
+import { lockIdentityEmail, emailInUse } from "@/lib/identity-lock";
 
 const COOKIE_NAME = "matflow-session";
 
@@ -103,6 +104,14 @@ export async function registerGymOwner(data: {
   let result: { gym: { id: string; name: string; slug: string }; member: { id: string } };
   try {
     result = await prisma.$transaction(async (tx) => {
+      // The address must be new to BOTH tables, checked under the per-address
+      // lock: an owner registration on an existing Student's address would
+      // create a second, unrelated identity for it (Codex round 2, finding 2).
+      await lockIdentityEmail(tx, emailLower);
+      if (await emailInUse(tx, emailLower)) {
+        throw new DuplicateRegistrationError("email", "An account with this email already exists");
+      }
+
       const gym = await tx.gym.create({
         data: {
           // Legacy compatibility column. randomUUID is collision-safe; Date.now()
@@ -270,6 +279,10 @@ export async function registerMember(data: {
   // gym leaves no orphan Student behind.
   try {
     return await prisma.$transaction(async (tx) => {
+      // Identity lock first (then capacity): the existence check above is
+      // advisory, this one is authoritative.
+      await lockIdentityEmail(tx, emailLower);
+      if (await emailInUse(tx, emailLower)) throw new ExistingAccountError();
       await lockMemberCapacity(tx, gym.id);
       await assertSeatAvailable(tx, gym.id);
 
@@ -338,15 +351,23 @@ export async function joinGymAsStudent(
   const member = await prisma.$transaction(async (tx) => {
     await lockMemberCapacity(tx, gym.id);
 
-    const existing = await tx.member.findFirst({
-      where: { gymId: gym.id, studentId },
-    });
-    if (existing && existing.active && existing.approved) {
-      return existing;
+    // Match this student's membership OR any row at this gym with the same
+    // address: an owner's deactivation must survive the student leaving and
+    // rejoining under a fresh link (Codex round 2, finding 1).
+    const own = await tx.member.findFirst({ where: { gymId: gym.id, studentId } });
+    if (own && own.active && own.approved) {
+      return own;
     }
+    const sameAddress = own
+      ? null
+      : await tx.member.findFirst({
+          where: { gymId: gym.id, email: { equals: student.email, mode: "insensitive" } },
+          select: { id: true },
+        });
     // A membership the owner deactivated or un-approved stays that way: only
-    // the owner can change it (PUT /api/admin/members/[id]).
-    if (existing) {
+    // the owner can change it (PUT /api/admin/members/[id]). The same goes for
+    // any other row at this academy on the student's address.
+    if (own || sameAddress) {
       throw new Error("Your membership at this academy is inactive. Contact the academy to reactivate it.");
     }
 
@@ -393,14 +414,21 @@ export async function registerStudent(data: {
   if (existing || existingMember) throw new Error("An account with this email already exists");
 
   const passwordHash = await bcrypt.hash(data.password, 10);
-  const student = await prisma.student.create({
-    data: {
-      email: emailLower,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone || null,
-      passwordHash,
-    },
+  const student = await prisma.$transaction(async (tx) => {
+    await lockIdentityEmail(tx, emailLower);
+    if (await emailInUse(tx, emailLower)) throw new Error("An account with this email already exists");
+    return tx.student.create({
+      data: {
+        email: emailLower,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone || null,
+        passwordHash,
+      },
+    });
+  }).catch((err) => {
+    if ((err as { code?: string })?.code === "P2002") throw new Error("An account with this email already exists");
+    throw err;
   });
 
   return { id: student.id, email: student.email, firstName: student.firstName, lastName: student.lastName };
@@ -440,6 +468,14 @@ export async function authenticateStudent(
 
 // ── Login handler ─────────────────────────────────────
 
+/** One password opens two unrelated identities for the same address. */
+export class AmbiguousIdentityError extends Error {
+  constructor() {
+    super("This email is used by more than one account. Contact support@mymatflow.com to sign in.");
+    this.name = "AmbiguousIdentityError";
+  }
+}
+
 export async function authenticateUser(
   email: string,
   password: string
@@ -451,6 +487,8 @@ export async function authenticateUser(
   //   1. privileged Member rows (platform admin, then gym owner), oldest first;
   //   2. the Student identity;
   //   3. every other Member row, oldest first.
+  // If 1 and 2 both match and the Member row is not linked to that Student,
+  // the login is refused as ambiguous (AmbiguousIdentityError).
   // The first identity whose password matches signs in. Password recovery
   // (forgot/reset-password) updates every identity with the address, so the
   // two paths agree.
@@ -473,8 +511,16 @@ export async function authenticateUser(
       break;
     }
   }
+  const studentSession = await authenticateStudent(email, password);
+  // The same password opens a Student AND a privileged Member row that is not
+  // that Student's own membership: two unrelated identities share the address
+  // (created before the Phase 0 identity lock). Neither is preferred
+  // automatically, because either one may be the impostor; support reconciles
+  // it (Codex round 2, finding 2). The pre-deploy backfill report lists these.
+  if (member && studentSession && member.studentId !== studentSession.studentId) {
+    throw new AmbiguousIdentityError();
+  }
   if (!member) {
-    const studentSession = await authenticateStudent(email, password);
     if (studentSession) return studentSession;
     for (const c of others) {
       if (await matches(c)) {

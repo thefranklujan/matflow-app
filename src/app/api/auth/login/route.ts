@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateUser, createSession } from "@/lib/local-auth";
+import { authenticateUser, createSession, AmbiguousIdentityError } from "@/lib/local-auth";
 import { isPlatformAdminSession } from "@/lib/platform-admin";
 
 export async function POST(request: NextRequest) {
@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
       isStudent: user.userType === "student",
     });
   } catch (error) {
+    if (error instanceof AmbiguousIdentityError) {
+      return NextResponse.json({ error: error.message, code: "AMBIGUOUS_IDENTITY" }, { status: 409 });
+    }
     console.error("Login error:", error);
     return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }

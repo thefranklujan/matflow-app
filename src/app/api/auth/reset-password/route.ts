@@ -7,11 +7,13 @@ import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { MIN_PASSWORD } from "@/lib/owner-registration";
 import { identitiesForEmail, identitiesFingerprint } from "@/lib/password-recovery";
+import { lockIdentityEmail } from "@/lib/identity-lock";
 
 /**
- * Verifies a reset token and updates the account password. The token is
- * single-use by virtue of embedding a prefix of the current passwordHash —
- * once the hash changes, the embedded prefix no longer matches.
+ * Verifies an address-wide reset token and sets the new password on every
+ * identity using the address. Single use: the token carries a fingerprint of
+ * all current hashes, re-checked and consumed atomically under the
+ * per-address identity lock (see src/lib/password-recovery.ts).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -27,12 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let payload: {
-      sub?: string;
-      kind?: "student" | "member" | "email";
-      hp?: string;
-      purpose?: string;
-    };
+    let payload: { sub?: string; kind?: string; hp?: string; purpose?: string };
     try {
       const verified = await jwtVerify(token, JWT_SECRET);
       payload = verified.payload as typeof payload;
@@ -43,75 +40,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (payload.purpose !== "password-reset" || !payload.sub || !payload.kind || !payload.hp) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    // Only address-wide links (src/lib/password-recovery.ts). Single-identity
+    // links issued before the Phase 0 hotfix are refused; the user requests a
+    // new one (they expired within an hour anyway).
+    if (payload.purpose !== "password-reset" || payload.kind !== "email" || !payload.sub || !payload.hp) {
+      return NextResponse.json({ error: "Reset link is invalid or expired" }, { status: 401 });
     }
+    const emailLower = payload.sub;
+    const expected = payload.hp;
 
-    // Current links: reset every identity that uses the address.
-    if (payload.kind === "email") {
-      const ids = await identitiesForEmail(payload.sub);
-      if (identitiesFingerprint(ids) !== payload.hp) {
-        return NextResponse.json(
-          { error: "This reset link has already been used" },
-          { status: 401 }
-        );
-      }
-      const newHash = await bcrypt.hash(password, 10);
-      const memberIds = ids.members.filter((m) => m.passwordHash).map((m) => m.id);
-      await prisma.$transaction([
-        ...(ids.student
-          ? [
-              prisma.student.update({ where: { id: ids.student.id }, data: { passwordHash: newHash } }),
-              prisma.member.updateMany({ where: { studentId: ids.student.id }, data: { passwordHash: newHash } }),
-            ]
-          : []),
-        prisma.member.updateMany({ where: { id: { in: memberIds } }, data: { passwordHash: newHash } }),
-      ]);
-      return NextResponse.json({ success: true });
-    }
-
-    // Links issued before the Phase 0 hotfix (one identity each).
-    if (payload.kind === "student") {
-      const student = await prisma.student.findUnique({
-        where: { id: payload.sub },
-        select: { id: true, passwordHash: true },
-      });
-      if (!student || student.passwordHash.slice(0, 20) !== payload.hp) {
-        return NextResponse.json(
-          { error: "This reset link has already been used" },
-          { status: 401 }
-        );
-      }
-      const newHash = await bcrypt.hash(password, 10);
-      await prisma.student.update({
-        where: { id: student.id },
-        data: { passwordHash: newHash },
-      });
-      // Also refresh any Member rows pointing at this student so sign-in via
-      // gym-member path keeps working.
-      await prisma.member.updateMany({
-        where: { studentId: student.id },
-        data: { passwordHash: newHash },
-      });
-      return NextResponse.json({ success: true });
-    }
-
-    // member (gym owner / staff)
-    const member = await prisma.member.findUnique({
-      where: { id: payload.sub },
-      select: { id: true, passwordHash: true },
-    });
-    if (!member?.passwordHash || member.passwordHash.slice(0, 20) !== payload.hp) {
-      return NextResponse.json(
-        { error: "This reset link has already been used" },
-        { status: 401 }
-      );
-    }
+    // Hash outside the transaction (slow); verify and write inside it, under
+    // the per-address lock, so the link is consumed exactly once.
     const newHash = await bcrypt.hash(password, 10);
-    await prisma.member.update({
-      where: { id: member.id },
-      data: { passwordHash: newHash },
+    const consumed = await prisma.$transaction(async (tx) => {
+      await lockIdentityEmail(tx, emailLower);
+      const ids = await identitiesForEmail(emailLower, tx);
+      if (identitiesFingerprint(ids) !== expected) return false;
+      if (ids.student) {
+        await tx.student.update({ where: { id: ids.student.id }, data: { passwordHash: newHash } });
+        // Member rows linked to the student mirror its password (join path).
+        await tx.member.updateMany({ where: { studentId: ids.student.id }, data: { passwordHash: newHash } });
+      }
+      const memberIds = ids.members.filter((m) => m.passwordHash).map((m) => m.id);
+      if (memberIds.length) {
+        await tx.member.updateMany({ where: { id: { in: memberIds } }, data: { passwordHash: newHash } });
+      }
+      return true;
     });
+
+    if (!consumed) {
+      return NextResponse.json({ error: "This reset link has already been used" }, { status: 401 });
+    }
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[reset-password]", err);

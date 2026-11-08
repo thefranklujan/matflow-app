@@ -42,6 +42,10 @@ import { registerGymOwner, DuplicateRegistrationError } from "./local-auth";
 function makeTx() {
   const writes: { model: string; data: Record<string, unknown> }[] = [];
   const tx = {
+    // Per-address identity lock and the in-transaction existence checks
+    // (Phase 0 hotfix, Codex round 2): nothing exists yet in these cases.
+    $executeRaw: vi.fn(async () => 1),
+    student: { findFirst: vi.fn(async () => null) },
     gym: {
       create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
         writes.push({ model: "gym", data });
@@ -49,6 +53,7 @@ function makeTx() {
       }),
     },
     member: {
+      findFirst: vi.fn(async () => null),
       create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
         writes.push({ model: "member", data });
         return { id: "mem_new" };
