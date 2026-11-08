@@ -41,11 +41,14 @@ test("sidebar navigation exposes the grouped owner nav with no broken links", as
   await page.goto("/app");
   const isMobileViewport = (page.viewportSize()?.width ?? 1440) < 768;
   if (!isMobileViewport) {
-    for (const group of ["Run", "Grow", "Commerce", "Manage"]) {
+    for (const group of ["Run", "Grow", "Content", "Manage"]) {
       await expect(page.getByText(group, { exact: true }).first()).toBeVisible();
     }
+    // Commerce is off (Phase 0 hotfix): no group, no Products link.
+    await expect(page.getByText("Commerce", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Products" })).toHaveCount(0);
     // Walk a representative link from each group.
-    for (const label of ["Members", "Announcements", "Products", "Analytics"]) {
+    for (const label of ["Members", "Announcements", "Videos", "Analytics"]) {
       await page.getByRole("link", { name: label, exact: false }).first().click();
       await expect(page.getByRole("heading").first()).toBeVisible();
     }

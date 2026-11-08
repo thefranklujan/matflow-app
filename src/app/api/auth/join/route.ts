@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { registerMember, createSession } from "@/lib/local-auth";
+import { registerMember, createSession, ExistingAccountError } from "@/lib/local-auth";
+import { MIN_PASSWORD } from "@/lib/owner-registration";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
@@ -19,9 +20,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 6) {
+    if (typeof password !== "string" || password.length < MIN_PASSWORD) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: `Password must be at least ${MIN_PASSWORD} characters` },
         { status: 400 }
       );
     }
@@ -69,6 +70,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
+    if (error instanceof ExistingAccountError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 409 });
+    }
     const message =
       error instanceof Error ? error.message : "Registration failed";
     return NextResponse.json({ error: message }, { status: 400 });

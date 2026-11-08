@@ -171,7 +171,8 @@ export function sendBeltPromotion(
   send(email, `Belt Promotion: ${newBelt} Belt`, html).catch(() => {});
 }
 
-export function sendTrialExpiring(email: string, name: string, daysLeft: number) {
+/** Returns the send promise so a cron can await it before the function freezes. */
+export function sendTrialExpiring(email: string, name: string, daysLeft: number): Promise<unknown> {
   const html = wrap({
     eyebrow: "Trial Ending",
     headline: `Your trial ends in ${daysLeft} day${daysLeft > 1 ? "s" : ""}.`,
@@ -180,7 +181,7 @@ export function sendTrialExpiring(email: string, name: string, daysLeft: number)
     ctaText: "Choose a Plan",
     ctaHref: "https://app.mymatflow.com/app/billing",
   });
-  send(email, `Your MatFlow trial ends in ${daysLeft} days`, html).catch(() => {});
+  return send(email, `Your MatFlow trial ends in ${daysLeft} days`, html).catch(() => {});
 }
 
 export function sendClassReminder(

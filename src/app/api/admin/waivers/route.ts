@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       kind: "waiver_required",
       title: `${gym?.name || "Your gym"} needs your signature`,
       body: `New waiver: ${title}. Tap to review and sign.`,
-      url: "/members/waiver",
+      url: "/student", // the legacy /members portal is gone (Phase 0 hotfix)
       gymId,
     });
 

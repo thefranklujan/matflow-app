@@ -56,7 +56,9 @@ export default async function LeaderboardPage({
   searchParams: Promise<{ category?: string; period?: string }>;
 }) {
   const params = await searchParams;
-  const { memberId: currentMemberId } = await requireMember();
+  // Every query below is scoped to the caller's gym (audit H1: this page used
+  // to rank members of every academy on the platform).
+  const { memberId: currentMemberId, gymId } = await requireMember();
 
   const category = params.category || "overall";
   const period = params.period || "month";
@@ -94,6 +96,7 @@ export default async function LeaderboardPage({
     const classTypeFilter = classTypeMap[category];
 
     const whereClause: Record<string, unknown> = {
+      gymId,
       classDate: dateFilter,
     };
     if (classTypeFilter) {
@@ -111,7 +114,7 @@ export default async function LeaderboardPage({
     if (grouped.length > 0) {
       const memberIds = grouped.map((g) => g.memberId);
       const members = await prisma.member.findMany({
-        where: { id: { in: memberIds } },
+        where: { id: { in: memberIds }, gymId },
         select: { id: true, firstName: true, lastName: true, beltRank: true },
       });
       const memberMap = new Map(members.map((m) => [m.id, m]));
@@ -132,7 +135,7 @@ export default async function LeaderboardPage({
     }
   } else if (category === "streaks") {
     const allAttendance = await prisma.attendance.findMany({
-      where: { classDate: dateFilter },
+      where: { gymId, classDate: dateFilter },
       select: { memberId: true, classDate: true },
     });
 
@@ -144,7 +147,7 @@ export default async function LeaderboardPage({
     if (sorted.length > 0) {
       const memberIds = sorted.map(([id]) => id);
       const members = await prisma.member.findMany({
-        where: { id: { in: memberIds } },
+        where: { id: { in: memberIds }, gymId },
         select: { id: true, firstName: true, lastName: true, beltRank: true },
       });
       const memberMap = new Map(members.map((m) => [m.id, m]));
@@ -165,7 +168,7 @@ export default async function LeaderboardPage({
     }
   } else if (category === "competitions") {
     const results = await prisma.competitionResult.findMany({
-      where: { date: dateFilter },
+      where: { gymId, date: dateFilter },
       select: { memberId: true, placement: true },
     });
 
@@ -194,7 +197,7 @@ export default async function LeaderboardPage({
     if (sorted.length > 0) {
       const memberIds = sorted.map(([id]) => id);
       const members = await prisma.member.findMany({
-        where: { id: { in: memberIds } },
+        where: { id: { in: memberIds }, gymId },
         select: { id: true, firstName: true, lastName: true, beltRank: true },
       });
       const memberMap = new Map(members.map((m) => [m.id, m]));
@@ -217,6 +220,7 @@ export default async function LeaderboardPage({
   } else if (category === "goals") {
     const completedGoals = await prisma.personalGoal.findMany({
       where: {
+        gymId,
         completed: true,
         updatedAt: dateFilter,
       },
@@ -238,7 +242,7 @@ export default async function LeaderboardPage({
     if (sorted.length > 0) {
       const memberIds = sorted.map(([id]) => id);
       const members = await prisma.member.findMany({
-        where: { id: { in: memberIds } },
+        where: { id: { in: memberIds }, gymId },
         select: { id: true, firstName: true, lastName: true, beltRank: true },
       });
       const memberMap = new Map(members.map((m) => [m.id, m]));

@@ -1,11 +1,13 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Shield, ArrowLeft } from "lucide-react";
 
 export default async function PlatformGroupDetail({ params }: { params: Promise<{ id: string }> }) {
+  await requirePlatformAdminPage();
   const { id } = await params;
 
   const group = await prisma.gymGroup.findUnique({

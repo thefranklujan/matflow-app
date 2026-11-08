@@ -8,11 +8,14 @@ export default function MemberActions({
   memberName,
   approved,
   active,
+  isOwner = false,
 }: {
   memberId: string;
   memberName?: string;
   approved: boolean;
   active: boolean;
+  /** The academy owner's own row: no Deactivate or Remove (the API refuses both). */
+  isOwner?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -44,6 +47,10 @@ export default function MemberActions({
     }
     router.refresh();
     setLoading(false);
+  }
+
+  if (isOwner) {
+    return <span className="text-xs text-gray-300 px-2 py-1">Owner</span>;
   }
 
   return (

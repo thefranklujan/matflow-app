@@ -2,36 +2,22 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createSession } from "@/lib/local-auth";
-import { prisma } from "@/lib/prisma";
+import { LEGACY_ORIGIN_COOKIES, restoreImpersonator } from "@/lib/platform-admin";
 
+/**
+ * End gym impersonation. Requires a valid session carrying `impersonatorId` (written
+ * into the signed JWT when impersonation started); restores that platform
+ * admin by member id and re-derives the role. Cookies are display-only and
+ * never decide who is restored (audit C2).
+ */
 export async function POST() {
+  const result = await restoreImpersonator();
+
   const c = await cookies();
-  const originEmail = c.get("view_gym_origin")?.value;
-  c.delete("view_gym_origin");
-  c.delete("view_gym_name");
-  c.delete("viewing_gym");
+  for (const name of [...LEGACY_ORIGIN_COOKIES, "view_gym_name", "viewing_gym"]) c.delete(name);
 
-  if (!originEmail) {
-    return NextResponse.json({ error: "No origin recorded" }, { status: 400 });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
-
-  const member = await prisma.member.findFirst({
-    where: { email: { equals: originEmail, mode: "insensitive" } },
-    orderBy: { createdAt: "asc" },
-  });
-  if (!member) {
-    return NextResponse.json({ error: "Original admin not found" }, { status: 404 });
-  }
-
-  await createSession({
-    userId: member.clerkUserId,
-    email: member.email,
-    name: `${member.firstName} ${member.lastName}`,
-    role: "admin",
-    gymId: member.gymId,
-    memberId: member.id,
-  });
-
   return NextResponse.json({ success: true });
 }

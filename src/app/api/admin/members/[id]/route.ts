@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { lockMemberCapacity, assertSeatAvailable, MemberLimitError } from "@/lib/member-capacity";
+import { MEMBER_SAFE_SELECT } from "@/lib/member-select";
+import { findGymOwnerId } from "@/lib/gym-owner";
+
+/** The caller's own row and the gym owner's row cannot be removed or deactivated. */
+async function isProtectedRow(id: string, gymId: string, callerMemberId: string | null) {
+  return id === callerMemberId || id === (await findGymOwnerId(gymId));
+}
 
 export async function GET(
   _req: NextRequest,
@@ -14,7 +21,8 @@ export async function GET(
 
     const member = await prisma.member.findFirst({
       where: { id, gymId },
-      include: {
+      select: {
+        ...MEMBER_SAFE_SELECT,
         beltHistory: { orderBy: { awardedAt: "desc" } },
       },
     });
@@ -38,7 +46,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId, memberId: callerMemberId } = await requireAdmin();
 
     const { id } = await params;
     const body = await req.json();
@@ -56,6 +64,10 @@ export async function PUT(
     if (typeof body.stripes === "number") data.stripes = body.stripes;
     if (typeof body.isAmbassador === "boolean") data.isAmbassador = body.isAmbassador;
 
+    if (data.active === false && (await isProtectedRow(id, gymId, callerMemberId))) {
+      return NextResponse.json({ error: "The academy owner's own membership cannot be deactivated." }, { status: 400 });
+    }
+
     // Reactivating an inactive member consumes a seat. The pre-transaction
     // `existing` row can be stale under concurrency, so when activation is
     // requested we re-read THIS member inside the locked transaction and only
@@ -69,9 +81,9 @@ export async function PUT(
           if (!current.active) {
             await assertSeatAvailable(tx, gymId);
           }
-          return tx.member.update({ where: { id }, data });
+          return tx.member.update({ where: { id }, data, select: MEMBER_SAFE_SELECT });
         })
-      : await prisma.member.update({ where: { id }, data });
+      : await prisma.member.update({ where: { id }, data, select: MEMBER_SAFE_SELECT });
 
     if (!member) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -91,13 +103,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { gymId } = await requireAdmin();
+    const { gymId, memberId: callerMemberId } = await requireAdmin();
     const { id } = await params;
 
     // Verify the member belongs to this gym before deleting
     const existing = await prisma.member.findFirst({ where: { id, gymId } });
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    if (await isProtectedRow(id, gymId, callerMemberId)) {
+      return NextResponse.json({ error: "The academy owner's own membership cannot be removed." }, { status: 400 });
     }
 
     // Cascades clean up attendance, belt progress, waivers, goals, etc.

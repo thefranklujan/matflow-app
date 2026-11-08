@@ -9,6 +9,7 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
 import { lockMemberCapacity, assertSeatAvailable } from "@/lib/member-capacity";
+import { isGymOwner } from "@/lib/gym-owner";
 
 const COOKIE_NAME = "matflow-session";
 
@@ -21,6 +22,11 @@ export interface SessionUser {
   memberId: string;
   userType?: "student" | "member";
   studentId?: string;
+  /**
+   * Set only while a platform admin impersonates a gym, a student or the demo
+   * gym: the platform admin's Member id. Exit restores that member by id.
+   */
+  impersonatorId?: string;
 }
 
 // ── JWT helpers ───────────────────────────────────────
@@ -219,6 +225,20 @@ export async function registerGymOwner(data: {
 
 // ── Register member (joins existing gym) ─────────────
 
+/**
+ * The email already belongs to an account. The join link is unauthenticated,
+ * so it must never modify an existing identity (audit C3: it used to overwrite
+ * the Student's password and reactivate deactivated members). The caller gets
+ * one generic answer: sign in, then use the link again (join-session).
+ */
+export class ExistingAccountError extends Error {
+  readonly code = "SIGN_IN_TO_JOIN";
+  constructor() {
+    super("An account with this email already exists. Sign in, then open this invite link again to join.");
+    this.name = "ExistingAccountError";
+  }
+}
+
 export async function registerMember(data: {
   email: string;
   phone?: string;
@@ -230,96 +250,61 @@ export async function registerMember(data: {
   const gym = await prisma.gym.findUnique({ where: { slug: data.gymSlug } });
   if (!gym) throw new Error("Gym not found");
 
-  const passwordHash = await bcrypt.hash(data.password, 10);
   const emailLower = data.email.trim().toLowerCase();
+  const insensitive = { equals: emailLower, mode: "insensitive" as const };
 
-  // Check if the person has a Member record at ANOTHER gym (one gym, one student rule)
-  const otherGymMember = await prisma.member.findFirst({
-    where: { email: emailLower, gymId: { not: gym.id } },
-    include: { gym: { select: { name: true } } },
-  });
-  if (otherGymMember) {
-    throw new Error(
-      `You're already a member of ${otherGymMember.gym.name}. Contact them to transfer.`
-    );
-  }
+  // Any existing Student or Member (any gym) with this email: refuse without
+  // touching it. One response for every case, so it reveals nothing about
+  // which gym, if any, the address belongs to.
+  const [existingStudent, existingMember] = await Promise.all([
+    prisma.student.findFirst({ where: { email: insensitive }, select: { id: true } }),
+    prisma.member.findFirst({ where: { email: insensitive }, select: { id: true } }),
+  ]);
+  if (existingStudent || existingMember) throw new ExistingAccountError();
 
-  // Find or create the underlying Student identity
-  let student = await prisma.student.findUnique({ where: { email: emailLower } });
-  if (!student) {
-    student = await prisma.student.create({
-      data: {
-        email: emailLower,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone || null,
-        passwordHash,
-      },
-    });
-  } else {
-    // Update password + profile so this signup replaces any stale credentials
-    student = await prisma.student.update({
-      where: { id: student.id },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone || null,
-        passwordHash,
-      },
-    });
-  }
+  const passwordHash = await bcrypt.hash(data.password, 10);
 
-  // Upsert Member for this gym (self-heal if a stale inactive record blocks
-  // re-signup). Both branches occupy an ACTIVE seat, so the whole decision runs
-  // under the gym's capacity lock — the count is re-read inside the lock and
-  // two concurrent joins at the limit cannot both succeed.
-  const member = await prisma.$transaction(async (tx) => {
-    await lockMemberCapacity(tx, gym.id);
+  // A brand-new identity: the Student and its Member row are created together
+  // under the gym's capacity lock (count re-read inside the lock), so a full
+  // gym leaves no orphan Student behind.
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await lockMemberCapacity(tx, gym.id);
+      await assertSeatAvailable(tx, gym.id);
 
-    const existing = await tx.member.findFirst({
-      where: { email: emailLower, gymId: gym.id },
-    });
-    if (existing && existing.active && existing.approved) {
-      throw new Error(
-        "You already have an active account at this gym. Sign in instead."
-      );
-    }
-
-    await assertSeatAvailable(tx, gym.id);
-
-    if (existing) {
-      return tx.member.update({
-        where: { id: existing.id },
+      const student = await tx.student.create({
         data: {
+          email: emailLower,
           firstName: data.firstName,
           lastName: data.lastName,
           phone: data.phone || null,
           passwordHash,
+        },
+      });
+      const member = await tx.member.create({
+        data: {
+          gymId: gym.id,
+          clerkUserId: `member-${randomUUID()}`,
+          email: emailLower,
+          phone: data.phone || null,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          passwordHash,
           approved: true,
           active: true,
+          beltRank: "white",
+          stripes: 0,
           studentId: student.id,
         },
       });
-    }
-    return tx.member.create({
-      data: {
-        gymId: gym.id,
-        clerkUserId: `member-${Date.now()}`,
-        email: emailLower,
-        phone: data.phone || null,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        passwordHash,
-        approved: true,
-        active: true,
-        beltRank: "white",
-        stripes: 0,
-        studentId: student.id,
-      },
+      return { member: { id: member.id, gymId: gym.id }, studentId: student.id };
     });
-  });
-
-  return { member: { id: member.id, gymId: gym.id }, studentId: student.id };
+  } catch (err) {
+    // Two concurrent joins with the same new email race to INSERT; the unique
+    // constraint is the real guard and gets the same generic answer.
+    if ((err as { code?: string })?.code === "P2002") throw new ExistingAccountError();
+    throw err;
+  }
 }
 
 // ── Join a gym as an already-signed-in student ───────
@@ -358,15 +343,14 @@ export async function joinGymAsStudent(
     if (existing && existing.active && existing.approved) {
       return existing;
     }
+    // A membership the owner deactivated or un-approved stays that way: only
+    // the owner can change it (PUT /api/admin/members/[id]).
+    if (existing) {
+      throw new Error("Your membership at this academy is inactive. Contact the academy to reactivate it.");
+    }
 
     await assertSeatAvailable(tx, gym.id);
 
-    if (existing) {
-      return tx.member.update({
-        where: { id: existing.id },
-        data: { approved: true, active: true },
-      });
-    }
     return tx.member.create({
       data: {
         gymId: gym.id,
@@ -397,10 +381,15 @@ export async function registerStudent(data: {
   phone?: string;
 }): Promise<{ id: string; email: string; firstName: string; lastName: string }> {
   const emailLower = data.email.trim().toLowerCase();
-  const existing = await prisma.student.findFirst({
-    where: { email: { equals: emailLower, mode: "insensitive" } },
-  });
-  if (existing) throw new Error("An account with this email already exists");
+  const insensitive = { equals: emailLower, mode: "insensitive" as const };
+  // A Member-only identity (owners, staff, platform admins) also blocks a new
+  // Student with the same email: otherwise anyone could register an owner's
+  // or a platform admin's address as their own (audit C1).
+  const [existing, existingMember] = await Promise.all([
+    prisma.student.findFirst({ where: { email: insensitive }, select: { id: true } }),
+    prisma.member.findFirst({ where: { email: insensitive }, select: { id: true } }),
+  ]);
+  if (existing || existingMember) throw new Error("An account with this email already exists");
 
   const passwordHash = await bcrypt.hash(data.password, 10);
   const student = await prisma.student.create({
@@ -461,25 +450,29 @@ export async function authenticateUser(
   // Find member by email (could be in any gym). Case-insensitive — older
   // records were stored with whatever case the user typed at signup, and the
   // login form may pass either. authenticateStudent already lowercases.
+  // Member.email is unique only per gym, so one address can match several
+  // rows. Try every row in a fixed order (platform admin first, then oldest)
+  // and sign in to the first whose password matches: a stray row with the
+  // same email (for example one created through the old join-link takeover)
+  // can neither win the lookup nor lock the real owner out.
   const emailLower = email.trim().toLowerCase();
-  const member = await prisma.member.findFirst({
-    where: { email: { equals: emailLower, mode: "insensitive" } },
-    include: { gym: true },
+  const candidates = await prisma.member.findMany({
+    where: { email: { equals: emailLower, mode: "insensitive" }, passwordHash: { not: null } },
+    orderBy: [{ isPlatformAdmin: "desc" }, { createdAt: "asc" }],
+    take: 20,
   });
 
+  let member: (typeof candidates)[number] | null = null;
+  for (const c of candidates) {
+    if (c.passwordHash && (await bcrypt.compare(password, c.passwordHash))) {
+      member = c;
+      break;
+    }
+  }
   if (!member) return null;
 
-  // Check password
-  if (!member.passwordHash) return null;
-  const valid = await bcrypt.compare(password, member.passwordHash);
-  if (!valid) return null;
-
-  // Determine role: first member created for a gym is admin
-  const firstMember = await prisma.member.findFirst({
-    where: { gymId: member.gymId },
-    orderBy: { createdAt: "asc" },
-  });
-  const isAdmin = firstMember?.id === member.id;
+  // Role: the gym's owner (registration marker, not row age) is admin.
+  const isAdmin = await isGymOwner(member);
 
   return {
     userId: member.clerkUserId,

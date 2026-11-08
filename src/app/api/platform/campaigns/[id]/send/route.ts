@@ -1,13 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
+import { findGymOwner } from "@/lib/gym-owner";
 import { Resend } from "resend";
-
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",")
-  .map((e) => e.trim().toLowerCase());
 
 import { signTrackingParams } from "@/lib/tracking-sig";
 
@@ -15,8 +12,8 @@ const FROM = "Frank from MatFlow <frank@mymatflow.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.mymatflow.com";
 
 async function requireAdmin() {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) return null;
+  const session = await getPlatformAdminSession();
+  if (!session) return null;
   return session;
 }
 
@@ -30,11 +27,8 @@ async function resolveRecipients(audience: string, _adminEmail: string): Promise
     const gyms = await prisma.gym.findMany({ select: { id: true } });
     const emails: string[] = [];
     for (const g of gyms) {
-      const first = await prisma.member.findFirst({
-        where: { gymId: g.id, active: true },
-        orderBy: { createdAt: "asc" },
-        select: { email: true },
-      });
+      // The owner by registration marker, not the oldest row.
+      const first = await findGymOwner(g.id, { email: true });
       if (first?.email) emails.push(first.email);
     }
     return emails;

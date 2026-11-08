@@ -18,8 +18,8 @@ export default function ResetPasswordForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (password.length < 10) {
+      setError("Password must be at least 10 characters");
       return;
     }
     if (password !== confirm) {
@@ -118,7 +118,7 @@ export default function ResetPasswordForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
-                placeholder="At least 6 characters"
+                placeholder="At least 10 characters"
                 className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#dc2626] transition"
               />
             </div>

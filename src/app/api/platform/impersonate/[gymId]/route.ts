@@ -2,37 +2,30 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getSession, createSession } from "@/lib/local-auth";
+import { createSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
-
-const PLATFORM_ADMINS = (
-  process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com"
-)
-  .split(",")
-  .map((e) => e.trim().toLowerCase());
+import { findGymOwner } from "@/lib/gym-owner";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ gymId: string }> }) {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
+  const session = await getPlatformAdminSession();
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { gymId } = await params;
 
-  const gym = await prisma.gym.findUnique({
-    where: { id: gymId },
-    include: { members: { orderBy: { createdAt: "asc" }, take: 1 } },
-  });
+  const gym = await prisma.gym.findUnique({ where: { id: gymId } });
+  // The owner by registration marker, not the oldest row.
+  const owner = gym ? await findGymOwner(gym.id) : null;
 
-  if (!gym || gym.members.length === 0) {
+  if (!gym || !owner) {
     return NextResponse.json({ error: "Gym or owner not found" }, { status: 404 });
   }
 
-  const owner = gym.members[0];
-
-  // Stash the admin's original email so Exit can restore them
+  // Display-only cookies for the "viewing as" banner. Who to restore on exit
+  // travels inside the signed session (impersonatorId), never in a cookie.
   const c = await cookies();
-  c.set("view_gym_origin", session.email, { httpOnly: true, path: "/", sameSite: "lax" });
   c.set("view_gym_name", gym.name, { httpOnly: false, path: "/", sameSite: "lax" });
   c.set("viewing_gym", "1", { httpOnly: false, path: "/", sameSite: "lax" });
 
@@ -43,6 +36,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ gy
     role: "admin",
     gymId: gym.id,
     memberId: owner.id,
+    userType: "member",
+    impersonatorId: session.memberId,
   });
 
   return NextResponse.json({ success: true });

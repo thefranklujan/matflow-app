@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +14,7 @@ function isPlatformAdmin(email: string) {
 }
 
 export default async function GymDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePlatformAdminPage();
   const { id } = await params;
 
   const gym = await prisma.gym.findUnique({

@@ -125,7 +125,7 @@ describe("reconcileSubscription", () => {
   it("the conflict message carries no Stripe identifiers", async () => {
     mocks.subscriptionsRetrieve.mockResolvedValue(subscription({ metadata: {} }));
     mocks.gymFindMany.mockResolvedValue([{ id: "gym_a" }, { id: "gym_b" }]);
-    const err = await reconcileSubscription("sub_1").catch((e) => e as Error);
+    const err = (await reconcileSubscription("sub_1").catch((e) => e)) as Error;
     expect(err.message).not.toMatch(/sub_|cus_|price_/);
   });
 

@@ -1,9 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import NominationsClient from "./NominationsClient";
 
 export default async function NominationsPage() {
+  await requirePlatformAdminPage();
   const [nominations, activeGyms] = await Promise.all([
     prisma.gymNomination.findMany({
       orderBy: { createdAt: "desc" },

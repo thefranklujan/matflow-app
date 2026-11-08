@@ -5,7 +5,7 @@
  * (email, slug) separately because those need queries.
  */
 
-export const MIN_PASSWORD = 6; // established minimum — unchanged
+export const MIN_PASSWORD = 10; // raised from 6 (audit H4, 2026-11-08); shared by every password check
 export const MAX_PASSWORD = 200; // bcrypt truncates at 72 bytes; bound the input
 export const MAX_NAME = 80;
 export const MAX_EMAIL = 254; // RFC 5321 practical maximum

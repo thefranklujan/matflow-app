@@ -119,7 +119,6 @@ describe("BillingReturnNotice", () => {
   it("strips the return parameters so a reload cannot replay the banner", () => {
     const replaceState = vi.fn();
     const original = window.history.replaceState;
-    // @ts-expect-error test double
     window.history.replaceState = replaceState;
     window.history.pushState({}, "", "/app/billing?success=true&keep=1");
 

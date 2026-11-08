@@ -5,6 +5,7 @@ import { jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { JWT_SECRET } from "@/lib/jwt-secret";
+import { MIN_PASSWORD } from "@/lib/owner-registration";
 
 /**
  * Verifies a reset token and updates the account password. The token is
@@ -18,9 +19,9 @@ export async function POST(request: NextRequest) {
     if (!token || typeof token !== "string") {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
-    if (!password || typeof password !== "string" || password.length < 6) {
+    if (!password || typeof password !== "string" || password.length < MIN_PASSWORD) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: `Password must be at least ${MIN_PASSWORD} characters` },
         { status: 400 }
       );
     }

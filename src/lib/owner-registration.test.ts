@@ -128,8 +128,8 @@ describe("validateOwnerRegistration — rejected", () => {
   });
 
   it("enforces password bounds without weakening the minimum", () => {
-    expect(MIN_PASSWORD).toBe(6); // established minimum, unchanged
-    expect(err({ password: "12345" })?.code).toBe("TOO_SHORT");
+    expect(MIN_PASSWORD).toBe(10); // raised from 6 by the Phase 0 hotfix (audit H4); never lower
+    expect(err({ password: "123456789" })?.code).toBe("TOO_SHORT");
     expect(err({ password: "p".repeat(MAX_PASSWORD + 1) })?.code).toBe("TOO_LONG");
   });
 

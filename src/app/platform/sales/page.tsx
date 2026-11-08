@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import { SYNTHETIC_GYM_IDS } from "@/lib/founder-metrics";
 import { OWNER_MARKER_PREFIX, RECENT_ATTENDANCE_DAYS, buildSalesQueueRow, type SalesQueueInput } from "@/lib/sales-queue";
@@ -14,6 +15,7 @@ import SalesQueueClient from "./SalesQueueClient";
  * to client code.
  */
 export default async function SalesQueuePage() {
+  await requirePlatformAdminPage();
   const now = new Date();
   const recentSince = new Date(now.getTime() - RECENT_ATTENDANCE_DAYS * 24 * 60 * 60 * 1000);
 

@@ -33,7 +33,8 @@ setup("prepare database, fixtures, and per-role sessions", async () => {
 
   // 2. Fixtures — the platform account also needs a login identity. It is a
   //    Member at the Pro gym so authenticateUser resolves it; platform access
-  //    itself comes solely from PLATFORM_ADMIN_EMAILS.
+  //    itself comes solely from the server-side Member.isPlatformAdmin flag
+  //    (never from PLATFORM_ADMIN_EMAILS, Phase 0 hotfix C1).
   const ids = await seed();
   const { PrismaClient } = await import("@prisma/client");
   const prisma = new PrismaClient({ datasources: { db: { url: E2E_DATABASE_URL } } });
@@ -41,7 +42,7 @@ setup("prepare database, fixtures, and per-role sessions", async () => {
   const hash = await bcrypt.hash(FIXTURE.password, 10);
   await prisma.member.upsert({
     where: { gymId_email: { gymId: ids.gyms.pro, email: FIXTURE.emails.platform } },
-    update: { passwordHash: hash, approved: true, active: true },
+    update: { passwordHash: hash, approved: true, active: true, isPlatformAdmin: true },
     create: {
       gymId: ids.gyms.pro,
       email: FIXTURE.emails.platform,
@@ -51,6 +52,7 @@ setup("prepare database, fixtures, and per-role sessions", async () => {
       passwordHash: hash,
       approved: true,
       active: true,
+      isPlatformAdmin: true,
     },
   });
   await prisma.$disconnect();

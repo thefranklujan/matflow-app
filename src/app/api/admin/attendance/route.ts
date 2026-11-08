@@ -3,6 +3,7 @@ import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity-log";
 import { notifyStreakMilestonesForMembers } from "@/lib/attendance-streak";
+import { MEMBER_SAFE_SELECT } from "@/lib/member-select";
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
           lte: dateEnd,
         },
       },
-      include: { member: true },
+      include: { member: { select: MEMBER_SAFE_SELECT } },
     });
 
     return NextResponse.json(records);
@@ -58,9 +59,20 @@ export async function POST(req: NextRequest) {
 
     const date = new Date(classDate);
 
+    // Only this gym's members: memberIds come from the request body, and
+    // Attendance has no Gym FK to stop cross-tenant rows (audit M4).
+    const ownMembers = await prisma.member.findMany({
+      where: { id: { in: memberIds.filter((m: unknown): m is string => typeof m === "string") }, gymId },
+      select: { id: true },
+    });
+    const validIds = ownMembers.map((m) => m.id);
+    if (validIds.length === 0) {
+      return NextResponse.json({ error: "No members of this academy were selected" }, { status: 400 });
+    }
+
     // Use createMany with skipDuplicates to handle members already checked in
     const result = await prisma.attendance.createMany({
-      data: memberIds.map((memberId: string) => ({
+      data: validIds.map((memberId) => ({
         memberId,
         classDate: date,
         classType,
@@ -75,7 +87,7 @@ export async function POST(req: NextRequest) {
     // Fire streak-milestone pushes (5/10/25/50/100 classes) for each member
     // checked in. Fire-and-forget so the response stays fast.
     if (result.count > 0) {
-      notifyStreakMilestonesForMembers(memberIds, gymId).catch((e) =>
+      notifyStreakMilestonesForMembers(validIds, gymId).catch((e) =>
         console.error("[attendance_streak batch] failed:", e)
       );
     }

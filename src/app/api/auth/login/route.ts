@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser, createSession } from "@/lib/local-auth";
+import { isPlatformAdminSession } from "@/lib/platform-admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,10 +18,8 @@ export async function POST(request: NextRequest) {
 
     await createSession(user);
 
-    const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "")
-      .split(",")
-      .map(e => e.trim().toLowerCase());
-    const isPlatformAdmin = platformAdmins.includes(user.email.trim().toLowerCase());
+    // Server-side flag on the Member row, never the email (audit C1).
+    const isPlatformAdmin = await isPlatformAdminSession(user);
 
     // Students always land in /student, whether they have a gym or not.
     // Gym context (gymId/memberId) is already populated in the session by

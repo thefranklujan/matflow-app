@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DemoModeButton from "./DemoModeButton";
@@ -14,6 +15,7 @@ import {
 import { Users, Flame, AlertTriangle, Clock, Scale } from "lucide-react";
 
 export default async function PlatformDashboard() {
+  await requirePlatformAdminPage();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

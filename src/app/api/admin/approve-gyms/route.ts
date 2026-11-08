@@ -1,21 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/local-auth";
+import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import { sendGymApprovedEmail } from "@/lib/email";
-
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",")
-  .map(e => e.trim().toLowerCase());
-
-async function requirePlatformAdmin() {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
-    throw new Error("Forbidden");
-  }
-  return session;
-}
+import { findGymOwner } from "@/lib/gym-owner";
 
 export async function GET() {
   try {
@@ -56,17 +45,10 @@ export async function PATCH(request: NextRequest) {
       const gym = await prisma.gym.update({
         where: { id: gymId },
         data: { approved: true },
-        include: {
-          members: {
-            take: 1,
-            orderBy: { createdAt: "asc" },
-            select: { firstName: true, lastName: true, email: true },
-          },
-        },
       });
 
-      // Send welcome email to gym owner
-      const owner = gym.members[0];
+      // Send welcome email to gym owner (registration marker, not row age)
+      const owner = await findGymOwner(gym.id, { firstName: true, lastName: true, email: true });
       if (owner?.email) {
         sendGymApprovedEmail(owner.email, `${owner.firstName} ${owner.lastName}`, gym.name);
       }

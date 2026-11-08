@@ -27,6 +27,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ gy
     memberId: member.id,
     userType: "student",
     studentId: session.studentId,
+    // Keep an impersonating platform admin able to exit after a gym switch.
+    ...(session.impersonatorId ? { impersonatorId: session.impersonatorId } : {}),
   });
 
   return NextResponse.redirect(new URL("/student", _req.url));

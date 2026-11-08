@@ -20,7 +20,7 @@ export default function LeaderboardTabs() {
   function handleClick(value: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("category", value);
-    router.push(`/members/leaderboard?${params.toString()}`);
+    router.push(`/app/leaderboard?${params.toString()}`);
   }
 
   return (

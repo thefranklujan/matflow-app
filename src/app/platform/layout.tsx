@@ -1,16 +1,12 @@
-import { getSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { redirect } from "next/navigation";
 import PlatformNav from "./PlatformNav";
 import PlatformUserMenu from "./PlatformUserMenu";
 
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",")
-  .map(e => e.trim().toLowerCase());
-
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession();
+  const session = await getPlatformAdminSession();
 
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
+  if (!session) {
     redirect("/sign-in");
   }
 

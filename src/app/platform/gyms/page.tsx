@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DeleteGymButton from "./DeleteGymButton";
@@ -8,6 +9,7 @@ const PLATFORM_ADMIN_EMAILS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@cra
   .split(",").map(e => e.trim().toLowerCase());
 
 export default async function GymsListPage() {
+  await requirePlatformAdminPage();
   const gymsRaw = await prisma.gym.findMany({
     where: { hidden: false },
     include: {

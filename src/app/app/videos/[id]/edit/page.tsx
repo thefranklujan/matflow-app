@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 
 import Link from "next/link";
 import VideoForm from "../../VideoForm";
@@ -12,8 +13,9 @@ export default async function AdminEditVideoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { gymId } = await requireAdmin();
 
-  const video = await prisma.video.findUnique({ where: { id } });
+  const video = await prisma.video.findFirst({ where: { id, gymId } });
   if (!video) notFound();
 
   const serialized = {

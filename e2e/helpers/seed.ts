@@ -136,6 +136,10 @@ export async function seed() {
     update: { passwordHash, homeGym: null },
     create: { email: FIXTURE.emails.studentSolo, firstName: "Iris", lastName: "Indie", passwordHash, beltRank: "white" },
   });
+  // The solo student must have NO membership anywhere. Upserts alone never
+  // removed one, so a membership left by a manual reproduction (the audit's C3
+  // join run) survived reseeding and made her proximity-eligible.
+  await prisma.member.deleteMany({ where: { studentId: studentSolo.id } });
 
   // Approved membership linking Sam -> Basic gym (student self-check-in target)
   const samMembership = await upsertMember({

@@ -1,3 +1,4 @@
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import CampaignDetailClient from "./CampaignDetailClient";
@@ -5,6 +6,7 @@ import CampaignDetailClient from "./CampaignDetailClient";
 export const dynamic = "force-dynamic";
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePlatformAdminPage();
   const { id } = await params;
   const campaign = await prisma.emailCampaign.findUnique({ where: { id } });
   if (!campaign) notFound();

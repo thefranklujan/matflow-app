@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePlan, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
 import { notify } from "@/lib/push";
+import { MEMBER_SAFE_SELECT } from "@/lib/member-select";
 
 export async function GET() {
   try {
@@ -9,7 +10,7 @@ export async function GET() {
 
     const results = await prisma.competitionResult.findMany({
       where: { gymId },
-      include: { member: true },
+      include: { member: { select: MEMBER_SAFE_SELECT } },
       orderBy: { date: "desc" },
     });
 

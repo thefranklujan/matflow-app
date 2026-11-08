@@ -1,9 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import StudentsClient from "./StudentsClient";
 
 export default async function StudentsPage() {
+  await requirePlatformAdminPage();
   // Hide demo / sample students from this list (they live only inside the demo gym)
   const students = await prisma.student.findMany({
     where: {

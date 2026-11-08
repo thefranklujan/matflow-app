@@ -1,4 +1,4 @@
-export type NavGroup = "Run" | "Grow" | "Content" | "Commerce" | "Manage";
+export type NavGroup = "Run" | "Grow" | "Content" | "Manage";
 
 export interface NavItem {
   slug: string;
@@ -15,9 +15,10 @@ export interface NavItem {
 //   Run      — daily operations (roster, schedule, check-ins)
 //   Grow     — acquisition and engagement (leads, drop-ins, announcements)
 //   Content  — member-facing content (videos)
-//   Commerce — the pro shop (products, orders, inventory)
 //   Manage   — configuration and back office (analytics, waivers, settings…)
-export const NAV_GROUP_ORDER: NavGroup[] = ["Run", "Grow", "Content", "Commerce", "Manage"];
+// Commerce (products, orders, inventory) was removed from the owner nav: it is
+// not sold and takes no money (owner-features finding 7). Its routes redirect.
+export const NAV_GROUP_ORDER: NavGroup[] = ["Run", "Grow", "Content", "Manage"];
 
 export const NAV_ITEMS: NavItem[] = [
   // Run
@@ -38,10 +39,6 @@ export const NAV_ITEMS: NavItem[] = [
   { slug: "nominate", label: "Nominate Gym", icon: "Megaphone", roles: ["member"], group: "Grow", section: "main" },
   // Content
   { slug: "videos", label: "Videos", icon: "Video", roles: ["admin", "member"], group: "Content", section: "main" },
-  // Commerce
-  { slug: "products", label: "Products", icon: "Package", roles: ["admin"], group: "Commerce", section: "main" },
-  { slug: "orders", label: "Orders", icon: "ShoppingBag", roles: ["admin"], group: "Commerce", section: "main" },
-  { slug: "inventory", label: "Inventory", icon: "ClipboardList", roles: ["admin"], group: "Commerce", section: "main" },
   // Manage
   { slug: "analytics", label: "Analytics", icon: "BarChart3", roles: ["admin"], group: "Manage", section: "main" },
   { slug: "waivers", label: "Waivers", icon: "FileText", roles: ["admin"], group: "Manage", section: "main" },

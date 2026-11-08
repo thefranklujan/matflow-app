@@ -1,16 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-  .split(",")
-  .map((e) => e.trim().toLowerCase());
-
 async function requireAdmin() {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) return null;
+  const session = await getPlatformAdminSession();
+  if (!session) return null;
   return session;
 }
 

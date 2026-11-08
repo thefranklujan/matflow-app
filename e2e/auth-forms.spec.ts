@@ -144,8 +144,9 @@ test("forgot password: status is announced without revealing account existence",
 
 test("reset password: client validation errors are announced and described", async ({ page }) => {
   await page.goto("/reset-password?token=e2e-synthetic-token");
-  await page.locator("#reset-password").fill("abcdef");
-  await page.locator("#reset-confirm").fill("different");
+  // Long enough for the 10-character minimum, so the mismatch is what fails.
+  await page.locator("#reset-password").fill("abcdefghij");
+  await page.locator("#reset-confirm").fill("different-1");
   await page.getByRole("button", { name: /update password/i }).click();
 
   const alert = alertRegion(page).first();
@@ -153,7 +154,7 @@ test("reset password: client validation errors are announced and described", asy
   await expect(alert).toContainText(/match/i);
   await expect(page.locator("#reset-password")).toHaveAttribute("aria-describedby", "reset-error");
   // Values are retained so the user can correct rather than retype.
-  await expect(page.locator("#reset-password")).toHaveValue("abcdef");
+  await expect(page.locator("#reset-password")).toHaveValue("abcdefghij");
 });
 
 test("auth forms expose correct autocomplete hints", async ({ page }) => {

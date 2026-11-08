@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendJoinRequestSubmittedToAdmin } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
 import { notify } from "@/lib/push";
+import { findGymOwner } from "@/lib/gym-owner";
 
 export async function GET() {
   const session = await getSession();
@@ -43,11 +44,9 @@ export async function POST(req: NextRequest) {
     include: { gym: true, student: true },
   });
 
-  // Email gym owner (first member of the gym)
-  const owner = await prisma.member.findFirst({
-    where: { gymId },
-    orderBy: { createdAt: "asc" },
-  });
+  // Email the gym owner (registration marker, not the oldest row: the oldest
+  // row can be a student, who would then see the requester's name).
+  const owner = await findGymOwner(gymId);
   if (owner) {
     sendJoinRequestSubmittedToAdmin(
       owner.email,

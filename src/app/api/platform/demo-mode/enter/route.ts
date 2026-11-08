@@ -2,23 +2,22 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getSession, createSession } from "@/lib/local-auth";
+import { createSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
-
-const PLATFORM_ADMINS = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com")
-  .split(",").map(e => e.trim().toLowerCase());
+import { findGymOwner } from "@/lib/gym-owner";
 
 const DEMO_GYM_ID = "platform-admin-gym";
 
 export async function POST() {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
+  const session = await getPlatformAdminSession();
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Stash original platform-admin email so Exit Demo can restore the session
+  // Display-only flag for the banner. Who to restore on exit travels inside
+  // the signed session (impersonatorId), never in a cookie.
   const c = await cookies();
-  c.set("demo_mode_origin", session.email, { httpOnly: true, path: "/", sameSite: "lax" });
   c.set("demo_mode", "1", { httpOnly: false, path: "/", sameSite: "lax" });
 
   let gym = await prisma.gym.findUnique({
@@ -65,11 +64,11 @@ export async function POST() {
     });
   }
 
-  if (!gym || gym.members.length === 0) {
+  const owner = gym ? await findGymOwner(gym.id) : null;
+  if (!gym || !owner) {
     return NextResponse.json({ error: "Demo gym not found" }, { status: 404 });
   }
 
-  const owner = gym.members[0];
   await createSession({
     userId: owner.clerkUserId,
     email: owner.email,
@@ -77,6 +76,8 @@ export async function POST() {
     role: "admin",
     gymId: gym.id,
     memberId: owner.id,
+    userType: "member",
+    impersonatorId: session.memberId,
   });
 
   return NextResponse.json({ success: true });

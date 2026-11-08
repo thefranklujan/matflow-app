@@ -9,6 +9,7 @@ import { BELT_RANKS } from "@/lib/constants";
 const LOCATIONS: { value: string; label: string }[] = [];
 import MemberActions from "./MemberActions";
 import MiniBelt from "@/components/members/MiniBelt";
+import { findGymOwnerId } from "@/lib/gym-owner";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function AdminMembersPage() {
     orderBy: { createdAt: "desc" },
   });
   const members = allMembers.filter((m) => !PLATFORM_ADMIN_EMAILS.includes(m.email.trim().toLowerCase()));
+  const ownerId = await findGymOwnerId(gymId);
 
   function beltLabel(value: string) {
     return BELT_RANKS.find((b) => b.value === value)?.label ?? value;
@@ -96,6 +98,7 @@ export default async function AdminMembersPage() {
                         memberName={`${member.firstName} ${member.lastName}`}
                         approved={member.approved}
                         active={member.active}
+                        isOwner={member.id === ownerId}
                       />
                     </div>
                   </td>

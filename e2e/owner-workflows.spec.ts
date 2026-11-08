@@ -159,9 +159,6 @@ test.describe("operational surfaces render seeded content (Basic owner)", () => 
   test.use({ storageState: storageStatePath("owner-basic") });
 
   const checks: { slug: string; expectText: RegExp }[] = [
-    { slug: "products", expectText: /E2E Academy Gi/i },
-    { slug: "products/categories", expectText: /E2E Apparel/i },
-    { slug: "orders", expectText: /Carla Customer/i },
     { slug: "instructors", expectText: /Prof\. Fixture/i },
     { slug: "announcements", expectText: /E2E Fixture Announcement/i },
     { slug: "waivers", expectText: /E2E Liability Waiver/i },
@@ -172,6 +169,14 @@ test.describe("operational surfaces render seeded content (Basic owner)", () => 
       await page.goto(`/app/${slug}`);
       await expect(page.getByText(expectText).first()).toBeVisible();
       expectCleanPage(health);
+    });
+  }
+
+  // Commerce is off (Phase 0 hotfix): its owner pages redirect to the dashboard.
+  for (const slug of ["products", "products/categories", "orders", "inventory"]) {
+    test(`/app/${slug} redirects to /app`, async ({ page }) => {
+      await page.goto(`/app/${slug}`);
+      await expect(page).toHaveURL(/\/app$/);
     });
   }
 

@@ -132,8 +132,8 @@ export default function StudentSignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-[#dc2626] transition"
-              placeholder="Min 6 characters"
-              minLength={6}
+              placeholder="Min 10 characters"
+              minLength={10}
               required
             />
           </div>

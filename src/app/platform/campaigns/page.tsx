@@ -1,3 +1,4 @@
+import { requirePlatformAdminPage } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Mail, Plus } from "lucide-react";
@@ -5,6 +6,7 @@ import { Mail, Plus } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function CampaignsPage() {
+  await requirePlatformAdminPage();
   const campaigns = await prisma.emailCampaign.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,

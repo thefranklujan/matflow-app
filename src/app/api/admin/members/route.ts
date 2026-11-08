@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireOwnerAccess, entitlementErrorBody } from "@/lib/owner-access";
 import { prisma } from "@/lib/prisma";
+import { MEMBER_SAFE_SELECT } from "@/lib/member-select";
 
 export async function GET() {
   try {
@@ -8,6 +9,7 @@ export async function GET() {
 
     const members = await prisma.member.findMany({
       where: { gymId },
+      select: MEMBER_SAFE_SELECT,
       orderBy: { createdAt: "desc" },
     });
 

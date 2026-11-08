@@ -5,6 +5,7 @@ import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { deriveEntitlement } from "@/lib/entitlements";
+import { isPlatformAdminSession } from "@/lib/platform-admin";
 
 export async function GET() {
   const session = await getSession();
@@ -53,10 +54,8 @@ export async function GET() {
     }
   }
 
-  const platformAdmins = (process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io")
-    .split(",")
-    .map(e => e.trim().toLowerCase());
-  const isPlatformAdmin = platformAdmins.includes(session.email.trim().toLowerCase());
+  // Server-side flag on the Member row the session names, never the email (audit C1).
+  const isPlatformAdmin = await isPlatformAdminSession(session);
 
   return NextResponse.json({ authenticated: true, user: session, gym, isPlatformAdmin, billing, entitlement });
 }

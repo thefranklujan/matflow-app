@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { registerStudent, createSession } from "@/lib/local-auth";
+import { MIN_PASSWORD } from "@/lib/owner-registration";
 import { sendWelcomeEmail, notifyAdminOfNewStudent } from "@/lib/email";
 import { logActivity } from "@/lib/activity-log";
 
@@ -13,8 +14,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+    if (typeof password !== "string" || password.length < MIN_PASSWORD) {
+      return NextResponse.json({ error: `Password must be at least ${MIN_PASSWORD} characters` }, { status: 400 });
     }
 
     const student = await registerStudent({ firstName, lastName, email, password, phone });

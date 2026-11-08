@@ -62,8 +62,8 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
         setError("Please enter a valid phone number, or leave it blank");
         return;
       }
-      if (password.length < 6) {
-        setError("Password must be at least 6 characters");
+      if (password.length < 10) {
+        setError("Password must be at least 10 characters");
         return;
       }
       setError("");
@@ -368,8 +368,8 @@ function SignUpForm({ initialNative = false }: { initialNative?: boolean }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-brand-black border border-brand-gray rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition"
-                  placeholder="Min 6 characters"
-                  minLength={6}
+                  placeholder="Min 10 characters"
+                  minLength={10}
                   required
                 />
               </div>

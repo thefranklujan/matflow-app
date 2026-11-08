@@ -1,18 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/local-auth";
+import { getPlatformAdminSession } from "@/lib/platform-admin";
 import { prisma } from "@/lib/prisma";
 
-const PLATFORM_ADMINS = (
-  process.env.PLATFORM_ADMIN_EMAILS || "matflow@craftedsystems.io,franklujan@gmail.com"
-)
-  .split(",")
-  .map((e) => e.trim().toLowerCase());
-
 export async function POST(req: NextRequest) {
-  const session = await getSession();
-  if (!session || !PLATFORM_ADMINS.includes(session.email.trim().toLowerCase())) {
+  const session = await getPlatformAdminSession();
+  if (!session) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

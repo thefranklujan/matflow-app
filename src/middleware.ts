@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, clientKey } from "@/lib/rate-limit";
 
-const publicPaths = ["/", "/sign-in", "/sign-up", "/join", "/dropin", "/kiosk", "/student/sign-up", "/onboarding", "/api/onboarding", "/privacy", "/support", "/forgot-password", "/reset-password", "/app-store", "/app-store-ipad", "/native-web-only", "/api/auth", "/api/webhooks", "/api/leads", "/api/kiosk", "/api/dropin", "/api/track", "/api/unsubscribe", "/unsubscribe"];
+// /kiosk and /api/kiosk are deliberately NOT public: the kiosk is off until
+// check-in codes are issued (both answer 404). /api/cron is public because
+// Vercel Cron sends no cookie; every cron route checks CRON_SECRET itself and
+// refuses when it is unset.
+const publicPaths = ["/", "/sign-in", "/sign-up", "/join", "/dropin", "/student/sign-up", "/onboarding", "/api/onboarding", "/privacy", "/support", "/forgot-password", "/reset-password", "/app-store", "/app-store-ipad", "/native-web-only", "/api/auth", "/api/webhooks", "/api/leads", "/api/dropin", "/api/track", "/api/unsubscribe", "/unsubscribe", "/api/cron"];
+
+// Commerce is not sold and takes no money (owner-features finding 7): every
+// owner and storefront commerce page sends the visitor to /app.
+const WEB_COMMERCE_PREFIXES = ["/app/products", "/app/orders", "/app/inventory", "/products", "/cart", "/checkout", "/categories"];
 
 // The iOS/Android app is a free STUDENT-only companion. These owner/admin and
 // commerce surfaces must never render inside the native shell (App Store 3.1.1 /
@@ -51,6 +60,41 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Rate limit unauthenticated writes (auth, leads, drop-in) before anything else.
+  const limited = checkRateLimit(request.method, pathname, clientKey(request.headers));
+  if (limited && !limited.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(limited.retryAfter),
+          "X-RateLimit-Limit": String(limited.limit),
+          "X-RateLimit-Remaining": "0",
+        },
+      },
+    );
+  }
+
+  // The legacy /members portal read across every academy (audit H1). It is
+  // deleted; old links and bookmarks land in the student app.
+  if (matchesPrefix(pathname, ["/members"])) {
+    return NextResponse.redirect(new URL("/student", request.url));
+  }
+
+  if (matchesPrefix(pathname, WEB_COMMERCE_PREFIXES)) {
+    return NextResponse.redirect(new URL("/app", request.url));
+  }
+
+  const res = routeAuth(request, pathname);
+  if (limited) {
+    res.headers.set("X-RateLimit-Limit", String(limited.limit));
+    res.headers.set("X-RateLimit-Remaining", String(limited.remaining));
+  }
+  return res;
+}
+
+function routeAuth(request: NextRequest, pathname: string): NextResponse {
   // Allow public paths
   if (publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();

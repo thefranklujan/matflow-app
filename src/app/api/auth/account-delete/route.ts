@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
+import { isGymOwner } from "@/lib/gym-owner";
 
 /**
  * In-app account deletion, required by Apple App Store Guideline 5.1.1(v).
@@ -37,11 +38,8 @@ export async function POST(req: NextRequest) {
       include: { gym: { select: { name: true } } },
     });
     if (member) {
-      const firstMember = await prisma.member.findFirst({
-        where: { gymId: member.gymId },
-        orderBy: { createdAt: "asc" },
-      });
-      if (firstMember?.id === member.id) {
+      // The owner by registration marker, not the oldest row.
+      if (await isGymOwner(member)) {
         return NextResponse.json(
           {
             error: `You own ${member.gym.name}. Deleting your account would orphan the gym and its students. Please contact support@mymatflow.com to transfer ownership or close the gym first.`,
