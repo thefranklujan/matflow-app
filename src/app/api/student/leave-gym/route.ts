@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/local-auth";
 import { prisma } from "@/lib/prisma";
-import { isGymOwner } from "@/lib/gym-owner";
+import { isGymOwner, OWNER_WHERE } from "@/lib/gym-owner";
 
 export async function POST() {
   const session = await getSession();
@@ -26,8 +26,17 @@ export async function POST() {
     return NextResponse.json({ error: "Your membership is inactive. Contact the academy to leave it." }, { status: 400 });
   }
 
-  // Delete the member record so the underlying Student is no longer affiliated
-  await prisma.member.delete({ where: { id: session.memberId } }).catch(() => null);
+  // Delete the member record so the underlying Student is no longer affiliated.
+  // The checks above give friendly messages; THIS write is the guard. It
+  // deletes only a row that is still active, approved and not an owner at the
+  // moment of the write, so an owner's deactivation committed after the read
+  // above still wins (Codex round 3, finding 1).
+  const deleted = await prisma.member.deleteMany({
+    where: { id: session.memberId, active: true, approved: true, NOT: OWNER_WHERE },
+  });
+  if (deleted.count === 0) {
+    return NextResponse.json({ error: "Your membership is inactive. Contact the academy to leave it." }, { status: 400 });
+  }
 
   // Clear session. they need to sign in again
   const c = await cookies();
